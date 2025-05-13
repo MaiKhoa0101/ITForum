@@ -1,5 +1,13 @@
 package com.example.itforum.root
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,10 +29,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -35,7 +46,7 @@ import com.example.itforum.R
 
 
 @Composable
-fun FootBarRoot(navHostController: NavHostController) {
+fun FootBarRoot(currentRoute:String?,navHostController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -49,16 +60,17 @@ fun FootBarRoot(navHostController: NavHostController) {
                 .fillMaxWidth()
                 .height(110.dp)
                 .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(horizontal = 16.dp).padding(top=10.dp),
+                .padding(horizontal = 16.dp)
+                .padding(top=10.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.Top,
 
             ) {
-            BoxItem(text = "Trang chủ", icon = R.drawable.home, nameDirection = "home", navHostController)
-            BoxItem(text = "Tiện ích", icon = R.drawable.tool,"tool",navHostController)
+            BoxItem(nameRoute = "Trang chủ", icon = R.drawable.home, nameDirection = "home", navHostController,currentRoute)
+            BoxItem(nameRoute = "Tiện ích", icon = R.drawable.tool,"tool",navHostController,currentRoute)
             Spacer(modifier = Modifier.width(50.dp)) // Space for the floating button
-            BoxItem(text = "Thông báo", icon = R.drawable.bell,"notification",navHostController)
-            BoxItem(text = "Cá nhân", icon = R.drawable.user,"personal",navHostController)
+            BoxItem(nameRoute = "Thông báo", icon = R.drawable.bell,"notification",navHostController,currentRoute)
+            BoxItem(nameRoute = "Cá nhân", icon = R.drawable.user,"personal",navHostController,currentRoute)
         }
 
         // Floating button in the center
@@ -99,34 +111,57 @@ fun CircleButton(
 
 @Composable
 fun BoxItem(
-    text: String,
+    nameRoute: String,
     icon: Int,
     nameDirection:String,
     navHostController: NavHostController,
+    currentRoute:String?,
+    visible: Boolean =true,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .size(70.dp)
-            .clickable {
-                println(nameDirection)
-                if (nameDirection.isNotEmpty()) {
-                    navHostController.navigate(nameDirection)
-                }
-            },
-        horizontalAlignment = Alignment.CenterHorizontally,
+    println(currentRoute + " " + nameDirection)
+
+    // Animate background color based on selection
+    val backgroundColor by animateColorAsState(
+        targetValue = if (currentRoute == nameDirection)
+            MaterialTheme.colorScheme.background
+        else
+            Color.Transparent,
+        animationSpec = tween(durationMillis = 300)
+    )
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+        exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
     ) {
-        Image(
-            painter = painterResource(icon),
-            contentDescription = "",
-            modifier = Modifier.height(20.dp))
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = text,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
+        Column(
+            modifier = modifier
+                .clip(CircleShape)
+                .background(backgroundColor)
+                .size(70.dp)
+                .clickable {
+                    println(nameDirection)
+                    if (nameDirection.isNotEmpty()) {
+                        navHostController.navigate(nameDirection)
+                    }
+                },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(icon),
+                contentDescription = "",
+                modifier = Modifier.height(20.dp),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = nameRoute,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
     }
 }
 

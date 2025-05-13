@@ -53,7 +53,7 @@ fun Root(){
             },
             bottomBar = {
                 if (showFootBars) {
-                    FootBarRoot(navHostController = navHostController)
+                    FootBarRoot(currentRoute=currentRoute,navHostController = navHostController)
                 }
             }
         ) { innerPadding ->
