@@ -43,7 +43,6 @@ fun Root(){
     val showFootBars = currentRoute in listOf("home", "tool", "notification", "personal")
     ITForumTheme (darkTheme = darkTheme)
     {
-        println(darkTheme)
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
