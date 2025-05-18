@@ -22,12 +22,24 @@ import com.example.itforum.ui.theme.ITForumTheme
 import androidx.navigation.compose.rememberNavController
 import kotlin.collections.contains
 
+import com.example.itforum.login.LoginScreen
+import com.example.itforum.login.ForgotPasswordScreen
+import com.example.itforum.login.EnterPhoneNumberScreen
+import com.example.itforum.login.EnterEmailScreen
+import com.example.itforum.login.EnterOtpScreen
+import com.example.itforum.login.ResetPasswordScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Root()
+//            Root()
+            LoginScreen()
+//            ForgotPasswordScreen()
+//            EnterPhoneNumberScreen()
+//            EnterEmailScreen()
+//            EnterOtpScreen()
+//            ResetPasswordScreen()
         }
     }
 }
