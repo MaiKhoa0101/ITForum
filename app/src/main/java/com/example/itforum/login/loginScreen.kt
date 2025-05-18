@@ -29,7 +29,10 @@ import androidx.compose.ui.text.style.TextDecoration
 
 @Composable
 
-fun LoginScreen(onRegisterClick: () -> Unit = {}) {
+fun LoginScreen(
+    onRegisterClick: () -> Unit = {},
+    onForgotPasswordClick: () -> Unit = {} // Thêm callback
+) {
     var phoneNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -190,6 +193,7 @@ fun LoginScreen(onRegisterClick: () -> Unit = {}) {
             modifier = Modifier
                 .align(Alignment.End)
                 .padding(end = 24.dp)
+                .clickable { onForgotPasswordClick() }
         )
 
         Spacer(modifier = Modifier.height(24.dp))

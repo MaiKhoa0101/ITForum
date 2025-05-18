@@ -105,7 +105,7 @@ fun ResetPasswordScreen(
                 .fillMaxWidth(0.85f)
                 .height(50.dp)
         ) {
-            Text("Đăng nhập", color = Color.White)
+            Text("Gửi", color = Color.White, fontSize = 24.sp)
         }
 
         Spacer(modifier = Modifier.weight(1f))
