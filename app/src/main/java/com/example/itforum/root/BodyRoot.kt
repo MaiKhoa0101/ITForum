@@ -10,6 +10,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.itforum.home.HomePage
 import com.example.itforum.notification.NotificationPage
+import com.example.itforum.profile.EditProfile
+import com.example.itforum.profile.OtherProfile
 import com.example.itforum.profile.UserProfile
 import com.example.itforum.tool.ToolPage
 
@@ -26,7 +28,13 @@ fun BodyRoot(navHostController: NavHostController,modifier: Modifier){
             ToolPage(modifier)
         }
         composable ("personal") {
-            UserProfile(modifier)
+            UserProfile(modifier, navHostController)
+        }
+        composable ("otherprofile") {
+            OtherProfile(modifier)
+        }
+        composable ("editprofile") {
+            EditProfile(navHostController)
         }
 
     }

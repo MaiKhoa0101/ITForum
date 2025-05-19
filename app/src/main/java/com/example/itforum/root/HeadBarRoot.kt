@@ -27,7 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.itforum.R
-
+import com.example.itforum.root.BodyRoot
 
 @Composable
 fun TopBarRoot(
@@ -67,7 +67,7 @@ fun TopBarRoot(
                     contentDescription = "Toggle Theme",
                     modifier = Modifier
                         .size(30.dp)
-                        .clickable { onToggleTheme() }
+                        .clickable { }
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Icon(

@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.itforum.ui.theme.ITForumTheme
 import androidx.navigation.compose.rememberNavController
+
 import kotlin.collections.contains
 
 class MainActivity : ComponentActivity() {
@@ -27,10 +28,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Root()
+          Root()
+        }
         }
     }
-}
+
 
 
 @Composable
