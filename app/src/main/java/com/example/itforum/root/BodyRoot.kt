@@ -8,7 +8,6 @@ import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.itforum.home.HomePage
 import com.example.itforum.intro.IntroScreen
 import com.example.itforum.login.EnterEmailScreen
@@ -58,64 +57,65 @@ fun BodyRoot(navHostController: NavHostController,modifier: Modifier){
         composable("listlike") {
             ListLikePage(navHostController)
         }
+        composable("intro") {
+            IntroScreen(navHostController)
+        }
+        composable("login") {
+            LoginScreen(
+                onRegisterClick = { navHostController.navigate("register") },
+                onForgotPasswordClick = { navHostController.navigate("forgot_password") }
+            )
+        }
+        composable("forgot_password") {
+            ForgotPasswordScreen(
+                onBackClick = { navHostController.popBackStack() },
+                onPhoneOptionClick = { navHostController.navigate("phone_otp") },
+                onEmailOptionClick = { navHostController.navigate("email_otp") }
+            )
+        }
+
+        composable("phone_otp") {
+            EnterPhoneNumberScreen(onBackClick = { navHostController.popBackStack() },
+                onContinueClick = {navHostController.navigate("enter_otp")})
+        }
+        composable("email_otp") {
+            EnterEmailScreen(onBackClick = { navHostController.popBackStack() },
+                onContinueClick = {navHostController.navigate("enter_otp")})
+        }
+        composable("enter_otp"){
+            EnterOtpScreen(onBackClick = { navHostController.popBackStack() },
+                onSubmitClick = {navHostController.navigate("sumit_otp")})
+
+        }
+        composable("sumit_otp"){
+            ResetPasswordScreen(onBackClick= {navHostController.popBackStack()},)
+            // thêm điều hướng cho nút
+        }
+        composable("com/example/itforum/register") {
+            RegisterScreen(navHostController) // Màn hình đăng ký mới thêm
+        }
+        composable("otp") {
+            OtpVerificationScreen(
+                onBackClick = { navHostController.popBackStack() },
+                onSubmitClick = { navHostController.navigate("success") }, //  Điều hướng sau khi xác thực thành công
+                onResendClick = { /* xử lý gửi lại */ },
+                onLoginClick = { navHostController.navigate("login") }
+            )
+        }
+        composable("success") {
+            RegistrationSuccessScreen(
+                onLoginClick = { navHostController.navigate("login") }
+            )
+        }
     }
 }
 //
 //ITForumTheme {
-//    val navController = rememberNavController()
+//    val navHostController = remembernavHostController()
 //    NavHost(
-//        navController = navController,
+//        navHostController = navHostController,
 //        startDestination = "intro" // Màn hình đầu tiên là intro
 //    ) {
-//        composable("intro") {
-//            IntroScreen(navController)
-//        }
-//        composable("login") {
-//            LoginScreen(
-//                onRegisterClick = { navController.navigate("register") },
-//                onForgotPasswordClick = { navController.navigate("forgot_password") }
-//            )
-//        }
-//        composable("forgot_password") {
-//            ForgotPasswordScreen(
-//                onBackClick = { navController.popBackStack() },
-//                onPhoneOptionClick = { navController.navigate("phone_otp") },
-//                onEmailOptionClick = { navController.navigate("email_otp") }
-//            )
-//        }
-//
-//        composable("phone_otp") {
-//            EnterPhoneNumberScreen(onBackClick = { navController.popBackStack() },
-//                onContinueClick = {navController.navigate("enter_otp")})
-//        }
-//        composable("email_otp") {
-//            EnterEmailScreen(onBackClick = { navController.popBackStack() },
-//                onContinueClick = {navController.navigate("enter_otp")})
-//        }
-//        composable("enter_otp"){
-//            EnterOtpScreen(onBackClick = { navController.popBackStack() },
-//                onSubmitClick = {navController.navigate("sumit_otp")})
-//
-//        }
-//        composable("sumit_otp"){
-//            ResetPasswordScreen(onBackClick= {navController.popBackStack()},)
-//            // thêm điều hướng cho nút
-//        }
-//        composable("com/example/itforum/register") {
-//            RegisterScreen(navController) // Màn hình đăng ký mới thêm
-//        }
-//        composable("otp") {
-//            OtpVerificationScreen(
-//                onBackClick = { navController.popBackStack() },
-//                onSubmitClick = { navController.navigate("success") }, //  Điều hướng sau khi xác thực thành công
-//                onResendClick = { /* xử lý gửi lại */ },
-//                onLoginClick = { navController.navigate("login") }
-//            )
-//        }
-//        composable("success") {
-//            RegistrationSuccessScreen(
-//                onLoginClick = { navController.navigate("login") }
-//            )
-//        }
+//        
 //    }
 //}
