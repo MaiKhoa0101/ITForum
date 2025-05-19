@@ -97,7 +97,7 @@ fun IntroScreen(navController: NavController) {
                                 contentColor= Color.Black)) {
                             Text("Đăng nhập", fontWeight = FontWeight.Bold)
                         }
-                        Button(onClick = { navController.navigate("register") },
+                        Button(onClick = { navController.navigate("com/example/itforum/register") },
                             modifier = Modifier
                                 .fillMaxWidth(0.8f)
                                 .height(48.dp)

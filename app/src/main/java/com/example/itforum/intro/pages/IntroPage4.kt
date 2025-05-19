@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.itforum.R
@@ -29,8 +31,15 @@ fun IntroPage4() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp)
+//            .padding(horizontal = 32.dp)
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.nenpage4),
+            contentDescription = "Background",
+            modifier = Modifier
+                .width(550.dp)
+                .height(378.dp)
+        )
         // Phần tiêu đề với gạch chân (giữ nguyên)
         Column(
             modifier = Modifier
@@ -98,4 +107,9 @@ fun IntroPage4() {
             )
         }
     }
+}
+@Preview(showBackground = true)
+@Composable
+fun Previewpage5(){
+    IntroPage4()
 }
