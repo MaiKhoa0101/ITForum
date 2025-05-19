@@ -35,13 +35,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.itforum.R
 
 @Composable
 fun RegisterScreen(
+    navController: NavController,
     onBackClick: () -> Unit = {},
     onLoginClick: () -> Unit = {},
     onRegisterSuccess: () -> Unit = {}
@@ -140,7 +141,7 @@ fun RegisterScreen(
                 .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Phone number field
+            // email field
             OutlinedTextField(
                 value = email,
                 onValueChange = {
@@ -151,6 +152,7 @@ fun RegisterScreen(
                 placeholder = { Text("Email của bạn") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 isError = !isEmailValid,
+                textStyle = androidx.compose.ui.text.TextStyle(color = Color.Black),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -173,6 +175,7 @@ fun RegisterScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 isError = passwordError,
+                textStyle = androidx.compose.ui.text.TextStyle(color = Color.Black),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -195,6 +198,7 @@ fun RegisterScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 isError = confirmPasswordError,
+                textStyle = androidx.compose.ui.text.TextStyle(color = Color.Black),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -215,7 +219,7 @@ fun RegisterScreen(
                     isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
                     if (!passwordError && !confirmPasswordError && isEmailValid) {
-                        onRegisterSuccess()
+                        navController.navigate("otp")
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -246,8 +250,4 @@ fun RegisterScreen(
         }
     }
 }
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun RegisterScreenPreview(){
-    RegisterScreen()
-}
+

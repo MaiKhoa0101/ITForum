@@ -19,7 +19,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.itforum.intro.IntroScreen
 import com.example.itforum.login.LoginScreen
+import com.example.itforum.register.OtpVerificationScreen
 import com.example.itforum.register.RegisterScreen
+import com.example.itforum.register.RegistrationSuccessScreen
 import com.example.itforum.ui.theme.ITForumTheme
 
 class MainActivity : ComponentActivity() {
@@ -39,8 +41,21 @@ class MainActivity : ComponentActivity() {
                     composable("login") {
                         LoginScreen() // Màn hình đăng nhập của bạn
                     }
-                    composable("register") {
-                        RegisterScreen() // Màn hình đăng ký mới thêm
+                    composable("com/example/itforum/register") {
+                        RegisterScreen(navController) // Màn hình đăng ký mới thêm
+                    }
+                    composable("otp") {
+                        OtpVerificationScreen(
+                            onBackClick = { navController.popBackStack() },
+                            onSubmitClick = { navController.navigate("success") }, // ✅ Điều hướng sau khi xác thực thành công
+                            onResendClick = { /* xử lý gửi lại */ },
+                            onLoginClick = { navController.navigate("login") }
+                        )
+                    }
+                    composable("success") {
+                        RegistrationSuccessScreen(
+                            onLoginClick = { navController.navigate("login") }
+                        )
                     }
                 }
             }
