@@ -119,7 +119,6 @@ fun BoxItem(
     visible: Boolean =true,
     modifier: Modifier = Modifier
 ) {
-    println(currentRoute + " " + nameDirection)
 
     // Animate background color based on selection
     val backgroundColor by animateColorAsState(
@@ -140,7 +139,6 @@ fun BoxItem(
                 .background(backgroundColor)
                 .size(70.dp)
                 .clickable {
-                    println(nameDirection)
                     if (nameDirection.isNotEmpty()) {
                         navHostController.navigate(nameDirection)
                     }

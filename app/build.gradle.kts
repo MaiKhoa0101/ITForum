@@ -60,6 +60,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
 
+
+    //Tải và hiển thị hình ảnh online
+    implementation(platform("androidx.compose:compose-bom:2025.05.00"))
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+
     implementation("androidx.compose.material:material:1.8.1")
     implementation("androidx.compose.material3:material3:1.3.2")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
