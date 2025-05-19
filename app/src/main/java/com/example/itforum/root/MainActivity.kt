@@ -19,6 +19,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.itforum.intro.IntroScreen
 import com.example.itforum.login.LoginScreen
+import com.example.itforum.login.ForgotPasswordScreen
+import com.example.itforum.login.EnterPhoneNumberScreen
+import com.example.itforum.login.EnterEmailScreen
+import com.example.itforum.login.EnterOtpScreen
+import com.example.itforum.login.ResetPasswordScreen
 import com.example.itforum.register.OtpVerificationScreen
 import com.example.itforum.register.RegisterScreen
 import com.example.itforum.register.RegistrationSuccessScreen
@@ -39,7 +44,35 @@ class MainActivity : ComponentActivity() {
                         IntroScreen(navController)
                     }
                     composable("login") {
-                        LoginScreen() // Màn hình đăng nhập của bạn
+                        LoginScreen(
+                            onRegisterClick = { navController.navigate("register") },
+                            onForgotPasswordClick = { navController.navigate("forgot_password") }
+                        )
+                    }
+                    composable("forgot_password") {
+                        ForgotPasswordScreen(
+                            onBackClick = { navController.popBackStack() },
+                            onPhoneOptionClick = { navController.navigate("phone_otp") },
+                            onEmailOptionClick = { navController.navigate("email_otp") }
+                        )
+                    }
+
+                    composable("phone_otp") {
+                        EnterPhoneNumberScreen(onBackClick = { navController.popBackStack() },
+                            onContinueClick = {navController.navigate("enter_otp")})
+                    }
+                    composable("email_otp") {
+                        EnterEmailScreen(onBackClick = { navController.popBackStack() },
+                            onContinueClick = {navController.navigate("enter_otp")})
+                    }
+                    composable("enter_otp"){
+                        EnterOtpScreen(onBackClick = { navController.popBackStack() },
+                            onSubmitClick = {navController.navigate("sumit_otp")})
+
+                    }
+                    composable("sumit_otp"){
+                        ResetPasswordScreen(onBackClick= {navController.popBackStack()},)
+                        // thêm điều hướng cho nút
                     }
                     composable("com/example/itforum/register") {
                         RegisterScreen(navController) // Màn hình đăng ký mới thêm
@@ -47,7 +80,7 @@ class MainActivity : ComponentActivity() {
                     composable("otp") {
                         OtpVerificationScreen(
                             onBackClick = { navController.popBackStack() },
-                            onSubmitClick = { navController.navigate("success") }, // ✅ Điều hướng sau khi xác thực thành công
+                            onSubmitClick = { navController.navigate("success") }, //  Điều hướng sau khi xác thực thành công
                             onResendClick = { /* xử lý gửi lại */ },
                             onLoginClick = { navController.navigate("login") }
                         )
