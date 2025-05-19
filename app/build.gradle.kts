@@ -61,6 +61,12 @@ dependencies {
 
 
     implementation("androidx.compose.material:material:1.8.1")
+    implementation("androidx.compose.material3:material3:1.3.2")
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.36.0")
+
+    implementation("io.coil-kt.coil3:coil-compose:3.2.0")
+
     val nav_version = "2.9.0"
 
     // Jetpack Compose integration

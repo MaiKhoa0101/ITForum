@@ -20,6 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.itforum.ui.theme.ITForumTheme
 import androidx.navigation.compose.rememberNavController
+import com.example.itforum.post.CreatePostPage
+import com.example.itforum.post.DetailPostPage
+import com.example.itforum.post.abc
 import kotlin.collections.contains
 
 class MainActivity : ComponentActivity() {
