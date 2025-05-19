@@ -18,22 +18,32 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.itforum.intro.IntroScreen
+import com.example.itforum.login.LoginScreen
+import com.example.itforum.register.RegisterScreen
 import com.example.itforum.ui.theme.ITForumTheme
 
-import com.example.itforum.login.LoginScreen
-import com.example.itforum.login.ForgotPasswordScreen
-import com.example.itforum.login.EnterPhoneNumberScreen
-import com.example.itforum.login.EnterEmailScreen
-import com.example.itforum.login.EnterOtpScreen
-import com.example.itforum.login.ResetPasswordScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-//            Root()
-
-            IntroScreen()
+            ITForumTheme {
+                val navController = rememberNavController()
+                NavHost(
+                    navController = navController,
+                    startDestination = "intro" // Màn hình đầu tiên là intro
+                ) {
+                    composable("intro") {
+                        IntroScreen(navController)
+                    }
+                    composable("login") {
+                        LoginScreen() // Màn hình đăng nhập của bạn
+                    }
+                    composable("register") {
+                        RegisterScreen() // Màn hình đăng ký mới thêm
+                    }
+                }
+            }
 
         }
     }
