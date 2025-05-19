@@ -69,7 +69,7 @@ fun DetailPostPage(
             modifier = Modifier.fillMaxSize()
         ) {
             TopDetailPost(
-//                navHostController
+                navHostController
             )
             LazyColumn(
                 modifier = Modifier
@@ -97,7 +97,7 @@ fun DetailPostPage(
 
 @Composable
 fun TopDetailPost(
-//    navHostController: NavHostController
+    navHostController: NavHostController
 ) {
     Spacer(modifier = Modifier.height(30.dp))
     Row(
@@ -108,7 +108,7 @@ fun TopDetailPost(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = {
-//            navHostController.popBackStack()
+            navHostController.popBackStack()
         }
         ) {
             Icon(
