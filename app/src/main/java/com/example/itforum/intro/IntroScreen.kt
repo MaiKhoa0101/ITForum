@@ -23,10 +23,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 
 @Composable
-fun IntroScreen() {
+fun IntroScreen(navController: NavController) {
     val pageCount = 5
     val pagerState = rememberPagerState(pageCount = { pageCount })
     val coroutineScope = rememberCoroutineScope()
@@ -84,7 +85,7 @@ fun IntroScreen() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(28.dp)
                     ) {
-                        Button(onClick = { /* Đăng nhập */ },
+                        Button(onClick = { navController.navigate("login") },
                             modifier = Modifier
                                 .fillMaxWidth(0.8f)
                                 .height(48.dp),
@@ -96,7 +97,7 @@ fun IntroScreen() {
                                 contentColor= Color.Black)) {
                             Text("Đăng nhập", fontWeight = FontWeight.Bold)
                         }
-                        Button(onClick = { /* Đăng ký */ },
+                        Button(onClick = { navController.navigate("register") },
                             modifier = Modifier
                                 .fillMaxWidth(0.8f)
                                 .height(48.dp)
