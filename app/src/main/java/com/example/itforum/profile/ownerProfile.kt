@@ -1,6 +1,7 @@
 package com.example.itforum.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -40,13 +40,16 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserProfile(modifier: Modifier = Modifier) {
+fun UserProfile(modifier: Modifier = Modifier, navHostController: NavHostController) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Thông tin", "Bài viết")
 
@@ -83,7 +86,7 @@ fun UserProfile(modifier: Modifier = Modifier) {
 
             when (selectedTabIndex) {
                 0 -> {
-                    item { UserInfoOverview() }
+                    item { UserInfoOverview(navHostController = navHostController) }
                     item { UserInfoDetail() }
                 }
                 1 -> {
@@ -159,12 +162,30 @@ fun UserTabRow(
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit
 ) {
-    TabRow(selectedTabIndex = selectedTabIndex) {
+    TabRow(
+        selectedTabIndex = selectedTabIndex,
+        containerColor = MaterialTheme.colorScheme.primaryContainer
+    ) {
         tabs.forEachIndexed { index, title ->
             Tab(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp))
+                    .background(
+                    if (selectedTabIndex == index)
+                        MaterialTheme.colorScheme.background
+                    else{
+                        MaterialTheme.colorScheme.primaryContainer}
+                )
+                ,
                 selected = selectedTabIndex == index,
                 onClick = { onTabSelected(index) },
-                text = { Text(title) }
+                text = {
+                    Text(
+                        title,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             )
         }
     }
@@ -172,7 +193,7 @@ fun UserTabRow(
 
 
 @Composable
-fun UserInfoOverview() {
+fun UserInfoOverview(navHostController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -180,11 +201,22 @@ fun UserInfoOverview() {
     ) {
         Spacer(modifier = Modifier.height(20.dp))
         Text("Chi tiết Thông tin", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         Divider(thickness = 1.dp)
-        Button(onClick = { /* TODO: Handle Edit */ }, modifier = Modifier.padding(top = 16.dp)) {
-            Text("Chỉnh sửa")
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Box(modifier = Modifier
+            .clip(CircleShape)
+            .clickable(onClick = { navHostController.navigate("editprofile") })
+            .width(150.dp)
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .padding(vertical = 10.dp)
+        ) {
+            Text("Chỉnh sửa", modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
         }
+
     }
 }
 

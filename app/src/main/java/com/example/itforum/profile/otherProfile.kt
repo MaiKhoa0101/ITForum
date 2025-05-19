@@ -114,8 +114,5 @@ fun OtherInfoOverview() {
         Text("Chi tiết Thông tin", fontWeight = FontWeight.Bold, fontSize = 20.sp)
         Spacer(modifier = Modifier.height(10.dp))
         Divider(thickness = 1.dp)
-        Button(onClick = { /* TODO: Handle Edit */ }, modifier = Modifier.padding(top = 16.dp)) {
-            Text("Chỉnh sửa")
-        }
     }
 }
