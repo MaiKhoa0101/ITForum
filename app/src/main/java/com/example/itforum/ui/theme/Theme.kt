@@ -13,18 +13,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
+    //Màu chủ đạo app xanh
     primaryContainer = MainTheme,
+    //Đối tượng trên nền màu chủ đạo
+    onPrimaryContainer = Color.Black,
+    //Màu nền phần nội dung
     background = Color(0xFF2A2A2A),
-    secondary = PurpleGrey80,
-    tertiary = Pink80,
-    onSurface = Color(0xFFFFFFFF),
+    //Đối tượng trên background
+    onBackground = Color(0xFFFFFFFF),
+    //Màu nền nội dung cấp 2
+    secondary = BoxGrey,
     )
 
 private val LightColorScheme = lightColorScheme(
+    //Màu chủ đạo app xanh
     primaryContainer = MainTheme,
+    //Đối tượng trên nền màu chủ đạo
+    onPrimaryContainer = Color.Black,
+    //Màu nền phần nội dung
     background = Color.White,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
+    //Đối tượng trên background
+    onBackground = Color.Black,
+    //Màu nền nội dung cấp 2
+    secondary = BoxGrey,
+
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
     surface = Color(0xFFFFFBFE),
@@ -33,7 +45,6 @@ private val LightColorScheme = lightColorScheme(
     onTertiary = Color.White,
     onBackground = Color(0xFF1C1B1F),
      */
-    onSurface = Color(0xFFFFFFFF),
 
 )
 
