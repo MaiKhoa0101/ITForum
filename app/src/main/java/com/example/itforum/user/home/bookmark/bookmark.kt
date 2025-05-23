@@ -1,4 +1,4 @@
-package com.example.itforum.user.bookmark
+package com.example.itforum.user.home.bookmark
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

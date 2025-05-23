@@ -1,4 +1,4 @@
-package com.example.itforum.user.myfeed
+package com.example.itforum.user.home.myfeed
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

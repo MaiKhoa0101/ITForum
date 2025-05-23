@@ -1,4 +1,4 @@
-package com.example.itforum.user.follow
+package com.example.itforum.user.home.follow
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
