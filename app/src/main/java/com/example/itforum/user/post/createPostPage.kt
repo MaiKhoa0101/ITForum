@@ -105,7 +105,7 @@ fun CreatePostPage(modifier: Modifier, navHostController: NavHostController) {
                         .fillMaxSize()
                         .background(Color.White)
                 ) {
-                    AvatarName(Icons.Default.AccountCircle, "Nguyễn Thành Đạt")
+                    IconWithText(Icons.Default.AccountCircle, "Nguyễn Thành Đạt")
                     WritePost()
                     AddTagPost()
                     AddMedia()
@@ -162,26 +162,28 @@ fun TopPost(navHostController: NavHostController) {
 }
 
 @Composable
-fun AvatarName(
+fun IconWithText(
     avatar: ImageVector,
-    name: String
+    name: String,
+    sizeIcon: Dp = 45.dp,
+    textStyle: TextStyle = TextStyle(fontSize = 20.sp),
+    modifier: Modifier = Modifier.padding(horizontal = 13.dp, vertical = 6.dp)
+        .fillMaxWidth(),
 ) {
     Row(
-        modifier = Modifier
-            .padding(horizontal = 13.dp, vertical = 6.dp)
-            .fillMaxWidth(),
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = avatar,
             contentDescription = "Avatar tài khoản",
-            modifier = Modifier.size(45.dp)
+            modifier = Modifier.size(sizeIcon)
         )
         Spacer(modifier = Modifier.width(5.dp))
         Text(
             text = name,
-            fontSize = 20.sp,
-            )
+            style = textStyle,
+        )
     }
 }
 
@@ -247,7 +249,7 @@ fun AddTagPost() {
                 onValueChange = {
                     textTag = it
                     isError = it.trim().isEmpty()
-                                },
+                },
                 placeholder = { Text("Nhập tag", color = Color(0x80000000), fontSize = 16.sp) },
                 shape = RoundedCornerShape(7.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -270,7 +272,7 @@ fun AddTagPost() {
                         items = items + textTag
                     else
                         isError = true
-                          },
+                },
                 modifier = Modifier
                     .padding(start = 10.dp)
                     .size(54.dp)
@@ -631,7 +633,7 @@ fun RadioOption(img: ImageVector, text: String) {
         Text(
             text = text,
             fontSize = 16.sp
-            )
+        )
     }
 }
 
