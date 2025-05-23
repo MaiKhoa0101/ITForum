@@ -7,6 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.itforum.user.bookmark.BookMarkScreen
+import com.example.itforum.user.follow.FollowScreen
+import com.example.itforum.user.follow.FollowerWidget
 import com.example.itforum.user.home.HomePage
 import com.example.itforum.user.intro.IntroScreen
 import com.example.itforum.user.login.EnterEmailScreen
@@ -15,6 +18,8 @@ import com.example.itforum.user.login.EnterPhoneNumberScreen
 import com.example.itforum.user.login.ForgotPasswordScreen
 import com.example.itforum.user.login.LoginScreen
 import com.example.itforum.user.login.ResetPasswordScreen
+import com.example.itforum.user.myfeed.MyFeedScreen
+import com.example.itforum.user.myfeed.TagRepository
 import com.example.itforum.user.notification.NotificationPage
 import com.example.itforum.user.post.CreatePostPage
 import com.example.itforum.user.post.DetailPostPage
@@ -108,6 +113,15 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
             RegistrationSuccessScreen(
                 onLoginClick = { navHostController.navigate("login") }
             )
+        }
+        composable("myfeed"){
+            MyFeedScreen(modifier)
+        }
+        composable("bookmark"){
+            BookMarkScreen()
+        }
+        composable("follow"){
+            FollowScreen()
         }
     }
 }

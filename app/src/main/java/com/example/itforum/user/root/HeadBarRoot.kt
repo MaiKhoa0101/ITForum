@@ -26,10 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.example.itforum.R
 
 @Composable
 fun TopBarRoot(
+    navHostController : NavHostController,
     onToggleTheme: () -> Unit
 ) {
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -62,11 +64,11 @@ fun TopBarRoot(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.camera),
+                    painter = painterResource(R.drawable.tool),
                     contentDescription = "Toggle Theme",
                     modifier = Modifier
                         .size(30.dp)
-                        .clickable { }
+                        .clickable {navHostController.navigate("myfeed")}
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Icon(

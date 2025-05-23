@@ -51,7 +51,7 @@ fun Root(sharedPreferences:SharedPreferences){
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 if (showTopBars) {
-                    TopBarRoot(onToggleTheme = { darkTheme = !darkTheme })
+                    TopBarRoot(navHostController,onToggleTheme = { darkTheme = !darkTheme })
                 }
             },
             bottomBar = {
