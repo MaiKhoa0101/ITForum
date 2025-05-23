@@ -61,6 +61,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.auth0.android:jwtdecode:2.0.2")
 
     // ViewModel + LiveData (bắt buộc)
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")  // ViewModel (Kotlin)
