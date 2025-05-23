@@ -2,6 +2,7 @@ package com.example.itforum.user.root
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -30,6 +31,8 @@ import com.example.itforum.user.register.OtpVerificationScreen
 import com.example.itforum.user.register.RegisterScreen
 import com.example.itforum.user.register.RegistrationSuccessScreen
 import com.example.itforum.user.tool.ToolPage
+
+import com.example.itforum.admin.adminAccount.AccountDetailScreen
 
 @Composable
 fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier){
@@ -125,5 +128,14 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
         composable("follow"){
             FollowScreen()
         }
+        composable("account_detail/{accountId}") { backStackEntry ->
+            val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
+            if (accountId != null) {
+                AccountDetailScreen(accountId)
+            } else {
+                Text("Không tìm thấy tài khoản.")
+            }
+        }
+
     }
 }
