@@ -27,7 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun MyFeedScreen(tagRepository: TagRepository, modifier: Modifier = Modifier) {
+fun MyFeedScreen( modifier: Modifier = Modifier) {
+    val tagRepository = rememberTagRepository()
     var feedName by remember { mutableStateOf(TextFieldValue("My Feed")) }
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Suggested", "My tags")
