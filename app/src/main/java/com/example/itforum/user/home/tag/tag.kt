@@ -1,4 +1,4 @@
-package com.example.itforum.user.tag
+package com.example.itforum.user.home.tag
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,9 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.itforum.user.myfeed.TagChip
+import com.example.itforum.user.home.myfeed.TagChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.foundation.lazy.items
 
 @Composable
 fun TagScreen(){

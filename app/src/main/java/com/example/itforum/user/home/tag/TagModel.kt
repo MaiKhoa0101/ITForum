@@ -1,4 +1,4 @@
-package com.example.itforum.user.tag
+package com.example.itforum.user.home.tag
 
 data class TagModel (
     val name : String,
