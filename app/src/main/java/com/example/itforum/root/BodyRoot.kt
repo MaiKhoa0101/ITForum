@@ -8,6 +8,7 @@ import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.itforum.admin.adminAccount.AccountDetailScreen
 import com.example.itforum.home.HomePage
 import com.example.itforum.intro.IntroScreen
 import com.example.itforum.login.EnterEmailScreen
@@ -107,6 +108,15 @@ fun BodyRoot(navHostController: NavHostController,modifier: Modifier){
                 onLoginClick = { navHostController.navigate("login") }
             )
         }
+        composable("account_detail/{accountId}") { backStackEntry ->
+            val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
+            if (accountId != null) {
+                AccountDetailScreen(accountId)
+            } else {
+                Text("Không tìm thấy tài khoản.")
+            }
+        }
+
     }
 }
 //

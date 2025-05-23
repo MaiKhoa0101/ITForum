@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -60,6 +62,18 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
 
+    // ViewModel + LiveData (bắt buộc)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")  // ViewModel (Kotlin)
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")   // LiveData (Kotlin)
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")    // LifecycleScope
+    implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
+
+
+    // Jetpack Compose tích hợp với ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+
+    // Coroutines (nếu dùng Flow)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
     //Tải và hiển thị hình ảnh online
     implementation(platform("androidx.compose:compose-bom:2025.05.00"))
