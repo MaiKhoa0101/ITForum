@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.itforum.ui.theme.ITForumTheme
 import androidx.navigation.compose.rememberNavController
-import com.example.itforum.user.follow.FollowScreen
 import kotlin.collections.contains
 
 class MainActivity : ComponentActivity() {
@@ -30,9 +29,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-//            val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-//            Root(sharedPreferences)
-            FollowScreen()
+            val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+            Root(sharedPreferences)
         }
     }
 }
@@ -53,7 +51,7 @@ fun Root(sharedPreferences:SharedPreferences){
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 if (showTopBars) {
-                    TopBarRoot(onToggleTheme = { darkTheme = !darkTheme })
+                    TopBarRoot(navHostController,onToggleTheme = { darkTheme = !darkTheme })
                 }
             },
             bottomBar = {
