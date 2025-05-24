@@ -11,11 +11,13 @@ data class UserModelResponse(
     val password: String
 )
 
-data class SignUpResponse(
+
+data class LoginResponse(
+    val accessToken: String,
     val message: String
 )
 
-data class LoginResponse(
-    val accessToken: String
+data class RegisterResponse(
+    val message: String
 )
 
