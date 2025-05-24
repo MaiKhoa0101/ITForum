@@ -32,7 +32,8 @@ import com.example.itforum.R
 @Composable
 fun TopBarRoot(
     navHostController : NavHostController,
-    onToggleTheme: () -> Unit
+    onToggleTheme: () -> Unit,
+    onMenuClick: () -> Unit
 ) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val roles = listOf("My feed", "Tag", "Follow", "Bookmark")
@@ -54,6 +55,18 @@ fun TopBarRoot(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(R.drawable.utilities),
+                    contentDescription = "Menu",
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clickable { onMenuClick() }
+                )
+
+
+            }
+
             Text(
                 text = "Appname",
                 style = MaterialTheme.typography.titleMedium,
@@ -70,16 +83,16 @@ fun TopBarRoot(
                         .size(30.dp)
                         .clickable {navHostController.navigate("myfeed")}
                 )
-                Spacer(modifier = Modifier.width(16.dp))
-                Icon(
-                    painter = painterResource(R.drawable.searchicon),
-                    contentDescription = "Search",
-                    modifier = Modifier
-                        .size(25.dp)
-                        .clickable {
-                            // TODO: Implement search
-                        }
-                )
+//                Spacer(modifier = Modifier.width(16.dp))
+//                Icon(
+//                    painter = painterResource(R.drawable.searchicon),
+//                    contentDescription = "Search",
+//                    modifier = Modifier
+//                        .size(25.dp)
+//                        .clickable {
+//                            // TODO: Implement search
+//                        }
+//                )
             }
         }
 

@@ -44,6 +44,15 @@ android {
 }
 
 dependencies {
+    //API gemini
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    //luu lịch sử
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    implementation("androidx.compose.material3:material3:1.1.2")
+
+    implementation("org.json:json:20240303")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

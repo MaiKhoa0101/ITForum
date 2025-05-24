@@ -67,7 +67,7 @@ fun FootBarRoot(currentRoute:String?,navHostController: NavHostController) {
 
             ) {
             BoxItem(nameRoute = "Trang chủ", icon = R.drawable.home, nameDirection = "home", navHostController,currentRoute)
-            BoxItem(nameRoute = "Tiện ích", icon = R.drawable.tool,"tool",navHostController,currentRoute)
+            BoxItem(nameRoute = "Tìm kiếm", icon = R.drawable.searchicon,"searchscreen",navHostController,currentRoute)
             Spacer(modifier = Modifier.width(50.dp)) // Space for the floating button
             BoxItem(nameRoute = "Thông báo", icon = R.drawable.bell,"notification",navHostController,currentRoute)
             BoxItem(nameRoute = "Cá nhân", icon = R.drawable.user,"personal",navHostController,currentRoute)
