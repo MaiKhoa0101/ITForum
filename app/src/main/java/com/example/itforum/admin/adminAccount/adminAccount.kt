@@ -26,6 +26,8 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Search
@@ -47,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.itforum.Model.account
+import com.example.itforum.user.post.icontext
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
@@ -56,13 +59,18 @@ import java.time.LocalDate
 @Composable
 fun AccountManagementScreen(users: List<account>, navController: NavHostController) {
     var searchText by remember { mutableStateOf("") }
-    var filteredUsers by remember { mutableStateOf(users) }
     val dateDialogStateStart = rememberMaterialDialogState()
     val dateDialogStateEnd = rememberMaterialDialogState()
     var startDate by remember { mutableStateOf<LocalDate?>(null) }
     var endDate by remember { mutableStateOf<LocalDate?>(null) }
     var showDateFilters by remember { mutableStateOf(false) }
 
+    var filteredUsers by remember { mutableStateOf(users) }
+    val headers = listOf("ID", "Ten", "email", "sdt", "ngay tao", "chi tiet")
+    val menuOptions = listOf(
+        icontext(Icons.Default.Edit,"Xem chi tiết"),
+        icontext(Icons.Default.Delete,"Xóa")
+    )
     Column(modifier = Modifier.fillMaxWidth().background(Color.White)) {
         Box(
             modifier = Modifier
@@ -186,9 +194,12 @@ fun AccountManagementScreen(users: List<account>, navController: NavHostControll
                 Text(text = "tong so user: ${filteredUsers.size}")
             }
             Spacer(modifier = Modifier.height(16.dp))
+
             TableData(
-                rows = convertAccountsToTableRows(filteredUsers),
-                onViewDetails = { accountId ->
+                headers,
+                rows = convertToTableRows(filteredUsers),
+                menuOptions,
+                onClickOption = { accountId ->
                     navController.navigate("account_detail/$accountId")
                 }
             )
@@ -232,59 +243,59 @@ fun AccountManagementScreen(users: List<account>, navController: NavHostControll
         }
     }
 }
-
-@Composable
-fun TableData(rows: List<List<String>>, onViewDetails: (Int) -> Unit) {
-    val headers = listOf("ID", "Ten", "email", "sdt", "ngay tao", "chi tiet")
-    val columnWidths = listOf(100.dp, 150.dp, 200.dp, 150.dp, 150.dp, 80.dp)
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
-    val maxTableHeight = screenHeight * 0.6f
-    var expandedIndex by remember { mutableStateOf(-1) }
-
-    Box(modifier = Modifier.fillMaxWidth().border(1.dp, Color.Gray).heightIn(max = maxTableHeight)) {
-        val horizontalScrollState = rememberScrollState()
-
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            item {
-                Row(modifier = Modifier.background(Color(0xFF2B544F)).horizontalScroll(horizontalScrollState)) {
-                    headers.forEachIndexed { index, header ->
-                        Box(modifier = Modifier.width(columnWidths[index]).padding(8.dp)) {
-                            Text(text = header, color = Color.White, modifier = Modifier.padding(4.dp))
-                        }
-                    }
-                }
-            }
-            itemsIndexed(rows) { index, row ->
-                val backgroundColor = if (index % 2 == 0) Color.White else Color(0xFFD9D9D9)
-
-                Row(modifier = Modifier.horizontalScroll(horizontalScrollState).background(backgroundColor), verticalAlignment = Alignment.CenterVertically) {
-                    repeat(row.size) { i ->
-                        Box(modifier = Modifier.width(columnWidths[i]).background(backgroundColor)) {
-                            Text(text = row[i], color = Color.Black, modifier = Modifier.padding(4.dp), softWrap = false)
-                        }
-                    }
-                    Box(modifier = Modifier.width(columnWidths.last()).background(backgroundColor)) {
-                        Box(modifier = Modifier.size(32.dp, 24.dp).background(Color(0xFFB1D05D), shape = RoundedCornerShape(6.dp)).border(1.dp, Color.Black, shape = RoundedCornerShape(6.dp)), contentAlignment = Alignment.Center) {
-                            IconButton(onClick = { expandedIndex = index }) {
-                                Icon(Icons.Default.MoreHoriz, "chi tiet", tint = Color.Black)
-                            }
-                            DropdownMenu(expanded = expandedIndex == index, onDismissRequest = { expandedIndex = -1 }, modifier = Modifier.width(170.dp)) {
-                                DropdownMenuItem(text = { Text("Xem chi tiết", fontSize = 14.sp, color = Color(0xFF00AEFF)) }, onClick = {
-                                    expandedIndex = -1
-                                    val accountId = row[0].toInt()
-                                    onViewDetails(accountId)
-                                })
-                                DropdownMenuItem(text = { Text("Xóa", fontSize = 14.sp, color = Color.Red) }, onClick = { expandedIndex = -1 })
-                            }
-                        }
-                    }
-                }
-                Divider(thickness = 1.dp, color = Color.Gray)
-            }
-        }
-    }
-}
+//
+//@Composable
+//fun TableData(rows: List<List<String>>, onViewDetails: (Int) -> Unit) {
+//    val headers = listOf("ID", "Ten", "email", "sdt", "ngay tao", "chi tiet")
+//    val columnWidths = listOf(100.dp, 150.dp, 200.dp, 150.dp, 150.dp, 80.dp)
+//    val configuration = LocalConfiguration.current
+//    val screenHeight = configuration.screenHeightDp.dp
+//    val maxTableHeight = screenHeight * 0.6f
+//    var expandedIndex by remember { mutableStateOf(-1) }
+//
+//    Box(modifier = Modifier.fillMaxWidth().border(1.dp, Color.Gray).heightIn(max = maxTableHeight)) {
+//        val horizontalScrollState = rememberScrollState()
+//
+//        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+//            item {
+//                Row(modifier = Modifier.background(Color(0xFF2B544F)).horizontalScroll(horizontalScrollState)) {
+//                    headers.forEachIndexed { index, header ->
+//                        Box(modifier = Modifier.width(columnWidths[index]).padding(8.dp)) {
+//                            Text(text = header, color = Color.White, modifier = Modifier.padding(4.dp))
+//                        }
+//                    }
+//                }
+//            }
+//            itemsIndexed(rows) { index, row ->
+//                val backgroundColor = if (index % 2 == 0) Color.White else Color(0xFFD9D9D9)
+//
+//                Row(modifier = Modifier.horizontalScroll(horizontalScrollState).background(backgroundColor), verticalAlignment = Alignment.CenterVertically) {
+//                    repeat(row.size) { i ->
+//                        Box(modifier = Modifier.width(columnWidths[i]).background(backgroundColor)) {
+//                            Text(text = row[i], color = Color.Black, modifier = Modifier.padding(4.dp), softWrap = false)
+//                        }
+//                    }
+//                    Box(modifier = Modifier.width(columnWidths.last()).background(backgroundColor)) {
+//                        Box(modifier = Modifier.size(32.dp, 24.dp).background(Color(0xFFB1D05D), shape = RoundedCornerShape(6.dp)).border(1.dp, Color.Black, shape = RoundedCornerShape(6.dp)), contentAlignment = Alignment.Center) {
+//                            IconButton(onClick = { expandedIndex = index }) {
+//                                Icon(Icons.Default.MoreHoriz, "chi tiet", tint = Color.Black)
+//                            }
+//                            DropdownMenu(expanded = expandedIndex == index, onDismissRequest = { expandedIndex = -1 }, modifier = Modifier.width(170.dp)) {
+//                                DropdownMenuItem(text = { Text("Xem chi tiết", fontSize = 14.sp, color = Color(0xFF00AEFF)) }, onClick = {
+//                                    expandedIndex = -1
+//                                    val accountId = row[0].toInt()
+//                                    onViewDetails(accountId)
+//                                })
+//                                DropdownMenuItem(text = { Text("Xóa", fontSize = 14.sp, color = Color.Red) }, onClick = { expandedIndex = -1 })
+//                            }
+//                        }
+//                    }
+//                }
+//                Divider(thickness = 1.dp, color = Color.Gray)
+//            }
+//        }
+//    }
+//}
 
 fun generateFakeAccounts(): List<account> {
     return List(20) {
@@ -297,15 +308,15 @@ fun generateFakeAccounts(): List<account> {
         )
     }
 }
-
-fun convertAccountsToTableRows(accounts: List<account>): List<List<String>> {
-    return accounts.map {
-        listOf(
-            it.id.toString(),
-            it.userName,
-            it.email,
-            it.sdt,
-            it.createdDate.toString()
-        )
-    }
-}
+//
+//fun convertAccountsToTableRows(accounts: List<account>): List<List<String>> {
+//    return accounts.map {
+//        listOf(
+//            it.id.toString(),
+//            it.userName,
+//            it.email,
+//            it.sdt,
+//            it.createdDate.toString()
+//        )
+//    }
+//}
