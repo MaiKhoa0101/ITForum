@@ -32,6 +32,10 @@ import com.example.itforum.user.register.RegisterScreen
 import com.example.itforum.user.register.RegistrationSuccessScreen
 import com.example.itforum.user.tool.ToolPage
 
+import com.example.itforum.utilities.SearchScreen
+import com.example.itforum.utilities.note.NotesApp
+import com.example.itforum.utilities.chat.ChatAIApp
+
 import com.example.itforum.admin.adminAccount.AccountDetailScreen
 
 @Composable
@@ -42,6 +46,24 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
         }
         composable ("notification") {
             NotificationPage(modifier, navHostController)
+        }
+        composable("chat") {
+            ChatAIApp(onExitToHome = {
+                navHostController.navigate("home") {
+                    popUpTo("home") { inclusive = false }
+                    launchSingleTop = true
+                }
+            })
+        }
+        composable("note") {
+            NotesApp(
+                onBackToHome = {
+                    navHostController.navigate("home") {
+                        popUpTo("home") { inclusive = false }
+                        launchSingleTop = true
+                    }
+                }
+            )
         }
         composable ("detail_notify") {
             DetailNotify(modifier, navHostController)
@@ -103,12 +125,14 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
             ResetPasswordScreen(onBackClick= {navHostController.popBackStack()},)
             // thêm điều hướng cho nút
         }
+
         composable("register") {
             RegisterScreen(
                 navHostController,
                 sharedPreferences=sharePreferences,
             ) // Màn hình đăng ký mới thêm
         }
+
         composable("otp") {
             OtpVerificationScreen(
                 onBackClick = { navHostController.popBackStack() },
@@ -130,6 +154,9 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
         }
         composable("follow"){
             FollowScreen()
+        }
+        composable ("searchscreen"){
+            SearchScreen(modifier)
         }
         composable("account_detail/{accountId}") { backStackEntry ->
             val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
