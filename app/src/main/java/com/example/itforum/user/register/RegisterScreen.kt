@@ -1,5 +1,6 @@
 package com.example.itforum.user.register
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,9 +19,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,22 +42,53 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.itforum.R
+import com.example.itforum.user.register.viewmodel.RegisterViewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavHostController
+import com.example.itforum.user.effect.UiStateLogin
+import com.example.itforum.user.effect.UiStateMessage
+import com.example.itforum.user.model.request.RegisterUser
+import kotlinx.coroutines.delay
+import okhttp3.internal.wait
+import kotlin.text.contains
 
 @Composable
 fun RegisterScreen(
-    navController: NavController,
+    navHostController: NavHostController,
+    sharedPreferences: SharedPreferences,
     onBackClick: () -> Unit = {},
-    onLoginClick: () -> Unit = {},
-    onRegisterSuccess: () -> Unit = {}
 ) {
+
+    val registerViewModel: RegisterViewModel = viewModel(factory = viewModelFactory {
+        initializer { RegisterViewModel(sharedPreferences) }
+    })
+    var name by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var isEmailValid by remember { mutableStateOf(true) }
+
+
+    var isEmailValid by remember { mutableStateOf(true)}
+    var isNameValid by remember { mutableStateOf(true)}
+    var isPhoneValid by remember { mutableStateOf(true)}
     var passwordError by remember { mutableStateOf(false) }
     var confirmPasswordError by remember { mutableStateOf(false) }
+
+
+    val uiState by registerViewModel.uiState.collectAsState()
+    var canSubmit by remember {mutableStateOf(false)}
+
+    LaunchedEffect(uiState) {
+        if (uiState is UiStateLogin.Success) {
+            println("uiState là success")
+            navHostController.navigate("success")
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -60,93 +96,78 @@ fun RegisterScreen(
             .background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(350.dp)
-        ) {
-            // Background wave design
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val width = size.width
-                val height = size.height
-
-                val path = Path().apply {
-                    moveTo(0f, 0f)
-                    lineTo(0f, height * 0.75f)
-                    quadraticTo(
-                        width * 0.07f, height * 1.25f,
-                        width * 0.5f, height * 0.8f
-                    )
-                    quadraticTo(
-                        width * 0.75f, height * 0.5f,
-                        width, height * 0.9f
-                    )
-                    lineTo(width, 0f)
-                    close()
-                }
-
-                drawPath(
-                    path = path,
-                    color = Color(0xFF6FA9FF)
-                )
-            }
-
-            // Title
-            Text(
-                text = "Đăng ký",
-                color = Color.White,
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold,
-                textDecoration = TextDecoration.Underline,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 70.dp)
-            )
-
-            // Logo and text
-            Box(
-                modifier = Modifier
-                    .offset(x = 13.dp, y = 162.dp) // Vị trí chính xác
-            ) {
-                Column {
-                    Image(
-                        painter = painterResource(id = R.drawable.logo),
-                        contentDescription = "Intro Image 4",
-                        modifier = Modifier.size(100.dp)
-                    )
-
-                    // Hai dòng chữ nghiêng
-                    Column(
-                        modifier = Modifier.padding(top = 8.dp)
-                    ) {
-                        Text(
-                            text = "Hello world",
-                            fontStyle = FontStyle.Italic, // Chữ nghiêng
-                            fontSize = 20.sp
-                        )
-                        Text(
-                            text = "Hello dev!",
-                            fontStyle = FontStyle.Italic, // Chữ nghiêng
-                            fontSize = 20.sp
-                        )
-                    }
-                }
-            }
-        }
 
         // Form fields
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Title
+            Text(
+                text = "Đăng ký",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 36.sp,
+                fontWeight = FontWeight.Bold,
+                textDecoration = TextDecoration.Underline,
+                modifier = Modifier
+                    .padding(top = 70.dp)
+            )
+            // Họ và tên field
+            OutlinedTextField(
+                value = name,
+                onValueChange = {
+                    name = it
+                    isNameValid = name.isNotEmpty() && name.all { it.isLetter() || it.isWhitespace() }
+
+                },
+                label = { Text("Họ và tên của bạn") },
+                placeholder = { Text("Nguyễn Văn A") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                textStyle = androidx.compose.ui.text.TextStyle(color = Color.Black),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            if (!isNameValid ) {
+                Text(
+                    text = "Ít nhất 2 từ và không chứa kí tự đặc biệt",
+                    color = Color.Red,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+
+
+            // Số điện thoại field
+            OutlinedTextField(
+                value = phone,
+                onValueChange = {
+                    phone = it
+                    isPhoneValid = phone.all { it.isDigit() }
+                },
+                label = { Text("Số điện thoại") },
+                placeholder = { Text("Số điện thoại của bạn") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                isError = !isPhoneValid,
+                textStyle = androidx.compose.ui.text.TextStyle(color = Color.Black),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            if (!isPhoneValid && phone.isNotEmpty()) {
+                Text(
+                    text = "Số điện thoại không hợp lệ",
+                    color = Color.Red,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+
             // email field
             OutlinedTextField(
                 value = email,
                 onValueChange = {
                     email = it
-                    isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
+                    isEmailValid = email.contains("@")
                 },
                 label = { Text("Email") },
                 placeholder = { Text("Email của bạn") },
@@ -216,10 +237,18 @@ fun RegisterScreen(
                     // Validate inputs
                     passwordError = password.length < 6
                     confirmPasswordError = password != confirmPassword
-                    isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+                    canSubmit= isEmailValid && isNameValid && isPhoneValid && !passwordError && !confirmPasswordError
+                    println("Đã nhấn đăng ký với cansubmit: $canSubmit")
 
-                    if (!passwordError && !confirmPasswordError && isEmailValid) {
-                        navController.navigate("otp")
+                    if (canSubmit) {
+                        registerViewModel.register(RegisterUser(name,phone, email, password))
+                    }
+                    else{
+                        println("email: "+isEmailValid+" "+email)
+                        println("name: "+isNameValid+" "+name)
+                        println("phone: "+isPhoneValid+" "+phone)
+                        println("password: "+passwordError+" "+password)
+                        println("confirmPassword: "+confirmPasswordError+" "+confirmPassword)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -244,9 +273,11 @@ fun RegisterScreen(
                     "Đăng nhập ngay",
                     color = Color(0xFF6FA9FF),
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onLoginClick() }
+                    modifier = Modifier.clickable { navHostController.navigate("login") }
                 )
             }
+            UiStateMessage(uiState, canSubmit)
+
         }
     }
 }

@@ -125,9 +125,14 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
             ResetPasswordScreen(onBackClick= {navHostController.popBackStack()},)
             // thêm điều hướng cho nút
         }
-//        composable("com/example/itforum/register") {
-//            RegisterScreen(navHostController) // Màn hình đăng ký mới thêm
-//        }
+
+        composable("register") {
+            RegisterScreen(
+                navHostController,
+                sharedPreferences=sharePreferences,
+            ) // Màn hình đăng ký mới thêm
+        }
+
         composable("otp") {
             OtpVerificationScreen(
                 onBackClick = { navHostController.popBackStack() },
