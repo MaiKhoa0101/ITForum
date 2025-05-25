@@ -51,6 +51,7 @@ import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.UploadFile
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Card
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -87,6 +88,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
 import com.example.itforum.R
+
+data class icontext(
+    val icon: ImageVector = Icons.Default.Visibility,
+    val text: String = "",
+)
 
 @Composable
 fun CreatePostPage(modifier: Modifier, navHostController: NavHostController) {
