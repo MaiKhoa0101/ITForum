@@ -1,9 +1,9 @@
-package com.example.itforum.Model
+package com.example.itforum.admin.adminAccount.Model
 
 import com.example.itforum.admin.adminAccount.TableRowConvertible
 import java.time.LocalDate
 
-data class account(
+data class UserAccountManagerAdmin(
     val id: Int,
     val userName: String,
     val email: String,

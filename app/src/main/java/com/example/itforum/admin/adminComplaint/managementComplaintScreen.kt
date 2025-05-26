@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
@@ -38,10 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import com.example.itforum.Model.account
 import com.example.itforum.admin.adminAccount.TableData
-import com.example.itforum.admin.adminAccount.TableRowConvertible
 import com.example.itforum.admin.adminAccount.convertToTableRows
 import com.example.itforum.admin.adminComplaint.Model.complaint
 import com.example.itforum.user.post.icontext
