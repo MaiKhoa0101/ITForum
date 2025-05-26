@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.itforum.admin.adminAccount.TableData
 import com.example.itforum.admin.adminAccount.convertToTableRows
-import com.example.itforum.admin.adminComplaint.Model.complaint
+import com.example.itforum.admin.adminComplaint.model.complaint
 import com.example.itforum.user.post.icontext
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker

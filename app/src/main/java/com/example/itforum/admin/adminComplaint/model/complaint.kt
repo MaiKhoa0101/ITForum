@@ -1,4 +1,4 @@
-package com.example.itforum.admin.adminComplaint.Model
+package com.example.itforum.admin.adminComplaint.model
 
 import com.example.itforum.admin.adminAccount.TableRowConvertible
 import java.time.LocalDate

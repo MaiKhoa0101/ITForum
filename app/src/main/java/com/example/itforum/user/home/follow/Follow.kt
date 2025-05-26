@@ -24,16 +24,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.itforum.R
+import com.example.itforum.user.home.follow.model.followModel
 import com.example.itforum.user.post.PostCard
 import com.example.itforum.user.post.postList
 
 @Composable
 fun FollowScreen(){
     val mockFollowerList = listOf(
-    followModel(name = "Bob Smith", following = "180 followers"),
-    followModel("Charlie Nguyen", "150 followers"),
-    followModel("Daisy Tran", "220 followers"),
-    followModel("Ethan Brown", "95 followers")
+        followModel(name = "Bob Smith", following = "180 followers"),
+        followModel("Charlie Nguyen", "150 followers"),
+        followModel("Daisy Tran", "220 followers"),
+        followModel("Ethan Brown", "95 followers")
     )
     val mockSuggestFollowerList = listOf(
         followModel(name = "Bob Smith", following = "180 followers"),

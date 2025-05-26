@@ -2,7 +2,6 @@ package com.example.itforum.user.post
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Alignment
+import com.example.itforum.user.post.model.postModel
 
 @Composable
 fun PostListScreen() {
@@ -35,7 +35,7 @@ fun PostListScreen() {
 }
 
 @Composable
-fun PostCard(post: PostModel) {
+fun PostCard(post: postModel) {
     Card(
         elevation = 4.dp,
         modifier = Modifier

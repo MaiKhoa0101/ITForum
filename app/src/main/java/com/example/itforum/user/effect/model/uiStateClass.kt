@@ -1,4 +1,4 @@
-package com.example.itforum.user.effect
+package com.example.itforum.user.effect.model
 
 sealed class UiStateLogin {
     object Loading : UiStateLogin()

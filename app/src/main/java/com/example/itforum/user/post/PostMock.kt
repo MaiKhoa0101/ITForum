@@ -2,9 +2,10 @@ package com.example.itforum.user.post
 
 
 import com.example.itforum.R
+import com.example.itforum.user.post.model.postModel
 
 val postList = listOf(
-    PostModel(
+    postModel(
         id = 1,
         author = "ByteByteGo",
         readTime = "5m read time",
@@ -13,7 +14,7 @@ val postList = listOf(
         imageRes = R.drawable.post,
         likes = 50
     ),
-    PostModel(
+    postModel(
         id = 2,
         author = "DevTo",
         readTime = "4m read time",
@@ -22,7 +23,7 @@ val postList = listOf(
         imageRes = R.drawable.post,
         likes = 34
     ),
-    PostModel(
+    postModel(
         id = 3,
         author = "DevTo",
         readTime = "4m read time",

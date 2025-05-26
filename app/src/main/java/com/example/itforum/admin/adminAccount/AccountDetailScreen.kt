@@ -13,11 +13,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.itforum.admin.adminAccount.model.UserAccountManagerAdmin
+import java.time.LocalDate
 
+fun generateAccounts(): List<UserAccountManagerAdmin> { // Definition 1
+    return List(20) {
+        UserAccountManagerAdmin(
+            id = it + 1,
+            userName = "Người dùng $it",
+            email = "user$it@example.com",
+            sdt = "01234567${it}9",
+            createdDate = LocalDate.of(2024, 1, 1).plusDays(it.toLong())
+        )
+    }
+}
 @Composable
 fun AccountDetailScreen(accountId: Int) {
     val fakeAccount = remember(accountId) {
-        generateFakeAccounts().find { it.id == accountId }
+        generateAccounts().find { it.id == accountId }
     }
 
     val isAccountLocked = remember { mutableStateOf(false) }

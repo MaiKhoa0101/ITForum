@@ -1,6 +1,6 @@
-package com.example.itforum.admin.adminPost.Model
+package com.example.itforum.admin.adminPost.model
 
-data class AdminManagerPost(
+data class adminManagerPost(
     val id: Int,
     val author: String,
     val time: String,

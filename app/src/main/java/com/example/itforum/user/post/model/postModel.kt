@@ -1,6 +1,6 @@
-package com.example.itforum.user.post
+package com.example.itforum.user.post.model
 
-data class PostModel(
+data class postModel(
     val id: Int,
     val author: String,
     val readTime: String,

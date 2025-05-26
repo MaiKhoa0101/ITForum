@@ -1,29 +1,19 @@
 package com.example.itforum.user.login.viewmodel
 
 
-import android.app.Application
-import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.auth0.android.jwt.JWT
 import com.example.itforum.retrofit.RetrofitInstance
-import com.example.itforum.user.effect.UiStateLogin
+import com.example.itforum.user.effect.model.UiStateLogin
 import com.example.itforum.user.model.request.LoginUser
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import okio.IOException
 
 

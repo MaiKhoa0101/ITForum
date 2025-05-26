@@ -3,25 +3,16 @@ package com.example.itforum.user.register.viewmodel
 
 import android.content.SharedPreferences
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.auth0.android.jwt.JWT
 import com.example.itforum.retrofit.RetrofitInstance
-import com.example.itforum.user.model.request.LoginUser
 import com.example.itforum.user.model.request.RegisterUser
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.delay
 import androidx.lifecycle.viewModelScope
-import com.example.itforum.user.effect.UiStateLogin
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
+import com.example.itforum.user.effect.model.UiStateLogin
 import okio.IOException
 
 class RegisterViewModel(private var sharedPreferences: SharedPreferences)  : ViewModel() {
