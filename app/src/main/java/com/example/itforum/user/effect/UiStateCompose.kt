@@ -7,18 +7,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.itforum.user.effect.model.UiStateLogin
+import com.example.itforum.user.effect.model.UiState
 
 @Composable
-fun UiStateMessage(uiState: UiStateLogin, canSubmit: Boolean) {
+fun UiStateMessage(uiState: UiState, canSubmit: Boolean) {
     if (!canSubmit) return
 
     when (uiState) {
-        is UiStateLogin.Loading -> {
+        is UiState.Loading -> {
             CircularProgressIndicator()
         }
 
-        is UiStateLogin.Error -> {
+        is UiState.Error -> {
             Text(
                 text = uiState.message,
                 color = Color.Red,
@@ -26,7 +26,7 @@ fun UiStateMessage(uiState: UiStateLogin, canSubmit: Boolean) {
             )
         }
 
-        is UiStateLogin.Success -> {
+        is UiState.Success -> {
             Text(
                 text = uiState.message,
                 color = Color.Green,
