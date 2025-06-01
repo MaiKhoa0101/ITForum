@@ -30,16 +30,54 @@ import com.example.itforum.utilities.DrawerContent
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import com.example.itforum.admin.AdminRoot.AdminRoot
+import com.example.itforum.admin.adminReport.ReportAccount.view.ReportedAccountScreen
+import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportViewModelFactory
+import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportedUserViewModel
+import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostScreen
+import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostViewModel
+import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostViewModelFactory
+import com.example.itforum.repository.ReportPostRepository
+import com.example.itforum.repository.ReportRepository
+import com.example.itforum.retrofit.RetrofitInstance
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+//        setContent {
+//            ITForumTheme {
+//                val repository = ReportPostRepository(RetrofitInstance.reportPostService)
+//                val viewModel: ReportedPostViewModel = viewModel(
+//                    factory = ReportedPostViewModelFactory(repository)
+//                )
+//                val navController = rememberNavController()
+//                ReportedPostScreen(viewModel = viewModel, navController = navController)
+//            }
+//        }
+//        setContent {
+//            ITForumTheme {
+//                val repository = ReportRepository(RetrofitInstance.reportService)
+//                val viewModel: ReportedUserViewModel = viewModel(
+//                    factory = ReportViewModelFactory(repository)
+//                )
+//                val navController = rememberNavController() // <-- thêm dòng này
+//                ReportedAccountScreen(viewModel = viewModel, navController = navController) // <-- truyền đủ
+//            }
+//        }
+
         setContent {
             val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-            Root(sharedPreferences)
+            val role =sharedPreferences.getString("role","user")
+            if (role=="admin"){
+                AdminRoot(sharedPreferences)
+            }
+            else{
+                Root(sharedPreferences)
+            }
         }
     }
 }

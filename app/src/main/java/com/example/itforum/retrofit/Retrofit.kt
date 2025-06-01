@@ -1,6 +1,8 @@
 package com.example.itforum.retrofit
 
 
+import com.example.itforum.service.ReportPostService
+import com.example.itforum.service.ReportService
 import com.example.itforum.service.UserService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -11,7 +13,7 @@ object RetrofitInstance {
 
 
 
-    private const val BASE_URL = "http://192.168.1.218:4000"
+    private const val BASE_URL = "http://192.168.1.9:4000"
 
 
     val okHttpClient = OkHttpClient.Builder()
@@ -25,8 +27,9 @@ object RetrofitInstance {
         .client(okHttpClient) // ← Đảm bảo dùng client có timeout
         .addConverterFactory(GsonConverterFactory.create())
         .build()
-
-
     val userService: UserService by lazy {retrofit.create(UserService::class.java) }
-
+    val reportService: ReportService = retrofit.create(ReportService::class.java)
+    val reportPostService: ReportPostService by lazy {
+        retrofit.create(ReportPostService::class.java)
+    }
 }
