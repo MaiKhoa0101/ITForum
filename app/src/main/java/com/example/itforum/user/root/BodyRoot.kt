@@ -44,7 +44,7 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
 
     NavHost(navHostController, startDestination = "login") {
         composable ("home") {
-            HomePage(modifier)
+            HomePage(modifier,sharePreferences)
         }
         composable ("notification") {
             NotificationPage(modifier, navHostController)

@@ -20,23 +20,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.itforum.user.post.PostCard
-import com.example.itforum.user.post.postList
+
+
 
 @Composable
 fun BookMarkScreen(){
     LazyColumn {
         item { SearchField() }
-        items(postList.size) { index ->
-            PostCard(post = postList[index])
-            // separate post box
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(2.dp)
-                    .background(Color.Black)
-            )
-        }
+//        items(postList.size) { index ->
+//            PostCard(post = postList[index])
+//            // separate post box
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(2.dp)
+//                    .background(Color.Black)
+//            )
+//        }
     }
 }
 @Composable
