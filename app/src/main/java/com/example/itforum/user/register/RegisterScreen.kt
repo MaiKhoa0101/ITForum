@@ -38,7 +38,7 @@ import com.example.itforum.user.register.viewmodel.RegisterViewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
-import com.example.itforum.user.effect.model.UiStateLogin
+import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.effect.UiStateMessage
 import com.example.itforum.user.model.request.RegisterUser
 import kotlin.text.contains
@@ -71,7 +71,7 @@ fun RegisterScreen(
     var canSubmit by remember {mutableStateOf(false)}
 
     LaunchedEffect(uiState) {
-        if (uiState is UiStateLogin.Success) {
+        if (uiState is UiState.Success) {
             println("uiState là success")
             navHostController.navigate("success")
         }

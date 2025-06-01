@@ -24,7 +24,7 @@ fun generateAccounts(): List<UserAccountManagerAdmin> { // Definition 1
             email = "user$it@example.com",
             sdt = "01234567${it}9",
             createdDate = LocalDate.of(2024, 1, 1).plusDays(it.toLong())
-        )
+        ) 
     }
 }
 @Composable

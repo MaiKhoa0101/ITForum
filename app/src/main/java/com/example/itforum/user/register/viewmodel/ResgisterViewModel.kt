@@ -12,33 +12,33 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.delay
 import androidx.lifecycle.viewModelScope
-import com.example.itforum.user.effect.model.UiStateLogin
+import com.example.itforum.user.effect.model.UiState
 import okio.IOException
 
 class RegisterViewModel(private var sharedPreferences: SharedPreferences)  : ViewModel() {
-    private val _uiState = MutableStateFlow<UiStateLogin>(UiStateLogin.Loading)
-    val uiState: StateFlow<UiStateLogin> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     fun register(registerUser: RegisterUser) {
         viewModelScope.launch {
-            _uiState.value = UiStateLogin.Loading
+            _uiState.value = UiState.Loading
             try {
                 val response = RetrofitInstance.userService.register(registerUser)
                 if (response.isSuccessful) {
-                    _uiState.value = UiStateLogin.Success(
+                    _uiState.value = UiState.Success(
                         response.body()?.message ?: "Đăng ký thành công"
                     )
                     delay(2000)
-                    _uiState.value = UiStateLogin.Idle
+                    _uiState.value = UiState.Idle
                 } else {
                     showError("Đăng ký thất bại: ${response.message()}")
-                    _uiState.value = UiStateLogin.Error(response.message())
+                    _uiState.value = UiState.Error(response.message())
                 }
             } catch (e: IOException) {
-                _uiState.value = UiStateLogin.Error("Lỗi phản hồi từ server")
+                _uiState.value = UiState.Error("Lỗi phản hồi từ server")
                 showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
             } catch (e: Exception) {
-                _uiState.value = UiStateLogin.Error("Lỗi không xác định: ${e.message}")
+                _uiState.value = UiState.Error("Lỗi không xác định: ${e.message}")
                 showError("Lỗi không xác định: ${e.localizedMessage ?: "Không rõ"}")
             }
         }

@@ -25,8 +25,7 @@ import com.example.itforum.user.post.CreatePostPage
 import com.example.itforum.user.post.DetailPostPage
 import com.example.itforum.user.post.ListLikePage
 import com.example.itforum.user.profile.EditProfile
-import com.example.itforum.user.profile.OtherProfile
-import com.example.itforum.user.profile.UserProfile
+
 import com.example.itforum.user.register.OtpVerificationScreen
 import com.example.itforum.user.register.RegisterScreen
 import com.example.itforum.user.register.RegistrationSuccessScreen
@@ -34,17 +33,17 @@ import com.example.itforum.user.tool.ToolPage
 
 import com.example.itforum.utilities.SearchScreen
 import com.example.itforum.utilities.note.NotesApp
-import com.example.itforum.user.utilities.chat.ChatAIApp
+import com.example.itforum.utilities.chat.ChatAIApp
 
 import com.example.itforum.admin.adminAccount.AccountDetailScreen
-import com.example.itforum.user.home.tag.TagScreen
+import com.example.itforum.user.profile.OtherUserProfileScreen
+import com.example.itforum.user.profile.UserProfileScreen
 
 @Composable
 fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier){
-
     NavHost(navHostController, startDestination = "login") {
         composable ("home") {
-            HomePage(modifier,sharePreferences)
+            HomePage(modifier)
         }
         composable ("notification") {
             NotificationPage(modifier, navHostController)
@@ -74,13 +73,13 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
             ToolPage(modifier)
         }
         composable ("personal") {
-            UserProfile(modifier, navHostController)
+            UserProfileScreen(sharePreferences, navHostController,modifier)
         }
         composable ("otherprofile") {
-            OtherProfile(modifier)
+            OtherUserProfileScreen(sharePreferences, navHostController,modifier)
         }
         composable ("editprofile") {
-            EditProfile(navHostController)
+            EditProfile(sharePreferences,navHostController)
         }
         composable("create_post") {
             CreatePostPage(modifier, navHostController)
@@ -160,7 +159,6 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
         composable ("searchscreen"){
             SearchScreen(modifier)
         }
-
         composable("account_detail/{accountId}") { backStackEntry ->
             val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
             if (accountId != null) {
