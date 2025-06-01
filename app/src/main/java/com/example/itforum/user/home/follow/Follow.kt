@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.itforum.R
 import com.example.itforum.user.home.follow.model.followModel
-import com.example.itforum.user.post.PostCard
-import com.example.itforum.user.post.postList
+
+
 
 @Composable
 fun FollowScreen(){
@@ -69,16 +69,7 @@ fun FollowScreen(){
             Text("Posts from your following ", fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(8.dp))
             Spacer(modifier = Modifier.height(16.dp))
         }
-        items(postList.size) { index ->
-            PostCard(post = postList[index])
-            // separate post box
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(2.dp)
-                    .background(Color.Black)
-            )
-        }
+
     }
 }
 @Composable

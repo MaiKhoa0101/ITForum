@@ -23,13 +23,8 @@ import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun TagScreen(){
-    val tagList = listOf(
-        TagModel("Kotlin","essse223"),
-        TagModel("Jetpack Compose","essse223"),
-        TagModel("Android","essse223"),
-        TagModel("AI","essse223"),
-        TagModel("Big Data","essse223")
-    )
+    val tagList = TagRepository.tagList
+
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 30.dp, vertical = 50.dp)
@@ -56,6 +51,7 @@ fun TagScreen(){
             Spacer(Modifier.height(10.dp))
 
             AllTagsWidget(tags = tagList)
+
         }
     }
 }
@@ -73,7 +69,12 @@ fun ListTagsWidget(tag: TagModel, index: String){
     }
 }
 @Composable
-fun AllTagsWidget(tags: List<TagModel>, modifier: Modifier = Modifier) {
+fun AllTagsWidget(
+    tags: List<TagModel>,
+    modifier: Modifier = Modifier,
+    onTagClick: (String) -> Unit = {}// ✅ thêm callback
+
+) {
     val groupedTags = tags.groupBy { it.name.first().uppercaseChar() }
     val sortedKeys = groupedTags.keys.sorted()
 
@@ -89,7 +90,9 @@ fun AllTagsWidget(tags: List<TagModel>, modifier: Modifier = Modifier) {
                 TagChip(
                     text = tag.name,
                     selected = false,
-                    onSelected = { /* Toggle selection */ },
+                    onSelected = {
+                        onTagClick(tag.name) // ✅ Gọi callback khi click
+                    },
                     modifier = Modifier
                         .padding(vertical = 4.dp)
                         .wrapContentSize()
@@ -98,3 +101,30 @@ fun AllTagsWidget(tags: List<TagModel>, modifier: Modifier = Modifier) {
         }
     }
 }
+//
+//@Composable
+//fun AllTagsWidget(tags: List<TagModel>, modifier: Modifier = Modifier) {
+//    val groupedTags = tags.groupBy { it.name.first().uppercaseChar() }
+//    val sortedKeys = groupedTags.keys.sorted()
+//
+//    Column(modifier = modifier.padding(16.dp)) {
+//        sortedKeys.forEach { key ->
+//            Text(
+//                text = key.toString(),
+//                style = MaterialTheme.typography.bodyLarge,
+//                modifier = Modifier.padding(vertical = 8.dp)
+//            )
+//
+//            groupedTags[key]?.forEach { tag ->
+//                TagChip(
+//                    text = tag.name,
+//                    selected = false,
+//                    onSelected = { /* Toggle selection */ },
+//                    modifier = Modifier
+//                        .padding(vertical = 4.dp)
+//                        .wrapContentSize()
+//                )
+//            }
+//        }
+//    }
+//}

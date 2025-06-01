@@ -32,7 +32,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
-import com.example.itforum.admin.AdminRoot.AdminRoot
 import com.example.itforum.admin.adminReport.ReportAccount.view.ReportedAccountScreen
 import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportViewModelFactory
 import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportedUserViewModel
@@ -58,27 +57,27 @@ class MainActivity : ComponentActivity() {
 //                ReportedPostScreen(viewModel = viewModel, navController = navController)
 //            }
 //        }
-//        setContent {
-//            ITForumTheme {
-//                val repository = ReportRepository(RetrofitInstance.reportService)
-//                val viewModel: ReportedUserViewModel = viewModel(
-//                    factory = ReportViewModelFactory(repository)
-//                )
-//                val navController = rememberNavController() // <-- thêm dòng này
-//                ReportedAccountScreen(viewModel = viewModel, navController = navController) // <-- truyền đủ
-//            }
-//        }
-
         setContent {
-            val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-            val role =sharedPreferences.getString("role","user")
-            if (role=="admin"){
-                AdminRoot(sharedPreferences)
-            }
-            else{
-                Root(sharedPreferences)
+            ITForumTheme {
+                val repository = ReportRepository(RetrofitInstance.reportService)
+                val viewModel: ReportedUserViewModel = viewModel(
+                    factory = ReportViewModelFactory(repository)
+                )
+                val navController = rememberNavController() // <-- thêm dòng này
+                ReportedAccountScreen(viewModel = viewModel, navController = navController) // <-- truyền đủ
             }
         }
+
+//        setContent {
+//            val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+//            val role =sharedPreferences.getString("role","user")
+//            if (role=="admin"){
+//                AdminRoot(sharedPreferences)
+//            }
+//            else{
+//                Root(sharedPreferences)
+//            }
+//        }
     }
 }
 
