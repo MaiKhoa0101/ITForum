@@ -24,7 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
-import com.example.itforum.user.effect.model.UiStateLogin
+import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.effect.UiStateMessage
 import com.example.itforum.user.login.viewmodel.LoginViewModel
 
@@ -40,8 +40,6 @@ fun LoginScreen(
         initializer { LoginViewModel(sharedPreferences) }
     })
 
-    val uiState by loginViewModel.uiState.collectAsState()
-
     var phoneNumberOrEmail by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -50,9 +48,9 @@ fun LoginScreen(
 
     var canSubmit by remember {mutableStateOf(false)}
 
-
+    val uiState by loginViewModel.uiState.collectAsState()
     LaunchedEffect(uiState) {
-        if (uiState is UiStateLogin.Success) {
+        if (uiState is UiState.Success) {
             println("uiState là success")
             navHostController.navigate("home")
         }

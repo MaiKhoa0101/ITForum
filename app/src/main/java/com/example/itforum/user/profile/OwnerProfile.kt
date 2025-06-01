@@ -1,5 +1,6 @@
 package com.example.itforum.user.profile
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,8 +27,11 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,19 +47,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.itforum.user.model.response.Skill
+import com.example.itforum.user.model.response.UserProfileResponse
+import com.example.itforum.user.model.response.UserResponse
+import com.example.itforum.user.profile.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserProfile(modifier: Modifier = Modifier, navHostController: NavHostController) {
+fun UserProfileScreen(
+    sharedPreferences: SharedPreferences,
+    navHostController: NavHostController,
+    modifier: Modifier = Modifier,
+    viewModel: UserViewModel = viewModel(factory = viewModelFactory {
+        initializer { UserViewModel(sharedPreferences) }
+    })
+) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Thông tin", "Bài viết")
-
+    val user by viewModel.user.collectAsState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
+    LaunchedEffect(Unit) { viewModel.getUser() }
+
     Scaffold(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -68,43 +88,53 @@ fun UserProfile(modifier: Modifier = Modifier, navHostController: NavHostControl
             )
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            item { UserHeader() }
+        ProfileContent(
+            user = user,
+            selectedTabIndex = selectedTabIndex,
+            onTabSelected = { selectedTabIndex = it },
+            navController = navHostController,
+            modifier = Modifier.padding(innerPadding),
+            tabs = tabs
+        )
+    }
+}
 
-            stickyHeader {
-                UserTabRow(
-                    tabs = tabs,
-                    selectedTabIndex = selectedTabIndex,
-                    onTabSelected = { selectedTabIndex = it }
-                )
+@Composable
+fun ProfileContent(
+    user: UserProfileResponse?,
+    selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit,
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
+    tabs: List<String>
+) {
+    LazyColumn(modifier = modifier.fillMaxSize()) {
+        item { UserHeader(user) }
+
+        stickyHeader {
+            UserTabRow(
+                tabs = tabs,
+                selectedTabIndex = selectedTabIndex,
+                onTabSelected = onTabSelected
+            )
+        }
+
+        when (selectedTabIndex) {
+            0 -> {
+                item { UserInfoOverview(navController) }
+                item { UserInfoDetail(user) }
             }
-
-            when (selectedTabIndex) {
-                0 -> {
-                    item { UserInfoOverview(navHostController = navHostController) }
-                    item { UserInfoDetail() }
-                }
-                1 -> {
-                    item {
-                        // TODO: Bài viết content
-                        Text(
-                            "Bài viết sẽ hiển thị ở đây",
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
+            1 -> {
+                item {
+                    Text("Bài viết sẽ hiển thị ở đây", modifier = Modifier.padding(16.dp))
                 }
             }
         }
     }
 }
 
-
 @Composable
-fun UserHeader() {
+fun UserHeader(user: UserProfileResponse?) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -118,7 +148,7 @@ fun UserHeader() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
-                model = "https://media.istockphoto.com/id/1197071216/photo/portrait-of-a-smart-and-handsome-it-specialist-wearing-glasses-smiles-behind-him-personal.jpg?s=612x612&w=0&k=20&c=Dy8TjvDmeXWhR6gAZ_OuqLu3ytUJmtycEYdVQenpWoI=",
+                model = user?.avatar?:"https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg",
                 contentDescription = "Ảnh đại diện người dùng",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -126,9 +156,10 @@ fun UserHeader() {
                     .clip(CircleShape)
             )
             Column(modifier = Modifier.padding(start = 16.dp)) {
-                Text("Mai Khoa", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Text("maikhoa@gmail.com")
-                Text("Thạc sĩ Công nghệ thông tin")
+                Text(user?.username?:"Người dùng", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text(user?.email?:"maikhoa@gmail.com")
+
+
                 Text(
                     "Tham gia 5 năm trước",
                     fontStyle = FontStyle.Italic,
@@ -139,17 +170,19 @@ fun UserHeader() {
         }
 
         Spacer(modifier = Modifier.height(20.dp))
-        UserStats()
+        UserStats(user)
         Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
 @Composable
-fun UserStats() {
+fun UserStats(user: UserProfileResponse?) {
     Column {
-        Text("Giới thiệu")
-        Text("10 Bài viết đã đăng")
-        Text("100 Câu trả lời")
+        Text("Giới thiệu",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp)
+        Text((user?.numberPost.toString()?:"Chưa có") + " bài viết")
+        Text((user?.numberComment.toString()?:"Không có")+" câu trả lời")
         Text("Được đánh giá 4.5 điểm")
         Text("Xếp hạng thứ 22 trong hệ thống")
     }
@@ -220,34 +253,24 @@ fun UserInfoOverview(navHostController: NavHostController) {
 }
 
 @Composable
-fun UserInfoDetail() {
+fun UserInfoDetail(user: UserProfileResponse?) {
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .padding(bottom = 100.dp)
     ) {
         Text("Giới thiệu", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text("Tôi là kĩ sư kiến trúc", fontSize = 15.sp)
+        Text(user?.introduce?:"Chưa có giới thiệu", fontSize = 15.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
         Text("Bằng cấp & chứng chỉ", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text("Thạc sĩ Công nghệ thông tin trường Đại học Công nghệ thông tinc", fontSize = 15.sp)
-        Text("Thạc sĩ Công nghệ thông tin trường Đại học Công nghệ thông tin", fontSize = 15.sp)
+
+        user?.certificate?.forEach {
+            Text(it.name?:"Chưa có chứng chỉ")
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Nơi làm việc", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text("Google", fontSize = 15.sp)
-        Text("NASA", fontSize = 15.sp)
-        Text("META", fontSize = 15.sp)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text("Nơi làm việc", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text("Google", fontSize = 15.sp)
-        Text("NASA", fontSize = 15.sp)
-        Text("META", fontSize = 15.sp)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        val languages = listOf("Flutter", "HTML", "Java", "C++", "Python", "Kotlin")
+        val languages = user?.skill
         TagSection(title = "Ngôn ngữ sử dụng:", tags = languages)
 
     }
@@ -257,7 +280,7 @@ fun UserInfoDetail() {
 @Composable
 fun TagSection(
     title: String,
-    tags: List<String>
+    tags: List<Skill>?
 ) {
     Column () {
         Text(
@@ -270,8 +293,8 @@ fun TagSection(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            tags.forEach { tag ->
-                TagItem(text = tag)
+            tags?.forEach { tag ->
+                TagItem(text = tag.name)
             }
         }
     }
