@@ -33,17 +33,19 @@ import com.example.itforum.user.tool.ToolPage
 
 import com.example.itforum.utilities.SearchScreen
 import com.example.itforum.utilities.note.NotesApp
-import com.example.itforum.utilities.chat.ChatAIApp
+
 
 import com.example.itforum.admin.adminAccount.AccountDetailScreen
 import com.example.itforum.user.profile.OtherUserProfileScreen
 import com.example.itforum.user.profile.UserProfileScreen
+import com.example.itforum.user.utilities.chat.ChatAIApp
+import com.example.itforum.user.utilities.chat.ChatAIApp
 
 @Composable
 fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier){
     NavHost(navHostController, startDestination = "login") {
         composable ("home") {
-            HomePage(modifier)
+            HomePage(modifier,sharePreferences)
         }
         composable ("notification") {
             NotificationPage(modifier, navHostController)
