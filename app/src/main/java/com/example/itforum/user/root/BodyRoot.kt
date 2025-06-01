@@ -34,12 +34,14 @@ import com.example.itforum.user.tool.ToolPage
 
 import com.example.itforum.utilities.SearchScreen
 import com.example.itforum.utilities.note.NotesApp
-import com.example.itforum.utilities.chat.ChatAIApp
+import com.example.itforum.user.utilities.chat.ChatAIApp
 
 import com.example.itforum.admin.adminAccount.AccountDetailScreen
+import com.example.itforum.user.home.tag.TagScreen
 
 @Composable
 fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier){
+
     NavHost(navHostController, startDestination = "login") {
         composable ("home") {
             HomePage(modifier)
@@ -158,6 +160,7 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
         composable ("searchscreen"){
             SearchScreen(modifier)
         }
+
         composable("account_detail/{accountId}") { backStackEntry ->
             val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
             if (accountId != null) {
