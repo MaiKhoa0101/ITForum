@@ -279,7 +279,7 @@ fun PostCardWithVote(
 
                     Column {
                         Text(
-                            text = post.userId ?: "Unknown User",
+                            text = post.userName ?: "Unknown User",
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp
                         )

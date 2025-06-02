@@ -78,7 +78,6 @@ class PostViewModel(private val sharedPreferences: SharedPreferences) : ViewMode
                 if (response.isSuccessful && response.body() != null) {
                     val newPosts = response.body()?.posts ?: emptyList()
                     Log.d("post", newPosts.toString())
-                    val userId = getStoredUserId() ?: "683b989ade8e8e2831d3e885" // Replace with actual logic to get userId
                     val postsWithVotes = newPosts.map { post ->
                         async {
                             PostWithVote(
