@@ -7,9 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.effect.model.UiStatePost
 import com.example.itforum.user.model.request.GetPostRequest
+import com.example.itforum.user.model.request.VoteRequest
 import com.example.itforum.user.model.response.GetVoteResponse
 import com.example.itforum.user.model.response.PostResponse
 import com.example.itforum.user.model.response.PostWithVote
+import com.example.itforum.user.model.response.VoteResponse
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +35,11 @@ class PostViewModel(private val sharedPreferences: SharedPreferences) : ViewMode
     private var canLoadMore = true
 
     private val allPostsWithVotes = mutableListOf<PostWithVote>()
+    private var userId = sharedPreferences.getString("userId", null)
+    init {
+        userId = sharedPreferences.getString("userId", null)
+    }
+
 
     private suspend fun getVoteDataByPostId(postId: String?, userId: String?): GetVoteResponse? {
         if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) return null
@@ -139,6 +146,21 @@ class PostViewModel(private val sharedPreferences: SharedPreferences) : ViewMode
     fun loadMorePosts() {
         if (canLoadMore && !_isLoadingMore.value) {
             fetchPosts(GetPostRequest(page = currentPage), isLoadMore = true)
+        }
+    }
+    fun votePost(postId: String?, type: String) {
+        if (postId.isNullOrEmpty() || userId.isNullOrEmpty() || type.isEmpty()) return
+        viewModelScope.launch {
+            try {
+                val voteRequest = VoteRequest(userId = userId, type = type)
+                val response = RetrofitInstance.postService.votePost(postId, voteRequest)
+                if (response.isSuccessful) {
+                   //
+                }
+                // No return needed
+            } catch (e: Exception) {
+                // Handle error (optional: log or update error state)
+            }
         }
     }
 

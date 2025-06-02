@@ -1,6 +1,7 @@
 package com.example.itforum.user.post
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +34,8 @@ import com.example.itforum.user.register.viewmodel.RegisterViewModel
 import java.time.Instant
 import java.time.Duration
 import com.example.itforum.user.model.response.GetVoteResponse
+import com.example.itforum.user.model.response.VoteResponse
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PostListScreen(
@@ -41,6 +44,7 @@ fun PostListScreen(
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(sharedPreferences) }
     })
+
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoadingMore by viewModel.isLoadingMore.collectAsState()
@@ -55,6 +59,7 @@ fun PostListScreen(
         refreshing = isRefreshing,
         onRefresh = { viewModel.refreshPosts() }
     )
+
 
     Box(
         modifier = Modifier
@@ -121,11 +126,12 @@ fun PostListScreen(
                             PostCardWithVote(
                                 post = postWithVote.post,
                                 vote = postWithVote.vote,
-                                onUpvoteClick = {  },
-                                onDownvoteClick = {  },
+                                onUpvoteClick = { viewModel.votePost(postWithVote.post.id,"upvote")  },
+                                onDownvoteClick = { viewModel.votePost(postWithVote.post.id,"downvote") },
                                 onCommentClick = {  },
                                 onBookmarkClick = {  },
-                                onShareClick = {  }
+                                onShareClick = {  },
+
                             )
 
                             // Separator between posts
@@ -173,7 +179,7 @@ fun PostListScreen(
                     }
                 }
             }
-            is UiStatePost.Success -> {
+            is UiStatePost.SuccessWithVotes -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Không có dữ liệu bình chọn cho bài viết.", color = Color.Gray)
                 }
@@ -210,6 +216,7 @@ fun PostListScreen(
             is UiStatePost.Idle -> {
                 // Handle idle state - maybe same as Success but without loading
             }
+
         }
 
         // Pull refresh indicator
@@ -223,14 +230,28 @@ fun PostListScreen(
 
 @Composable
 fun PostCardWithVote(
+
     post: PostResponse,
     vote: GetVoteResponse?,
     onUpvoteClick: () -> Unit = {},
     onDownvoteClick: () -> Unit = {},
     onCommentClick: () -> Unit = {},
     onBookmarkClick: () -> Unit = {},
-    onShareClick: () -> Unit = {}
+    onShareClick: () -> Unit = {},
+
 ) {
+    var isChange by remember { mutableStateOf(false) }
+    var upvotes by remember { mutableStateOf(vote?.data?.upVoteData?.total?: 0) }
+    var isVote by remember { mutableStateOf(vote?.data?.userVote) }
+
+
+    LaunchedEffect(isChange) {
+        if (isChange) {
+
+
+            isChange = false
+        }
+    }
     Card(
         elevation = 4.dp,
         modifier = Modifier
@@ -322,25 +343,45 @@ fun PostCardWithVote(
             ) {
                 // Upvote/Downvote section
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onUpvoteClick) {
+                    IconButton(onClick = {
+                        onUpvoteClick()
+                        if(isVote == "upvote"){
+                            upvotes --
+                            isVote = "none"
+                        }else if(isVote == "downvote" || isVote == "none"){
+                            upvotes++
+                            isVote = "upvote"
+                        }
+                    } ) {
                         Icon(
                             painter = painterResource(id = R.drawable.upvote),
                             contentDescription = "Upvote",
                             modifier = Modifier.size(30.dp),
-                            tint = Color.Unspecified
+                            tint = if (isVote == "upvote") Color.Green else Color.Unspecified
                         )
                     }
                     Text(
-                        text = "${vote?.data?.upVoteData?.total ?: "0"}",
+                        text = "${upvotes}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
                     )
-                    IconButton(onClick = onDownvoteClick) {
+                    IconButton(onClick = {
+                        onDownvoteClick()
+                        if(isVote == "downvote"){
+                            isVote = "none"
+                        }else if(isVote == "upvote" ){
+                            upvotes--
+                            isVote = "downvote"
+                        }else if(isVote=="none"){
+                            isVote = "downvote"
+                        }
+
+                    }) {
                         Icon(
                             painter = painterResource(id = R.drawable.downvote),
                             contentDescription = "Downvote",
                             modifier = Modifier.size(30.dp),
-                            tint = Color.Unspecified
+                            tint = if (isVote == "downvote") Color.Red else Color.Unspecified
                         )
                     }
                 }
