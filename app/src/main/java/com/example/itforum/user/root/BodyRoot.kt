@@ -36,6 +36,7 @@ import com.example.itforum.utilities.note.NotesApp
 
 
 import com.example.itforum.admin.adminAccount.AccountDetailScreen
+import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.profile.OtherUserProfileScreen
 import com.example.itforum.user.profile.UserProfileScreen
 import com.example.itforum.user.utilities.chat.ChatAIApp
@@ -45,7 +46,7 @@ import com.example.itforum.user.utilities.chat.ChatAIApp
 fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier){
     NavHost(navHostController, startDestination = "login") {
         composable ("home") {
-            HomePage(modifier,sharePreferences)
+            HomePage(navHostController,modifier,sharePreferences)
         }
         composable ("notification") {
             NotificationPage(modifier, navHostController)
@@ -84,7 +85,7 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
             EditProfile(sharePreferences,navHostController)
         }
         composable("create_post") {
-            CreatePostPage(modifier, navHostController)
+            CreatePostPage(modifier, navHostController, sharePreferences)
         }
         composable("detail_post"){
             DetailPostPage(navHostController)
@@ -169,6 +170,11 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
                 Text("Không tìm thấy tài khoản.")
             }
         }
-
+        composable("detail_news/{newsId}") { backStackEntry ->
+            val newsId = backStackEntry.arguments?.getString("newsId")
+            if (newsId != null) {
+                DetailNewsPage(newsId,modifier,navHostController, sharePreferences)
+            }
+        }
     }
 }

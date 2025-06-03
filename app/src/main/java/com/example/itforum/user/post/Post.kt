@@ -1,7 +1,12 @@
 package com.example.itforum.user.post
 
 import android.content.SharedPreferences
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -21,25 +26,74 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.effect.model.UiStatePost
 import com.example.itforum.user.model.request.GetPostRequest
 import com.example.itforum.user.model.response.PostResponse
-import com.example.itforum.user.register.viewmodel.RegisterViewModel
 import java.time.Instant
 import java.time.Duration
 import com.example.itforum.user.model.response.GetVoteResponse
+import com.example.itforum.user.model.response.News
+import com.example.itforum.user.news.viewmodel.NewsViewModel
+import kotlinx.coroutines.delay
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PostListScreen(
     sharedPreferences: SharedPreferences,
+    navHostController: NavHostController
 ) {
+    val newsViewModel: NewsViewModel = viewModel(factory = viewModelFactory {
+        initializer { NewsViewModel(sharedPreferences) }
+    })
+    LaunchedEffect(Unit) {
+        newsViewModel.getNews()
+    }
+    val listNews by newsViewModel.listNews.collectAsState()
+
+    Column(
+        modifier = Modifier.padding(10.dp)
+    ) {
+        if(listNews != null){
+            Text(
+                text = "Tin tức",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+            listNews?.forEach {news->
+                AdvancedMarqueeText(news,
+                    navHostController,
+                    modifier = Modifier
+                        .padding(horizontal = 30.dp)
+                        .width(300.dp)
+                        .height(40.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 50.dp)
+                        .fillMaxWidth()       // Chiều rộng 100%
+                        .height(1.dp)         // Độ dày của đường
+                        .background(Color.Black)
+                )
+            }
+        }
+    }
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(sharedPreferences) }
+        initializer { PostViewModel(navHostController,sharedPreferences) }
     })
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
@@ -393,5 +447,72 @@ fun getTimeAgo(isoTimestamp: String): String {
         }
     } catch (e: Exception) {
         "Unknown"
+    }
+}
+
+@Composable
+fun AdvancedMarqueeText(
+    news: News,
+    navHostController: NavHostController,
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = TextStyle.Default,
+    durationMillis: Int = 10000
+) {
+    var isPaused by remember { mutableStateOf(false) }
+    val animOffset = remember { Animatable(0f) }
+
+    var textWidth by remember { mutableStateOf(0f) }
+    var containerWidth by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(isPaused) {
+        while (true) {
+            if (!isPaused) {
+                // Nếu đã chạy hết thì mới reset lại
+                if (animOffset.value <= -textWidth) {
+                    animOffset.snapTo(10f)
+                }
+                animOffset.animateTo(
+                    targetValue = -textWidth,
+                    animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing)
+                )
+            } else {
+                delay(100)
+            }
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .clipToBounds()
+            .onGloballyPositioned {
+                containerWidth = it.size.width.toFloat()
+            }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        isPaused = true
+                        tryAwaitRelease()
+                        isPaused = false
+                    }
+                )
+            },
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(
+            text = news.title,
+            style = textStyle,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Visible,
+            modifier = Modifier
+                .clickable {
+                    navHostController.navigate("detail_news/${news.id}")
+                }
+                .wrapContentWidth()
+                .offset { IntOffset(animOffset.value.toInt(), 0) }
+                .onGloballyPositioned {
+                    textWidth = it.size.width.toFloat()
+                }
+        )
     }
 }

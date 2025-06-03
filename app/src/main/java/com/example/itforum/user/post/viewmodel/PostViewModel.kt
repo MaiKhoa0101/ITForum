@@ -1,12 +1,17 @@
 package com.example.itforum.user.post.viewmodel
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.itforum.retrofit.RetrofitInstance
+import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.effect.model.UiStatePost
+import com.example.itforum.user.model.request.CreatePostRequest
 import com.example.itforum.user.model.request.GetPostRequest
+import com.example.itforum.user.model.request.RegisterUser
 import com.example.itforum.user.model.request.VoteRequest
 import com.example.itforum.user.model.response.GetVoteResponse
 import com.example.itforum.user.model.response.PostResponse
@@ -14,6 +19,7 @@ import com.example.itforum.user.model.response.PostWithVote
 import com.example.itforum.user.model.response.VoteResponse
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,10 +27,16 @@ import kotlinx.coroutines.launch
 import okhttp3.Response
 import java.io.IOException
 
-class PostViewModel(private val sharedPreferences: SharedPreferences) : ViewModel() {
+class PostViewModel(
+    navHostController: NavHostController,
+    private val sharedPreferences: SharedPreferences
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiStatePost>(UiStatePost.Loading)
     val uiState: StateFlow<UiStatePost> = _uiState.asStateFlow()
+
+    private val _uiStateCreate = MutableStateFlow<UiState>(UiState.Idle)
+    val uiStateCreate: StateFlow<UiState> = _uiStateCreate.asStateFlow()
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -50,6 +62,7 @@ class PostViewModel(private val sharedPreferences: SharedPreferences) : ViewMode
         }
     }
 
+    @SuppressLint("SuspiciousIndentation")
     fun fetchPosts(getPostRequest: GetPostRequest, isRefresh: Boolean = false, isLoadMore: Boolean = false) {
         if (isRefresh) {
             allPosts.clear()
@@ -139,7 +152,35 @@ class PostViewModel(private val sharedPreferences: SharedPreferences) : ViewMode
             }
         }
     }
+    fun createPost(createPostRequest: CreatePostRequest) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.userService.createPost(createPostRequest)
+                if (response.isSuccessful) {
+                    _uiStateCreate.value = UiState.Success(
+                        response.body()?.message ?: "Đăng bài thành công"
+                    )
+                    delay(2000)
+                    _uiStateCreate.value = UiState.Idle
+                } else {
+                    showError("Đăng ký thất bại: ${response.message()}")
+                    _uiStateCreate.value = UiState.Error(response.message())
+                }
+            } catch (e: IOException) {
+                _uiStateCreate.value = UiState.Error("Lỗi phản hồi từ server")
+                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+            } catch (e: Exception) {
+                _uiStateCreate.value = UiState.Error("Lỗi không xác định: ${e.message}")
+                showError("Lỗi không xác định: ${e.localizedMessage ?: "Không rõ"}")
+            }
+        }
+    }
 
+
+    private fun showError(message: String) {
+        // TODO: Hiển thị lỗi lên UI, ví dụ Toast, Snackbar, hoặc cập nhật LiveData
+        Log.e("Register", message)
+    }
     fun loadMorePosts() {
         if (canLoadMore && !_isLoadingMore.value) {
             fetchPosts(GetPostRequest(page = currentPage), isLoadMore = true)
