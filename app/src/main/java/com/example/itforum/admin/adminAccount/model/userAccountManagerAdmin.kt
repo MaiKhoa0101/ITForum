@@ -1,6 +1,6 @@
 package com.example.itforum.admin.adminAccount.model
 
-import com.example.itforum.admin.adminAccount.TableRowConvertible
+import com.example.itforum.admin.components.TableRowConvertible
 import java.time.LocalDate
 
 data class UserAccountManagerAdmin(

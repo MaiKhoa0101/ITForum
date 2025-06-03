@@ -14,7 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.itforum.admin.adminAccount.TableData
+import com.example.itforum.admin.components.TableData
 import com.example.itforum.admin.adminReport.ReportPost.convertReportedPostsToRows
 import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostViewModel
 import com.example.itforum.admin.components.AdminScreenLayout
@@ -43,8 +43,9 @@ fun ReportedPostScreen(
     ) { searchText, _, _ ->
         val filteredPosts = posts.filter {
             it.reason.contains(searchText, ignoreCase = true) ||
-                    (it.reportedPostId?.contains(searchText, ignoreCase = true) ?:false)
+                    (it.reportedPostId?._id?.contains(searchText, ignoreCase = true) ?: false)
         }
+
 
         if (error != null) {
             Text("Lỗi: $error", color = MaterialTheme.colorScheme.error)
@@ -58,6 +59,7 @@ fun ReportedPostScreen(
             onClickOption = { reportId ->
                 navController.navigate("post_detail/$reportId")
             }
+
         )
     }
 }

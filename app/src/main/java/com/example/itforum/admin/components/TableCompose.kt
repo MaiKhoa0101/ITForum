@@ -1,4 +1,4 @@
-package com.example.itforum.admin.adminAccount
+package com.example.itforum.admin.components
 
 import androidx.compose.foundation.background
 import androidx.compose.material3.Icon
@@ -49,7 +49,7 @@ fun TableData(
     headers: List<String>,
     rows: List<List<String>>,
     menuOptions: List<icontext>,
-    onClickOption: (Int) -> Unit) {
+    onClickOption: (String) -> Unit) {
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val maxTableHeight = screenHeight * 0.6f
@@ -141,7 +141,7 @@ fun TableData(
                                        },
                                         onClick = {
                                             expandedIndex = -1
-                                            val accountId = row[0].toInt()
+                                            val accountId = row[0]
                                             onClickOption(accountId)
                                         }
                                     )

@@ -6,7 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.itforum.admin.adminAccount.TableData
+import com.example.itforum.admin.components.TableData
 import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportedUserViewModel
 import com.example.itforum.admin.adminReport.ReportAccount.model.response.ReportedUser
 import com.example.itforum.admin.components.AdminScreenLayout
@@ -59,6 +59,6 @@ fun ReportedAccountScreen(
 
 fun convertReportedUsersToRows(users: List<ReportedUser>): List<List<String>> {
     return users.map {
-        listOf(it.userId, it.username, it.email, it.reportCount.toString())
+        listOf(it._id, it.username, it.email, it.reportCount.toString())
     }
 }

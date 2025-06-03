@@ -2,7 +2,7 @@ package com.example.itforum.retrofit
 
 
 import com.example.itforum.service.ReportPostService
-import com.example.itforum.service.ReportService
+import com.example.itforum.service.ReportAccountService
 import com.example.itforum.service.UserService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -13,7 +13,7 @@ object RetrofitInstance {
 
 
 
-    private const val BASE_URL = "http://192.168.0.112:4000"
+    private const val BASE_URL = "http://192.168.1.3:4000"
 
 
     val okHttpClient = OkHttpClient.Builder()
@@ -28,7 +28,7 @@ object RetrofitInstance {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val reportService: ReportService by lazy { retrofit.create(ReportService::class.java) }
+    val reportAccountService: ReportAccountService by lazy { retrofit.create(ReportAccountService::class.java) }
     val userService: UserService by lazy {retrofit.create(UserService::class.java) }
     val reportPostService: ReportPostService by lazy { retrofit.create(ReportPostService::class.java) }
 }

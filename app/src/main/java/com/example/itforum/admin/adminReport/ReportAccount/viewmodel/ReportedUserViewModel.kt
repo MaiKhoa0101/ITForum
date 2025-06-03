@@ -2,6 +2,7 @@ package com.example.itforum.admin.adminReport.ReportAccount.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.itforum.admin.adminReport.ReportAccount.model.response.ReportedAccountResponse
 import com.example.itforum.admin.adminReport.ReportAccount.model.response.ReportedUser
 import com.example.itforum.repository.ReportRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,4 +30,22 @@ class ReportedUserViewModel(private val repository: ReportRepository) : ViewMode
             }
         }
     }
+    private val _detail = MutableStateFlow<ReportedAccountResponse?>(null)
+    val detail: StateFlow<ReportedAccountResponse?> = _detail
+
+    fun loadReportedUserDetail(reportId: String) {
+        viewModelScope.launch {
+            try {
+                val response = repository.getReportedUserDetail(reportId)
+                if (response.isSuccessful) {
+                    _detail.value = response.body()
+                } else {
+                    _error.value = "API lỗi: ${response.code()}"
+                }
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+        }
+    }
+
 }

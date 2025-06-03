@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -36,6 +37,9 @@ import com.example.itforum.utilities.note.NotesApp
 
 
 import com.example.itforum.admin.adminAccount.AccountDetailScreen
+import com.example.itforum.admin.adminReport.ReportPost.model.request.ReportedPost
+import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailScreen
+import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
 import com.example.itforum.user.profile.OtherUserProfileScreen
 import com.example.itforum.user.profile.UserProfileScreen
 import com.example.itforum.user.utilities.chat.ChatAIApp
@@ -169,6 +173,9 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
                 Text("Không tìm thấy tài khoản.")
             }
         }
+
+
+
 
     }
 }
