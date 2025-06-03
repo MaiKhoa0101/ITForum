@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.effect.model.UiStatePost
@@ -40,6 +41,7 @@ import com.example.itforum.user.model.response.VoteResponse
 @Composable
 fun PostListScreen(
     sharedPreferences: SharedPreferences,
+    navController: NavController
 ) {
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(sharedPreferences) }
@@ -128,7 +130,7 @@ fun PostListScreen(
                                 vote = postWithVote.vote,
                                 onUpvoteClick = { viewModel.votePost(postWithVote.post.id,"upvote")  },
                                 onDownvoteClick = { viewModel.votePost(postWithVote.post.id,"downvote") },
-                                onCommentClick = {  },
+                                onCommentClick = { navController.navigate("comment/${postWithVote.post.id}")  },
                                 onBookmarkClick = {  },
                                 onShareClick = {  },
 

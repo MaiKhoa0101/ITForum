@@ -167,6 +167,7 @@ class PostViewModel(private val sharedPreferences: SharedPreferences) : ViewMode
         fetchPosts(GetPostRequest(page = 1), isRefresh = true)
     }
 
+
     fun getStoredUserId(): String? {
         return sharedPreferences.getString("userId", null)
     }
@@ -177,5 +178,8 @@ class PostViewModel(private val sharedPreferences: SharedPreferences) : ViewMode
 
     private fun logDebug(msg: String) {
         Log.d("PostViewModel", msg)
+    }
+    fun fetchComment(postId: String?){
+
     }
 }
