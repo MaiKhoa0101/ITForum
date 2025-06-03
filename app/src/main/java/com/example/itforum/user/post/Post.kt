@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.user.post.viewmodel.PostViewModel
@@ -50,6 +52,8 @@ import com.example.itforum.user.model.response.GetVoteResponse
 import com.example.itforum.user.model.response.News
 import com.example.itforum.user.news.viewmodel.NewsViewModel
 import kotlinx.coroutines.delay
+
+import com.example.itforum.user.model.response.VoteResponse
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -95,6 +99,7 @@ fun PostListScreen(
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(navHostController,sharedPreferences) }
     })
+
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoadingMore by viewModel.isLoadingMore.collectAsState()
@@ -109,6 +114,7 @@ fun PostListScreen(
         refreshing = isRefreshing,
         onRefresh = { viewModel.refreshPosts() }
     )
+
 
     Box(
         modifier = Modifier
@@ -175,11 +181,12 @@ fun PostListScreen(
                             PostCardWithVote(
                                 post = postWithVote.post,
                                 vote = postWithVote.vote,
-                                onUpvoteClick = {  },
-                                onDownvoteClick = {  },
-                                onCommentClick = {  },
+                                onUpvoteClick = { viewModel.votePost(postWithVote.post.id,"upvote")  },
+                                onDownvoteClick = { viewModel.votePost(postWithVote.post.id,"downvote") },
+                                onCommentClick = { navHostController.navigate("comment/${postWithVote.post.id}")  },
                                 onBookmarkClick = {  },
-                                onShareClick = {  }
+                                onShareClick = {  },
+
                             )
 
                             // Separator between posts
@@ -227,7 +234,7 @@ fun PostListScreen(
                     }
                 }
             }
-            is UiStatePost.Success -> {
+            is UiStatePost.SuccessWithVotes -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Không có dữ liệu bình chọn cho bài viết.", color = Color.Gray)
                 }
@@ -264,6 +271,7 @@ fun PostListScreen(
             is UiStatePost.Idle -> {
                 // Handle idle state - maybe same as Success but without loading
             }
+
         }
 
         // Pull refresh indicator
@@ -277,14 +285,28 @@ fun PostListScreen(
 
 @Composable
 fun PostCardWithVote(
+
     post: PostResponse,
     vote: GetVoteResponse?,
     onUpvoteClick: () -> Unit = {},
     onDownvoteClick: () -> Unit = {},
     onCommentClick: () -> Unit = {},
     onBookmarkClick: () -> Unit = {},
-    onShareClick: () -> Unit = {}
+    onShareClick: () -> Unit = {},
+
 ) {
+    var isChange by remember { mutableStateOf(false) }
+    var upvotes by remember { mutableStateOf(vote?.data?.upVoteData?.total?: 0) }
+    var isVote by remember { mutableStateOf(vote?.data?.userVote) }
+
+
+    LaunchedEffect(isChange) {
+        if (isChange) {
+
+
+            isChange = false
+        }
+    }
     Card(
         elevation = 4.dp,
         modifier = Modifier
@@ -312,7 +334,7 @@ fun PostCardWithVote(
 
                     Column {
                         Text(
-                            text = post.userId ?: "Unknown User",
+                            text = post.userName ?: "Unknown User",
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp
                         )
@@ -376,25 +398,45 @@ fun PostCardWithVote(
             ) {
                 // Upvote/Downvote section
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onUpvoteClick) {
+                    IconButton(onClick = {
+                        onUpvoteClick()
+                        if(isVote == "upvote"){
+                            upvotes --
+                            isVote = "none"
+                        }else if(isVote == "downvote" || isVote == "none"){
+                            upvotes++
+                            isVote = "upvote"
+                        }
+                    } ) {
                         Icon(
                             painter = painterResource(id = R.drawable.upvote),
                             contentDescription = "Upvote",
                             modifier = Modifier.size(30.dp),
-                            tint = Color.Unspecified
+                            tint = if (isVote == "upvote") Color.Green else Color.Unspecified
                         )
                     }
                     Text(
-                        text = "${vote?.data?.upVoteData?.total ?: "0"}",
+                        text = "${upvotes}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
                     )
-                    IconButton(onClick = onDownvoteClick) {
+                    IconButton(onClick = {
+                        onDownvoteClick()
+                        if(isVote == "downvote"){
+                            isVote = "none"
+                        }else if(isVote == "upvote" ){
+                            upvotes--
+                            isVote = "downvote"
+                        }else if(isVote=="none"){
+                            isVote = "downvote"
+                        }
+
+                    }) {
                         Icon(
                             painter = painterResource(id = R.drawable.downvote),
                             contentDescription = "Downvote",
                             modifier = Modifier.size(30.dp),
-                            tint = Color.Unspecified
+                            tint = if (isVote == "downvote") Color.Red else Color.Unspecified
                         )
                     }
                 }

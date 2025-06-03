@@ -56,15 +56,4 @@ interface UserService {
     @GET("user/getall")
     suspend fun getAllUser(): Response<List<UserResponse>>
 
-    @POST("posts/search")
-    suspend fun getPost(@Body getPostRequest : GetPostRequest) : Response<PostListResponse>
-
-    @POST("vote/{postId}")
-    suspend fun votePost(@Path("postId") postId: String, @Body voteRequest: VoteRequest): Response<VoteResponse>
-
-    @GET("vote/{postId}/{userId}")
-    suspend fun getVoteData(@Path("postId") postId: String, @Path("userId") userId: String): Response<GetVoteResponse>
-
-    @POST("posts/create")
-    suspend fun createPost(@Body createPostRequest: CreatePostRequest): Response<CreatePostResponse>
 }

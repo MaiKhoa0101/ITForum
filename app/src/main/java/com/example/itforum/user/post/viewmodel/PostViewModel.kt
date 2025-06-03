@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.Response
 import java.io.IOException
 
 class PostViewModel(
@@ -46,18 +45,22 @@ class PostViewModel(
 
     private var currentPage = 1
     private var canLoadMore = true
-    private val allPosts = mutableListOf<PostResponse>()
 
+    private val allPostsWithVotes = mutableListOf<PostWithVote>()
+    private var userId = sharedPreferences.getString("userId", null)
+    init {
+        userId = sharedPreferences.getString("userId", null)
+    }
 
 
     private suspend fun getVoteDataByPostId(postId: String?, userId: String?): GetVoteResponse? {
         if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) return null
         return try {
-            val response = RetrofitInstance.userService.getVoteData(postId, userId)
-            Log.d("vote data",response.body().toString())
+            val response = RetrofitInstance.postService.getVoteData(postId, userId)
+            Log.d("vote data", response.body().toString())
             if (response.isSuccessful) response.body() else null
         } catch (e: Exception) {
-            Log.d("Error","Vote fetch error: ${e.message}")
+            Log.d("Error", "Vote fetch error: ${e.message}")
             null
         }
     }
@@ -65,58 +68,57 @@ class PostViewModel(
     @SuppressLint("SuspiciousIndentation")
     fun fetchPosts(getPostRequest: GetPostRequest, isRefresh: Boolean = false, isLoadMore: Boolean = false) {
         if (isRefresh) {
-            allPosts.clear()
+
+            allPostsWithVotes.clear()
             _isRefreshing.value = true
             currentPage = 1
             canLoadMore = true
-
         } else if (isLoadMore) {
             if (!canLoadMore || _isLoadingMore.value) return
             _isLoadingMore.value = true
         } else {
+
+            allPostsWithVotes.clear()
             _uiState.value = UiStatePost.Loading
             currentPage = 1
             canLoadMore = true
+            Log.d("load state", canLoadMore.toString())
         }
 
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.userService.getPost(getPostRequest)
+                val response = RetrofitInstance.postService.getPost(getPostRequest)
                 if (response.isSuccessful && response.body() != null) {
                     val newPosts = response.body()?.posts ?: emptyList()
-                    Log.d("post",newPosts.toString());
-                    val userId = "683b989ade8e8e2831d3e885"
+                    Log.d("post", newPosts.toString())
                     val postsWithVotes = newPosts.map { post ->
                         async {
                             PostWithVote(
                                 post = post,
-                                vote = getVoteDataByPostId(post.id,userId)
+                                vote = getVoteDataByPostId(post.id, userId)
                             )
                         }
                     }.awaitAll()
-//                    if (newPosts.size < 3) {
-//                        canLoadMore = false
-//                    }
 
-                        if (isRefresh || isLoadMore) {
-                        if (postsWithVotes.isEmpty()) {
-                            canLoadMore = false
-                        } else {
-                            allPosts.addAll(newPosts)
-                            if (isLoadMore) {
-                                currentPage++
-                            }
-                        }
-                        _uiState.value = UiStatePost.SuccessWithVotes(postsWithVotes)
-                    } else {
-                        allPosts.addAll(newPosts)
-                        _uiState.value = UiStatePost.SuccessWithVotes(postsWithVotes)
-                        if (newPosts.isNotEmpty()) {
-                            currentPage = 2
-                        }
+                    // Pagination logic
+                    if (newPosts.size < 3) {
+                        canLoadMore = false
                     }
 
-                    logDebug("Successfully fetched ${newPosts.size} posts and votes. Total: ${allPosts.size}")
+                    if (isRefresh || !isLoadMore) {
+                        // Fresh load or refresh: both lists cleared above
+
+                        allPostsWithVotes.addAll(postsWithVotes)
+                        if (newPosts.isNotEmpty()) currentPage = 2
+                    } else if (isLoadMore) {
+                        // Load more: append new data
+
+                        allPostsWithVotes.addAll(postsWithVotes)
+                        if (newPosts.isNotEmpty()) currentPage++
+                    }
+
+                    // Always update the UI with all accumulated posts
+                    _uiState.value = UiStatePost.SuccessWithVotes(allPostsWithVotes)
                 } else {
                     if (isLoadMore) {
                         canLoadMore = false
@@ -155,7 +157,7 @@ class PostViewModel(
     fun createPost(createPostRequest: CreatePostRequest) {
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.userService.createPost(createPostRequest)
+                val response = RetrofitInstance.postService.createPost(createPostRequest)
                 if (response.isSuccessful) {
                     _uiStateCreate.value = UiState.Success(
                         response.body()?.message ?: "Đăng bài thành công"
@@ -186,10 +188,26 @@ class PostViewModel(
             fetchPosts(GetPostRequest(page = currentPage), isLoadMore = true)
         }
     }
+    fun votePost(postId: String?, type: String) {
+        if (postId.isNullOrEmpty() || userId.isNullOrEmpty() || type.isEmpty()) return
+        viewModelScope.launch {
+            try {
+                val voteRequest = VoteRequest(userId = userId, type = type)
+                val response = RetrofitInstance.postService.votePost(postId, voteRequest)
+                if (response.isSuccessful) {
+                   //
+                }
+                // No return needed
+            } catch (e: Exception) {
+                // Handle error (optional: log or update error state)
+            }
+        }
+    }
 
     fun refreshPosts() {
         fetchPosts(GetPostRequest(page = 1), isRefresh = true)
     }
+
 
     fun getStoredUserId(): String? {
         return sharedPreferences.getString("userId", null)
@@ -201,5 +219,8 @@ class PostViewModel(
 
     private fun logDebug(msg: String) {
         Log.d("PostViewModel", msg)
+    }
+    fun fetchComment(postId: String?){
+
     }
 }
