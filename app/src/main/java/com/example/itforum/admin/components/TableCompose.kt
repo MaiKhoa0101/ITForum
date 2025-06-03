@@ -134,7 +134,7 @@ fun TableData(
                                 menuOptions.forEach(){item->
                                     DropdownMenuItem(
                                         text = {
-                                            IconWithText(item.icon,item.text,25.dp,
+                                            IconWithText("https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",item.text,25.dp,
                                                 TextStyle(fontSize = 14.sp),
                                                 modifier = Modifier.padding(horizontal = 0.dp, vertical = 0.dp)
                                             )

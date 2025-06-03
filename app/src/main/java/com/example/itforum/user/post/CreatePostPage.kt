@@ -1,5 +1,6 @@
 package com.example.itforum.user.post
 
+import android.content.SharedPreferences
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.OpenableColumns
@@ -36,7 +37,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Close
@@ -53,6 +53,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,8 +79,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
+import com.example.itforum.user.model.request.CreatePostRequest
+import com.example.itforum.user.post.viewmodel.PostViewModel
+import com.example.itforum.user.profile.viewmodel.UserViewModel
 
 data class icontext(
     val icon: ImageVector = Icons.Default.Visibility,
@@ -86,7 +95,30 @@ data class icontext(
 )
 
 @Composable
-fun CreatePostPage(modifier: Modifier, navHostController: NavHostController) {
+fun CreatePostPage(
+    modifier: Modifier,
+    navHostController: NavHostController,
+    sharedPreferences: SharedPreferences
+) {
+    var userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
+        initializer { UserViewModel(sharedPreferences) }
+    })
+
+    var postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
+        initializer { PostViewModel(navHostController,sharedPreferences) }
+    })
+
+    val userInfo by userViewModel.user.collectAsState()
+
+    LaunchedEffect(Unit) {
+        userViewModel.getUser()
+    }
+
+    var imageUrl by remember  { mutableStateOf<Uri?>(null) }
+    var title by remember { mutableStateOf("") }
+    var content by remember { mutableStateOf("") }
+    var tags by remember { mutableStateOf(listOf<String?>(null)) }
+    var isPublished by remember { mutableStateOf("public") }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -96,16 +128,30 @@ fun CreatePostPage(modifier: Modifier, navHostController: NavHostController) {
             modifier = Modifier.fillMaxSize()
         ) {
             item {
-                TopPost(navHostController)
+                TopPost(navHostController){
+                    postViewModel.createPost(
+                        CreatePostRequest(
+                        imageUrl = imageUrl,
+                        userId = userInfo?.id ?: "",
+                        title = title,
+                        content = content,
+                        tags = tags,
+                        isPublished = isPublished
+                    ))
+                    navHostController.navigate("home")
+                }
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.White)
                 ) {
-                    IconWithText(Icons.Default.AccountCircle, "Nguyễn Thành Đạt")
-                    WritePost()
-                    AddTagPost()
-                    AddMedia()
+                    userInfo?.let { IconWithText(it.avatar, it.name) }
+                    WritePost(){input ->
+                        title = input
+                        content = input
+                    }
+                    AddTagPost(){tags = it}
+                    AddMedia(){imageUrl = it}
                     CustomPost()
                 }
             }
@@ -114,7 +160,10 @@ fun CreatePostPage(modifier: Modifier, navHostController: NavHostController) {
 }
 
 @Composable
-fun TopPost(navHostController: NavHostController) {
+fun TopPost(
+    navHostController: NavHostController,
+    onClickPush: () -> Unit = {}
+) {
     Spacer(modifier = Modifier.height(30.dp))
     Row(
         modifier = Modifier
@@ -140,7 +189,7 @@ fun TopPost(navHostController: NavHostController) {
         )
         Button(
             onClick = {
-                navHostController.navigate("detail_post")
+                onClickPush()
             },
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(
@@ -160,19 +209,20 @@ fun TopPost(navHostController: NavHostController) {
 
 @Composable
 fun IconWithText(
-    avatar: ImageVector,
+    avatar: String,
     name: String,
     sizeIcon: Dp = 45.dp,
     textStyle: TextStyle = TextStyle(fontSize = 20.sp),
-    modifier: Modifier = Modifier.padding(horizontal = 13.dp, vertical = 6.dp)
+    modifier: Modifier = Modifier
+        .padding(horizontal = 13.dp, vertical = 6.dp)
         .fillMaxWidth(),
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = avatar,
+        AsyncImage(
+            model = avatar,
             contentDescription = "Avatar tài khoản",
             modifier = Modifier.size(sizeIcon)
         )
@@ -185,7 +235,7 @@ fun IconWithText(
 }
 
 @Composable
-fun WritePost() {
+fun WritePost(onChange: (String) -> Unit) {
     Column(
         modifier = Modifier
             .TopBorder()
@@ -197,6 +247,7 @@ fun WritePost() {
             onValueChange = { newText ->
                 if (newText.length <= 1000) {
                     textPost = newText
+                    onChange(newText)
                 }
             },
             placeholder = { Text(
@@ -229,11 +280,13 @@ fun WritePost() {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun AddTagPost() {
+fun AddTagPost(
+    onChange: (List<String?>) -> Unit
+) {
     Column(
         modifier = Modifier.padding(top = 30.dp, start = 25.dp, end = 25.dp)
     ) {
-        var items by remember { mutableStateOf(listOf<String>(("Python"),("C++"),("Kotlin"),("Java"))) }
+        var items by remember { mutableStateOf(listOf<String?>(null)) }
         var textTag by remember { mutableStateOf("") }
         var isError by remember { mutableStateOf(false) }
         var isFocused by remember { mutableStateOf(false) }
@@ -265,8 +318,10 @@ fun AddTagPost() {
             )
             IconButton(
                 onClick = {
-                    if(textTag.trim().isNotEmpty())
+                    if(textTag.trim().isNotEmpty()) {
                         items = items + textTag
+                        onChange(items)
+                    }
                     else
                         isError = true
                 },
@@ -299,11 +354,14 @@ fun AddTagPost() {
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ){
             items.forEach { item ->
-                TagChild(
-                    item,items
-                )
-                {newList->
-                    items = newList as List<String>
+                if (item != null) {
+                    TagChild(
+                        item,items
+                    )
+                    {newList->
+                        items = newList
+                        onChange(items)
+                    }
                 }
             }
         }
@@ -313,10 +371,9 @@ fun AddTagPost() {
 @Composable
 fun TagChild(
     item: Any,
-    items: List<Any>,
+    items: List<String?>,
     icon: ImageVector? = null,
-    uri: Uri? = null,
-    removeTag: (List<Any>) -> Unit
+    removeTag: (List<String>) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -354,10 +411,7 @@ fun TagChild(
                 .clickable {
                     if (items.isNotEmpty() && items.first() is String) {
                         val newList = items - item
-                        removeTag(newList)
-                    }else if (uri != null){
-                        val newList = items - uri
-                        removeTag(newList)
+                        removeTag(newList as List<String>)
                     }
                 }
         )
@@ -365,7 +419,9 @@ fun TagChild(
 }
 
 @Composable
-fun AddMedia() {
+fun AddMedia(
+    onChange: (Uri) -> Unit
+) {
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var videoUri by remember { mutableStateOf<List<Uri>>(emptyList()) }
@@ -379,7 +435,10 @@ fun AddMedia() {
         uris.forEach{uri ->
             val type =context.contentResolver.getType(uri) ?:""
             when{
-                type.startsWith("image") -> imageUri = imageUri + uri
+                type.startsWith("image") -> {
+                    imageUri = imageUri + uri
+                    onChange(uri)
+                }
                 type.startsWith("video") -> videoUri = videoUri + uri
                 type.startsWith("application") -> applicationUri = applicationUri + uri
             }
@@ -460,7 +519,7 @@ fun AddMedia() {
                             } else "kocoten"
                         }
                         if (name != null) {
-                            TagChild(name, applicationUri, Icons.Default.AttachFile, uri, removeTag = {newList -> applicationUri = newList as List<Uri>})
+                            TagFile(name, applicationUri, Icons.Default.AttachFile, uri, removeTag = {newList -> applicationUri = newList as List<Uri>})
                         }
                     }
                 }
@@ -666,3 +725,57 @@ fun Modifier.BottomBorder(
         )
     }
 )
+
+@Composable
+fun TagFile(
+    item: Any,
+    items: List<Any>,
+    icon: ImageVector? = null,
+    uri: Uri? = null,
+    removeTag: (List<Any>) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .padding(vertical = 8.dp, horizontal = 5.dp)
+            .background(
+                Color(0xFF00FBFF),
+                RoundedCornerShape(8.dp)
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if(icon != null){
+            Icon(
+                imageVector = Icons.Default.AttachFile,
+                contentDescription = "Xóa tag",
+                modifier = Modifier
+                    .padding(start = 2.dp)
+                    .size(17.dp)
+            )
+        }
+        Text(
+            text = item.toString(),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .padding(if (icon == null) (9.dp) else 5.dp)
+                .widthIn(max = 100.dp)
+        )
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = "Xóa tag",
+            modifier = Modifier
+                .padding(end = 5.dp)
+                .size(17.dp)
+                .clickable {
+                    if (items.isNotEmpty() && items.first() is String) {
+                        val newList = items - item
+                        removeTag(newList)
+                    } else if (uri != null) {
+                        val newList = items - uri
+                        removeTag(newList)
+                    }
+                }
+        )
+    }
+}
