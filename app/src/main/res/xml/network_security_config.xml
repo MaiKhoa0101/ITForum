@@ -6,11 +6,8 @@
     <domain includeSubdomains="true">192.168.0.100</domain>
     <domain includeSubdomains="true">192.168.0.101</domain>
     <domain includeSubdomains="true">192.168.1.104</domain>
-=======
     <domain includeSubdomains="true">192.168.1.3</domain>
     <domain includeSubdomains="true">192.168.0.112</domain>
     <domain includeSubdomains="true">192.168.1.4</domain>
->>>>>>> ac5f72171ad1c4863ed5dd43da844bddec8104cc
-
     </domain-config>
 </network-security-config>
