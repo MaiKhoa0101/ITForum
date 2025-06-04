@@ -1,3 +1,4 @@
+
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -26,4 +27,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "ITForum"
 include(":app")
- 

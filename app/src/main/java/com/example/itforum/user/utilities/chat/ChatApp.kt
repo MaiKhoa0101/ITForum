@@ -10,12 +10,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
-
 import com.example.itforum.utilities.chat.ChatHistoryScreen
 import com.example.itforum.utilities.chat.ChatScreen
 import com.example.itforum.utilities.chat.ChatSession
 import com.example.itforum.utilities.chat.Message
-import com.example.itforum.user.utilities.chat.ChatViewModel
 
 @Composable
 fun ChatAIApp(
@@ -24,18 +22,20 @@ fun ChatAIApp(
 ) {
     val navController = rememberNavController()
 
+    // Get userId from SharedPreferences
+    val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    val userId = sharedPreferences.getString("userId", "") ?: ""
+
     // Setup Room + Repository + ViewModel
     val db = remember { ChatDatabase.getDatabase(context) }
     val repository = remember { ChatRepository(db.chatDao()) }
-    val factory = remember { ChatViewModelFactory(repository) }
+    val factory = remember { ChatViewModelFactory(repository, userId) }
     val viewModel: ChatViewModel = viewModel(factory = factory)
-
-
 
     val sessions by viewModel.sessions.collectAsState()
     val messages by viewModel.messages.collectAsState()
 
-    // ✅ Tạo session mặc định nếu chưa có
+    // Tạo session mặc định nếu chưa có
     LaunchedEffect(sessions) {
         if (sessions.isEmpty()) {
             viewModel.createNewSession()
@@ -46,8 +46,6 @@ fun ChatAIApp(
         composable("chat") {
             val currentSessionId by viewModel.currentSessionId.collectAsState()
 
-
-            // ✅ Chỉ hiển thị ChatScreen nếu đã có session được chọn
             if (currentSessionId != null) {
                 ChatScreen(
                     navController = navController,
@@ -55,15 +53,11 @@ fun ChatAIApp(
                     onSend = { input ->
                         viewModel.sendMessage(input, isUser = true)
                         viewModel.updateSessionTitleIfNeeded(input)
-
-                        // Đã xử lý bên trong viewModel rồi
-
                     },
                     onShowHistory = { navController.navigate("history") },
                     onBackToHome = onExitToHome
                 )
-            }else {
-                // fallback UI để không bị trắng màn hình
+            } else {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -73,160 +67,135 @@ fun ChatAIApp(
             }
         }
 
-
-
         composable("history") {
             ChatHistoryScreen(
-                sessions = sessions.map { ChatSession(it.id, it.title, emptyList()) },
+                sessions = sessions.map { ChatSession(it.sessionId, it.title, userId, emptyList()) },
                 onNewChat = {
                     viewModel.createNewSession()
                     navController.navigate("chat")
                 },
                 onSelectSession = { session ->
-                    viewModel.setCurrentSession(session.id)    // ✅ Gán session
-                    navController.navigate("chat")             // ✅ Chuyển sang chat
+                    viewModel.setCurrentSession(session.id)
+                    navController.navigate("chat")
                 },
-
                 onDeleteSession = {
-                    viewModel.deleteSession(ChatSessionEntity(it.id, it.title))
+                    viewModel.deleteSession(
+                        ChatSessionEntity(
+                            sessionId = it.id,
+                            title = it.title,
+                            userId = userId,
+                            timestamp = System.currentTimeMillis()
+                        )
+                    )
                 },
                 onBackToChat = { navController.navigate("chat") }
             )
         }
-
-
     }
 }
 
 
-
-//        composable("chat") {
-//            ChatScreen(
-//                navController = navController,
-//                messages = messages.map { Message(it.text, it.isUser) },
-//                onSend = { input ->
-//                    viewModel.sendMessage(input, isUser = true)
-//                    viewModel.updateSessionTitleIfNeeded(input)
+//package com.example.itforum.user.utilities.chat
 //
-//                    OpenRouterApiClient.generateText(input) { reply ->
-//                        viewModel.sendMessage(reply ?: "Lỗi khi kết nối AI", isUser = false)
-//                    }
-//                },
-//                onShowHistory = { navController.navigate("history") },
-//                onBackToHome = onExitToHome
-//            )
-//        }
-
-
-
+//import android.content.Context
+//import androidx.compose.foundation.layout.*
+//import androidx.compose.material.Text
+//import androidx.compose.runtime.*
+//import androidx.compose.ui.Alignment
+//import androidx.compose.ui.Modifier
+//import androidx.compose.ui.graphics.Color
+//import androidx.compose.ui.platform.LocalContext
+//import androidx.lifecycle.viewmodel.compose.viewModel
+//import androidx.navigation.compose.*
+//
+//import com.example.itforum.utilities.chat.ChatHistoryScreen
+//import com.example.itforum.utilities.chat.ChatScreen
+//import com.example.itforum.utilities.chat.ChatSession
+//import com.example.itforum.utilities.chat.Message
+//import com.example.itforum.user.utilities.chat.ChatViewModel
+//
 //@Composable
-//fun ChatAIApp(onExitToHome: () -> Unit) {
+//fun ChatAIApp(
+//    context: Context = LocalContext.current,
+//    onExitToHome: () -> Unit
+//) {
 //    val navController = rememberNavController()
-//    val sessions = remember { mutableStateListOf<ChatSession>() }
-//    val currentSession = remember { mutableStateOf<ChatSession?>(null) }
 //
-//    LaunchedEffect(Unit) {
+//    // Setup Room + Repository + ViewModel
+//    val db = remember { ChatDatabase.getDatabase(context) }
+//    val repository = remember { ChatRepository(db.chatDao()) }
+//    val factory = remember { ChatViewModelFactory(repository) }
+//    val viewModel: ChatViewModel = viewModel(factory = factory)
+//
+//
+//
+//    val sessions by viewModel.sessions.collectAsState()
+//    val messages by viewModel.messages.collectAsState()
+//
+//    // ✅ Tạo session mặc định nếu chưa có
+//    LaunchedEffect(sessions) {
 //        if (sessions.isEmpty()) {
-//            val initial = ChatSession(title = "Chat mới", messages = emptyList())
-//            sessions.add(initial)
-//            currentSession.value = initial
+//            viewModel.createNewSession()
 //        }
 //    }
 //
 //    NavHost(navController = navController, startDestination = "chat") {
 //        composable("chat") {
-//            currentSession.value?.let { session ->
-//                val messages = remember {
-//                    mutableStateListOf<Message>().apply { addAll(session.messages) }
-//                }
+//            val currentSessionId by viewModel.currentSessionId.collectAsState()
 //
+//
+//            // ✅ Chỉ hiển thị ChatScreen nếu đã có session được chọn
+//            if (currentSessionId != null) {
 //                ChatScreen(
 //                    navController = navController,
-//                    messages = messages,
-////                    onSend = { input ->
-////                        messages.add(Message(input, true))
-////                        OpenRouterApiClient.generateText(input) { reply ->
-////                            messages.add(
-////                                reply?.let { Message(it, false) }
-////                                    ?: Message("Đã xảy ra lỗi khi kết nối với AI.", false)
-////                            )
-////                        }
-////                    }
-////                    ,
+//                    messages = messages.map { Message(it.text, it.isUser) },
 //                    onSend = { input ->
-//                        val userMessage = Message(input, true)
-//                        messages.add(userMessage)
+//                        viewModel.sendMessage(input, isUser = true)
+//                        viewModel.updateSessionTitleIfNeeded(input)
 //
-//                        // ✅ Cập nhật title nếu là chat mới
-//                        if (currentSession.value?.title == "Chat mới") {
-//                            currentSession.value = currentSession.value?.copy(title = input)
-//                        }
+//                        // Đã xử lý bên trong viewModel rồi
 //
-//                        // ✅ Cập nhật lại session hiện tại với messages mới
-//                        currentSession.value = currentSession.value?.copy(
-//                            messages = messages.toList()
-//                        )
-//
-//                        // ✅ Ghi đè session mới vào danh sách sessions
-//                        currentSession.value?.let { updated ->
-//                            val index = sessions.indexOfFirst { it.id == updated.id }
-//                            if (index != -1) {
-//                                sessions[index] = updated
-//                            }
-//                        }
-//
-//                        // Gọi API và xử lý phản hồi
-//                        OpenRouterApiClient.generateText(input) { reply ->
-//                            val aiMessage = reply?.let { Message(it, false) }
-//                                ?: Message("Đã xảy ra lỗi khi kết nối với AI.", false)
-//
-//                            messages.add(aiMessage)
-//
-//                            currentSession.value = currentSession.value?.copy(
-//                                messages = messages.toList()
-//                            )
-//
-//                            currentSession.value?.let { updated ->
-//                                val index = sessions.indexOfFirst { it.id == updated.id }
-//                                if (index != -1) {
-//                                    sessions[index] = updated
-//                                }
-//                            }
-//                        }
 //                    },
-//                            onShowHistory = { navController.navigate("history") },
-//                    onBackToHome = onExitToHome // ✅ gọi ra ngoài
+//                    onShowHistory = { navController.navigate("history") },
+//                    onBackToHome = onExitToHome
 //                )
+//            }else {
+//                // fallback UI để không bị trắng màn hình
+//                Box(
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    Text("Không có đoạn chat nào được chọn", color = Color.Gray)
+//                }
 //            }
 //        }
 //
+//
+//
 //        composable("history") {
 //            ChatHistoryScreen(
-//                sessions = sessions,
+//                sessions = sessions.map { ChatSession(it.id, it.title, emptyList()) },
 //                onNewChat = {
-//                    val newSession = ChatSession(title = "Chat mới", messages = listOf())
-//                    sessions.add(0, newSession)         // thêm vào đầu danh sách
-//                    currentSession.value = newSession   // đặt làm session hiện tại
+//                    viewModel.createNewSession()
 //                    navController.navigate("chat")
 //                },
 //                onSelectSession = { session ->
-//                    currentSession.value = session
-//                    navController.navigate("chat")
+//                    viewModel.setCurrentSession(session.id)    // ✅ Gán session
+//                    navController.navigate("chat")             // ✅ Chuyển sang chat
 //                },
-//                onDeleteSession = { sessionToDelete ->
-//                    sessions.remove(sessionToDelete)
-//                    if (sessions.isEmpty()) {
-//                        currentSession.value = null
-//                    }
-//                },
-//                onBackToChat = {
-//                    navController.navigate("chat")
-//                }
-//            )
 //
+//                onDeleteSession = {
+//                    viewModel.deleteSession(ChatSessionEntity(it.id, it.title))
+//                },
+//                onBackToChat = { navController.navigate("chat") }
+//            )
 //        }
+//
+//
 //    }
 //}
-
-
-
+//
+//
+//
+//
+//

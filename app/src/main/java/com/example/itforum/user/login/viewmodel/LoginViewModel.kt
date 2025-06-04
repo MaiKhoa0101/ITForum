@@ -62,8 +62,11 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
         saveToken(token)
         try {
             val jwt = JWT(token)
+
             val id = jwt.getClaim("userId").asString()
+            val role = jwt.getClaim("role").asString()
             saveUserId(id)
+            saveUserRole(role)
             // TODO: Xử lý role nếu cần
         } catch (e: Exception) {
             showError("Invalid token format")
@@ -80,6 +83,12 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
             .putString("userId", userId)
             .apply()
     }
+    private fun saveUserRole(role: String?) {
+        sharedPreferences.edit()
+            .putString("role", role)
+            .apply()
+    }
+
 
 
 
