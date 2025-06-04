@@ -1,10 +1,12 @@
 package com.example.itforum.service
 
+import com.example.itforum.user.model.request.CreatePostRequest
 import com.example.itforum.user.model.request.GetPostRequest
 import com.example.itforum.user.model.request.LoginUser
 import com.example.itforum.user.model.request.RegisterUser
 import com.example.itforum.user.model.request.UserUpdateRequest
 import com.example.itforum.user.model.request.VoteRequest
+import com.example.itforum.user.model.response.CreatePostResponse
 import com.example.itforum.user.model.response.GetVoteResponse
 import com.example.itforum.user.model.response.LoginResponse
 import com.example.itforum.user.model.response.PostListResponse
@@ -54,12 +56,4 @@ interface UserService {
     @GET("user/getall")
     suspend fun getAllUser(): Response<List<UserResponse>>
 
-    @POST("posts/search")
-    suspend fun getPost(@Body getPostRequest : GetPostRequest) : Response<PostListResponse>
-
-    @POST("vote/{postId}")
-    suspend fun votePost(@Path("postId") postId: String, @Body voteRequest: VoteRequest): Response<VoteResponse>
-
-    @GET("vote/{postId}/{userId}")
-    suspend fun getVoteData(@Path("postId") postId: String, @Path("userId") userId: String): Response<GetVoteResponse>
 }

@@ -1,7 +1,13 @@
 package com.example.itforum.user.post
 
 import android.content.SharedPreferences
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -21,26 +27,79 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.effect.model.UiStatePost
 import com.example.itforum.user.model.request.GetPostRequest
 import com.example.itforum.user.model.response.PostResponse
-import com.example.itforum.user.register.viewmodel.RegisterViewModel
 import java.time.Instant
 import java.time.Duration
 import com.example.itforum.user.model.response.GetVoteResponse
+import com.example.itforum.user.model.response.News
+import com.example.itforum.user.news.viewmodel.NewsViewModel
+import kotlinx.coroutines.delay
+
+import com.example.itforum.user.model.response.VoteResponse
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PostListScreen(
     sharedPreferences: SharedPreferences,
+    navHostController: NavHostController
 ) {
-    val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(sharedPreferences) }
+    val newsViewModel: NewsViewModel = viewModel(factory = viewModelFactory {
+        initializer { NewsViewModel(sharedPreferences) }
     })
+    LaunchedEffect(Unit) {
+        newsViewModel.getNews()
+    }
+    val listNews by newsViewModel.listNews.collectAsState()
+
+    Column(
+        modifier = Modifier.padding(10.dp)
+    ) {
+        if(listNews != null){
+            Text(
+                text = "Tin tức",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+            listNews?.forEach {news->
+                AdvancedMarqueeText(news,
+                    navHostController,
+                    modifier = Modifier
+                        .padding(horizontal = 30.dp)
+                        .width(300.dp)
+                        .height(40.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 50.dp)
+                        .fillMaxWidth()       // Chiều rộng 100%
+                        .height(1.dp)         // Độ dày của đường
+                        .background(Color.Black)
+                )
+            }
+        }
+    }
+    val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
+        initializer { PostViewModel(navHostController,sharedPreferences) }
+    })
+
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoadingMore by viewModel.isLoadingMore.collectAsState()
@@ -55,6 +114,7 @@ fun PostListScreen(
         refreshing = isRefreshing,
         onRefresh = { viewModel.refreshPosts() }
     )
+
 
     Box(
         modifier = Modifier
@@ -121,11 +181,12 @@ fun PostListScreen(
                             PostCardWithVote(
                                 post = postWithVote.post,
                                 vote = postWithVote.vote,
-                                onUpvoteClick = {  },
-                                onDownvoteClick = {  },
-                                onCommentClick = {  },
+                                onUpvoteClick = { viewModel.votePost(postWithVote.post.id,"upvote")  },
+                                onDownvoteClick = { viewModel.votePost(postWithVote.post.id,"downvote") },
+                                onCommentClick = { navHostController.navigate("comment/${postWithVote.post.id}")  },
                                 onBookmarkClick = {  },
-                                onShareClick = {  }
+                                onShareClick = {  },
+
                             )
 
                             // Separator between posts
@@ -173,7 +234,7 @@ fun PostListScreen(
                     }
                 }
             }
-            is UiStatePost.Success -> {
+            is UiStatePost.SuccessWithVotes -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Không có dữ liệu bình chọn cho bài viết.", color = Color.Gray)
                 }
@@ -210,6 +271,7 @@ fun PostListScreen(
             is UiStatePost.Idle -> {
                 // Handle idle state - maybe same as Success but without loading
             }
+
         }
 
         // Pull refresh indicator
@@ -223,14 +285,28 @@ fun PostListScreen(
 
 @Composable
 fun PostCardWithVote(
+
     post: PostResponse,
     vote: GetVoteResponse?,
     onUpvoteClick: () -> Unit = {},
     onDownvoteClick: () -> Unit = {},
     onCommentClick: () -> Unit = {},
     onBookmarkClick: () -> Unit = {},
-    onShareClick: () -> Unit = {}
+    onShareClick: () -> Unit = {},
+
 ) {
+    var isChange by remember { mutableStateOf(false) }
+    var upvotes by remember { mutableStateOf(vote?.data?.upVoteData?.total?: 0) }
+    var isVote by remember { mutableStateOf(vote?.data?.userVote) }
+
+
+    LaunchedEffect(isChange) {
+        if (isChange) {
+
+
+            isChange = false
+        }
+    }
     Card(
         elevation = 4.dp,
         modifier = Modifier
@@ -258,7 +334,7 @@ fun PostCardWithVote(
 
                     Column {
                         Text(
-                            text = post.userId ?: "Unknown User",
+                            text = post.userName ?: "Unknown User",
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp
                         )
@@ -322,25 +398,45 @@ fun PostCardWithVote(
             ) {
                 // Upvote/Downvote section
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onUpvoteClick) {
+                    IconButton(onClick = {
+                        onUpvoteClick()
+                        if(isVote == "upvote"){
+                            upvotes --
+                            isVote = "none"
+                        }else if(isVote == "downvote" || isVote == "none"){
+                            upvotes++
+                            isVote = "upvote"
+                        }
+                    } ) {
                         Icon(
                             painter = painterResource(id = R.drawable.upvote),
                             contentDescription = "Upvote",
                             modifier = Modifier.size(30.dp),
-                            tint = Color.Unspecified
+                            tint = if (isVote == "upvote") Color.Green else Color.Unspecified
                         )
                     }
                     Text(
-                        text = "${vote?.data?.upVoteData?.total ?: "0"}",
+                        text = "${upvotes}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
                     )
-                    IconButton(onClick = onDownvoteClick) {
+                    IconButton(onClick = {
+                        onDownvoteClick()
+                        if(isVote == "downvote"){
+                            isVote = "none"
+                        }else if(isVote == "upvote" ){
+                            upvotes--
+                            isVote = "downvote"
+                        }else if(isVote=="none"){
+                            isVote = "downvote"
+                        }
+
+                    }) {
                         Icon(
                             painter = painterResource(id = R.drawable.downvote),
                             contentDescription = "Downvote",
                             modifier = Modifier.size(30.dp),
-                            tint = Color.Unspecified
+                            tint = if (isVote == "downvote") Color.Red else Color.Unspecified
                         )
                     }
                 }
@@ -393,5 +489,72 @@ fun getTimeAgo(isoTimestamp: String): String {
         }
     } catch (e: Exception) {
         "Unknown"
+    }
+}
+
+@Composable
+fun AdvancedMarqueeText(
+    news: News,
+    navHostController: NavHostController,
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = TextStyle.Default,
+    durationMillis: Int = 10000
+) {
+    var isPaused by remember { mutableStateOf(false) }
+    val animOffset = remember { Animatable(0f) }
+
+    var textWidth by remember { mutableStateOf(0f) }
+    var containerWidth by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(isPaused) {
+        while (true) {
+            if (!isPaused) {
+                // Nếu đã chạy hết thì mới reset lại
+                if (animOffset.value <= -textWidth) {
+                    animOffset.snapTo(10f)
+                }
+                animOffset.animateTo(
+                    targetValue = -textWidth,
+                    animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing)
+                )
+            } else {
+                delay(100)
+            }
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .clipToBounds()
+            .onGloballyPositioned {
+                containerWidth = it.size.width.toFloat()
+            }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        isPaused = true
+                        tryAwaitRelease()
+                        isPaused = false
+                    }
+                )
+            },
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(
+            text = news.title,
+            style = textStyle,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Visible,
+            modifier = Modifier
+                .clickable {
+                    navHostController.navigate("detail_news/${news.id}")
+                }
+                .wrapContentWidth()
+                .offset { IntOffset(animOffset.value.toInt(), 0) }
+                .onGloballyPositioned {
+                    textWidth = it.size.width.toFloat()
+                }
+        )
     }
 }

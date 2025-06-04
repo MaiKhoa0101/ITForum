@@ -37,8 +37,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.itforum.admin.adminAccount.TableData
-import com.example.itforum.admin.adminAccount.convertToTableRows
+import com.example.itforum.admin.components.TableData
+import com.example.itforum.admin.components.convertToTableRows
 import com.example.itforum.admin.adminComplaint.model.complaint
 import com.example.itforum.user.post.icontext
 import com.vanpra.composematerialdialogs.MaterialDialog

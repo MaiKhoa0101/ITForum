@@ -7,15 +7,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import com.example.itforum.user.post.PostListScreen
 
 @Composable
-fun HomePage(modifier: Modifier,sharePreferences: SharedPreferences){
+fun HomePage(
+    navHostController: NavHostController,
+    modifier: Modifier,
+    sharePreferences: SharedPreferences
+){
     Column(
         modifier=modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        PostListScreen(sharePreferences);
+        PostListScreen(sharePreferences, navHostController);
     }
 }

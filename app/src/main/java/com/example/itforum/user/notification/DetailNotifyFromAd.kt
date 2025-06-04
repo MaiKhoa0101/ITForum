@@ -59,7 +59,7 @@ fun DetailNotify(
                 )
             ) {
                 IconWithText(
-                    Icons.Default.QuestionMark,
+                    "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
                     "Liên hệ hỗ trợ",
                     25.dp,
                     modifier = Modifier.padding(0.dp)
@@ -89,9 +89,9 @@ fun FormNotify() {
                modifier = Modifier.fillMaxWidth(),
                textAlign = TextAlign.Center
            )
-           IconWithText(Icons.Default.DateRange,"Ngày: 01/04/2025 11:35 AM", sizeIcon = 35.dp)
-           IconWithText(Icons.Default.PermIdentity,"Từ: Admin hệ thống", sizeIcon = 35.dp)
-           IconWithText(Icons.Default.ContentPaste,"Nội dung thông báo:", sizeIcon = 35.dp)
+           IconWithText("https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg","Ngày: 01/04/2025 11:35 AM", sizeIcon = 35.dp)
+           IconWithText("https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg","Từ: Admin hệ thống", sizeIcon = 35.dp)
+           IconWithText("https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg","Nội dung thông báo:", sizeIcon = 35.dp)
            Text(
                text = "Chúng tôi xing thông báo rằng chính sách sử dụng dịch vụ" +
                        " ádaskdasdafjafjs sjfsjsifjsdfjjsd fdfkjdf  sdfsd fsf  sf" +

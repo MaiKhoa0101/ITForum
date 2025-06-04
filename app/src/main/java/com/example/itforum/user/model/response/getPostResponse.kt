@@ -14,7 +14,8 @@ data class PostResponse(
     val totalUpvotes: Int? = null,
     val totalDownvotes: Int? = null,
     val __v: Int? = null,
-    val createdAt : String? = null
+    val createdAt : String? = null,
+    val userName : String? = null
 )
 data class PostListResponse(
     val posts: List<PostResponse>? = null,

@@ -107,6 +107,7 @@ class EditProfileViewModel : ViewModel() {
             originalAvatarURL = it.avatar?.toUri()
             originalName = it.name ?: ""
             originalUsername = it.username ?: ""
+            originalAvatarURL = it.avatar?.toUri()
             originalEmail = it.email ?: ""
             originalPhone = it.phone ?: ""
             originalIntroduce = it.introduce ?: ""

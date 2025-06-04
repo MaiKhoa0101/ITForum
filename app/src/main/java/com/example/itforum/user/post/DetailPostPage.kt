@@ -53,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.itforum.R
 
 @Composable
@@ -76,7 +77,11 @@ fun DetailPostPage(
                     .background(Color.White)
             ) {
                 item{
-                    AvatarNameDetail()
+                    AvatarNameDetail(
+                        avatar = R.drawable.avatar,
+                        name = "Nguyễn Thành Đạt",
+                        time = "2025-06-01T08:14:16.547+00:00"
+                    )
                     ContentPost()
                     MediaPost()
                     ActionsPost(navHostController)
@@ -135,15 +140,15 @@ fun TopDetailPost(
 }
 
 @Composable
-fun AvatarNameDetail() {
+fun AvatarNameDetail(avatar: Int, name: String, time: String) {
     Row(
         modifier = Modifier
             .padding(horizontal = 13.dp, vertical = 6.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Default.AccountCircle,
+        AsyncImage(
+            model = avatar,
             contentDescription = "Avatar tài khoản",
             modifier = Modifier.size(45.dp)
         )
@@ -152,12 +157,12 @@ fun AvatarNameDetail() {
             verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             Text(
-                "Nguyễn Thành Đạt",
+                text = name,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                "5 phút",
+                text = "${getTimeAgo(time)} • ${""}",
                 fontSize = 12.sp,
             )
         }
