@@ -33,6 +33,6 @@ data class Certificate(
 )
 
 data class Skill(
-    @SerializedName("_id") val id: String,
+    @SerializedName("_id") val id: String? = null,
     val name: String,
 )

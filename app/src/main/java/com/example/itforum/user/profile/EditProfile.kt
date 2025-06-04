@@ -11,16 +11,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -72,8 +83,8 @@ class EditProfileViewModel : ViewModel() {
     var passInput by mutableStateOf("")
     var repassInput by mutableStateOf("")
     var introduce by mutableStateOf("")
-    var skills by mutableStateOf<List<Skill>?>(null)
-    var certificate by mutableStateOf<List<Certificate>?>(null)
+    var skillsInput by mutableStateOf<List<Skill>?>(null)
+    var certificateInput by mutableStateOf<List<Certificate>?>(null)
 
     // Lưu trữ dữ liệu gốc để so sánh
     private var originalAvatarURL: Uri? = null
@@ -82,8 +93,13 @@ class EditProfileViewModel : ViewModel() {
     private var originalEmail: String = ""
     private var originalPhone: String = ""
     private var originalIntroduce: String = ""
-    private var originalSkills: List<Skill>? = null
-    private var originalCertificate: List<Certificate>? = null
+
+
+
+    var originalSkills: List<Skill>? = null
+    var originalCertificate: List<Certificate>? = null
+
+
 
     // Hàm để lưu dữ liệu gốc khi load user info
     fun setOriginalData(user: UserProfileResponse?) {
@@ -104,8 +120,8 @@ class EditProfileViewModel : ViewModel() {
             emailInput = originalEmail
             phoneInput = originalPhone
             introduce = originalIntroduce
-            skills = originalSkills
-            certificate = originalCertificate
+            skillsInput = originalSkills
+            certificateInput = originalCertificate
         }
     }
 
@@ -119,11 +135,147 @@ class EditProfileViewModel : ViewModel() {
             introduce = if (introduce != originalIntroduce && introduce.isNotBlank()) introduce else null,
             avatar = if (avatarURL != originalAvatarURL) avatarURL else null,
             password = passInput.takeIf { it.isNotBlank() }, // Password luôn gửi nếu có
-            certificate = if (certificate != originalCertificate) certificate else null,
-            skills = if (skills != originalSkills) skills else null,
+            certificate = if (certificateInput != originalCertificate) certificateInput else null,
+            skills = if (skillsInput != originalSkills) skillsInput else null,
         )
 
         userViewModel.ModifierUser(request, context)
+    }
+}
+@Composable
+fun EditProfileBody(user: UserProfileResponse?,viewModel: EditProfileViewModel) {
+    var tempSkills = ""
+    var tempCertificate = ""
+    ChangeAvatar(
+        user?.avatar,
+        imageUri = viewModel.avatarURL,
+        onImageSelected = { viewModel.avatarURL = it }
+    )
+    FieldText("Giới thiệu", "Tôi có đam mê...", viewModel.introduce) { viewModel.introduce = it }
+    FieldText("Họ và tên", "Tên của bạn", viewModel.nameInput) { viewModel.nameInput = it }
+    FieldText("Tên người dùng", "username123", viewModel.usernameInput) { viewModel.usernameInput = it }
+    FieldText("Email", "user@gmail.com", viewModel.emailInput) { viewModel.emailInput = it }
+    FieldText("Số điện thoại", "0912345678", viewModel.phoneInput) { viewModel.phoneInput = it }
+    FieldText("Mật khẩu", "********", viewModel.passInput) { viewModel.passInput = it }
+    FieldText("Nhập lại mật khẩu", "********", viewModel.repassInput) { viewModel.repassInput = it }
+    Spacer(Modifier.height(12.dp))
+    FieldText("Nhập thêm kĩ năng", "C++", tempSkills) { tempSkills = it }
+    AddSkillButton(
+        tempSkills,
+        onAddSkill = {
+            viewModel.skillsInput = viewModel.skillsInput?.plus(Skill(name = it))
+        }
+    )
+    HorizontalDivider(thickness = 2.dp, color = Color.Gray)
+
+}
+
+@Composable
+fun AddSkillButton(tempSkills: String, onAddSkill: (String) -> Unit){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ){
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Add Skill",
+            modifier = Modifier.clickable{
+                onAddSkill(tempSkills)
+            }
+        )
+    }
+}
+
+@Composable
+fun ButtonSaveModify(onSave: () -> Unit) {
+    Button(onClick = onSave, modifier = Modifier.padding(16.dp)) {
+        Text("Lưu thay đổi")
+    }
+}
+
+
+@Composable
+fun ChangeAvatar(
+    userAvatar: String?,
+    imageUri: Uri?,
+    onImageSelected: (Uri) -> Unit)
+{
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { onImageSelected(it) }
+    }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+
+    ) {
+        Box(contentAlignment = Alignment.Center,
+            modifier = Modifier.clickable {
+                launcher.launch("image/*")
+            }
+        ) {
+            println("Avatar: "+userAvatar)
+            if (imageUri != null) {
+                AsyncImage(
+                    model = imageUri,
+                    contentDescription = "avatar",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.White, CircleShape)
+                )
+            } else {
+                AsyncImage(
+                    model = userAvatar,
+                    contentDescription = "Avatar",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.White, CircleShape)
+                )
+            }
+            Icon(
+                painter = painterResource(R.drawable.camera),
+                contentDescription = "Change Avatar",
+                tint = Color.White,
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                    .padding(6.dp)
+                    .clip(CircleShape)
+            )
+        }
+    }
+}
+
+
+
+@Composable
+fun FieldText(
+    title: String,
+    placeHolder: String,
+    text: String,
+    onTextChange: (String) -> Unit
+) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text(
+            text = title,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        TextField(
+            value = text,
+            onValueChange = onTextChange,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
@@ -199,112 +351,5 @@ fun EditProfile(
                 }
             }
         }
-    }
-}
-
-
-@Composable
-fun ButtonSaveModify(onSave: () -> Unit) {
-    Button(onClick = onSave, modifier = Modifier.padding(16.dp)) {
-        Text("Lưu thay đổi")
-    }
-}
-
-
-@Composable
-fun ChangeAvatar(
-    userAvatar: String?,
-    imageUri: Uri?,
-    onImageSelected: (Uri) -> Unit)
-{
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let { onImageSelected(it) }
-    }
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp)
-
-    ) {
-        Box(contentAlignment = Alignment.Center,
-            modifier = Modifier.clickable {
-                launcher.launch("image/*")
-            }
-        ) {
-            println("Avatar: "+userAvatar)
-            if (imageUri != null) {
-                AsyncImage(
-                    model = imageUri,
-                    contentDescription = "avatar",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, Color.White, CircleShape)
-                )
-            } else {
-                AsyncImage(
-                    model = userAvatar,
-                    contentDescription = "Avatar",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, Color.White, CircleShape)
-                )
-            }
-            Icon(
-                painter = painterResource(R.drawable.camera),
-                contentDescription = "Change Avatar",
-                tint = Color.White,
-                modifier = Modifier
-                    .size(36.dp)
-                    .background(Color.Black.copy(alpha = 0.6f), CircleShape)
-                    .padding(6.dp)
-                    .clip(CircleShape)
-            )
-        }
-    }
-}
-@Composable
-fun EditProfileBody(user: UserProfileResponse?,viewModel: EditProfileViewModel) {
-    ChangeAvatar(
-        user?.avatar,
-        imageUri = viewModel.avatarURL,
-        onImageSelected = { viewModel.avatarURL = it }
-    )
-    FieldText("Giới thiệu", "Tôi có đam mê...", viewModel.introduce) { viewModel.introduce = it }
-    FieldText("Họ và tên", "Tên của bạn", viewModel.nameInput) { viewModel.nameInput = it }
-    FieldText("Tên người dùng", "username123", viewModel.usernameInput) { viewModel.usernameInput = it }
-    FieldText("Email", "user@gmail.com", viewModel.emailInput) { viewModel.emailInput = it }
-    FieldText("Số điện thoại", "0912345678", viewModel.phoneInput) { viewModel.phoneInput = it }
-    FieldText("Mật khẩu", "********", viewModel.passInput) { viewModel.passInput = it }
-    FieldText("Nhập lại mật khẩu", "********", viewModel.repassInput) { viewModel.repassInput = it }
-
-}
-
-
-@Composable
-fun FieldText(
-    title: String,
-    placeHolder: String,
-    text: String,
-    onTextChange: (String) -> Unit
-) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(
-            text = title,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        TextField(
-            value = text,
-            onValueChange = onTextChange,
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
