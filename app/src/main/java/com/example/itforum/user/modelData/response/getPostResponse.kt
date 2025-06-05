@@ -8,7 +8,7 @@ data class PostResponse(
     val userId: String? = null,
     val title: String? = null,
     val content: String? = null,
-    val imageUrl: String? = null,
+    val imageUrls: List<String>? = null,
     val tags: List<String>? = null,
     val isPublished: String? = null,
     val totalUpvotes: Int? = null,
