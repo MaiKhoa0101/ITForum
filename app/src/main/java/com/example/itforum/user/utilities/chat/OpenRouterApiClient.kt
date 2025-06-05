@@ -12,7 +12,7 @@ import org.json.JSONObject
 import java.io.IOException
 
 object OpenRouterApiClient {
-    private const val API_KEY = "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"
+    private const val API_KEY = ""
 
 
 

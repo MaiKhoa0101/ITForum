@@ -9,6 +9,11 @@ import java.util.concurrent.TimeUnit
 import kotlin.getValue
 import kotlin.jvm.java
 
+import com.example.itforum.service.ReportPostService
+import com.example.itforum.service.NewsService
+import com.example.itforum.service.PostService
+import com.example.itforum.service.ReportAccountService
+
 object RetrofitInstance {
 
 

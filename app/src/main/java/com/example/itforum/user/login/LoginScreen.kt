@@ -59,7 +59,7 @@ fun LoginScreen(
         if (uiState is UiState.Success) {
             val role = sharedPreferences.getString("role", null)
             if (role != null) {
-                val destination = if (role == "admin") "admin_root" else "user_root"
+                val destination = if (role == "admin") "admin_root" else "home"
                 navHostController.navigate(destination)
             } else {
                 println("Không tìm thấy role trong SharedPreferences.")
