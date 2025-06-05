@@ -4,7 +4,6 @@ import android.content.SharedPreferences
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -33,27 +32,23 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.effect.model.UiStatePost
-import com.example.itforum.user.model.request.GetPostRequest
-import com.example.itforum.user.model.response.PostResponse
+import com.example.itforum.user.modelData.request.GetPostRequest
+import com.example.itforum.user.modelData.response.PostResponse
 import java.time.Instant
 import java.time.Duration
-import com.example.itforum.user.model.response.GetVoteResponse
-import com.example.itforum.user.model.response.News
+import com.example.itforum.user.modelData.response.GetVoteResponse
+import com.example.itforum.user.modelData.response.News
 import com.example.itforum.user.news.viewmodel.NewsViewModel
 import kotlinx.coroutines.delay
-
-import com.example.itforum.user.model.response.VoteResponse
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

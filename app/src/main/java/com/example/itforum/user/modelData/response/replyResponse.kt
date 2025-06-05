@@ -1,4 +1,4 @@
-package com.example.itforum.user.model.response
+package com.example.itforum.user.modelData.response
 
 data class Reply(
     val content: String,

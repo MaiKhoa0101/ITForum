@@ -1,8 +1,8 @@
 package com.example.itforum.service
 
-import com.example.itforum.user.model.request.NewsRequest
-import com.example.itforum.user.model.response.News
-import com.example.itforum.user.model.response.NewsResponse
+import com.example.itforum.user.modelData.request.NewsRequest
+import com.example.itforum.user.modelData.response.News
+import com.example.itforum.user.modelData.response.NewsResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE

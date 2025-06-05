@@ -14,6 +14,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,17 +24,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -44,6 +46,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,11 +69,13 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.R
 import com.example.itforum.user.effect.model.UiState
-import com.example.itforum.user.model.request.UserUpdateRequest
-import com.example.itforum.user.model.response.Certificate
-import com.example.itforum.user.model.response.Skill
-import com.example.itforum.user.model.response.UserProfileResponse
+import com.example.itforum.user.modelData.request.UserUpdateRequest
+import com.example.itforum.user.modelData.response.Certificate
+import com.example.itforum.user.modelData.response.Skill
+import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.profile.viewmodel.UserViewModel
+
+var paddingHorizontal = 26.dp
 
 class EditProfileViewModel : ViewModel() {
 
@@ -137,61 +142,211 @@ class EditProfileViewModel : ViewModel() {
             avatar = if (avatarURL != originalAvatarURL) avatarURL else null,
             password = passInput.takeIf { it.isNotBlank() }, // Password luôn gửi nếu có
             certificate = if (certificateInput != originalCertificate) certificateInput else null,
-            skills = if (skillsInput != originalSkills) skillsInput else null,
+            skill = if (skillsInput != originalSkills) skillsInput else null,
         )
 
         userViewModel.ModifierUser(request, context)
     }
 }
 @Composable
-fun EditProfileBody(user: UserProfileResponse?,viewModel: EditProfileViewModel) {
-    var tempSkills = ""
-    var tempCertificate = ""
-    ChangeAvatar(
-        user?.avatar,
-        imageUri = viewModel.avatarURL,
-        onImageSelected = { viewModel.avatarURL = it }
-    )
-    FieldText("Giới thiệu", "Tôi có đam mê...", viewModel.introduce) { viewModel.introduce = it }
-    FieldText("Họ và tên", "Tên của bạn", viewModel.nameInput) { viewModel.nameInput = it }
-    FieldText("Tên người dùng", "username123", viewModel.usernameInput) { viewModel.usernameInput = it }
-    FieldText("Email", "user@gmail.com", viewModel.emailInput) { viewModel.emailInput = it }
-    FieldText("Số điện thoại", "0912345678", viewModel.phoneInput) { viewModel.phoneInput = it }
-    FieldText("Mật khẩu", "********", viewModel.passInput) { viewModel.passInput = it }
-    FieldText("Nhập lại mật khẩu", "********", viewModel.repassInput) { viewModel.repassInput = it }
-    Spacer(Modifier.height(12.dp))
-    FieldText("Nhập thêm kĩ năng", "C++", tempSkills) { tempSkills = it }
-    AddSkillButton(
-        tempSkills,
-        onAddSkill = {
-            viewModel.skillsInput = viewModel.skillsInput?.plus(Skill(name = it))
+fun EditProfileBody(modifier: Modifier, user: UserProfileResponse?, viewModel: EditProfileViewModel) {
+    var tempSkills by remember { mutableStateOf("") }
+    var tempCertificate by remember { mutableStateOf("") }
+    Column {
+        ChangeAvatar(
+            user?.avatar,
+            imageUri = viewModel.avatarURL,
+            onImageSelected = { viewModel.avatarURL = it }
+        )
+        FieldText("Giới thiệu", "Tôi có đam mê...", viewModel.introduce) { viewModel.introduce = it }
+        FieldText("Họ và tên", "Tên của bạn", viewModel.nameInput) { viewModel.nameInput = it }
+        FieldText("Tên người dùng", "username123", viewModel.usernameInput) { viewModel.usernameInput = it }
+        FieldText("Email", "user@gmail.com", viewModel.emailInput) { viewModel.emailInput = it }
+        FieldText("Số điện thoại", "0912345678", viewModel.phoneInput) { viewModel.phoneInput = it }
+        FieldText("Mật khẩu", "********", viewModel.passInput) { viewModel.passInput = it }
+        FieldText("Nhập lại mật khẩu", "********", viewModel.repassInput) { viewModel.repassInput = it }
+        Spacer(Modifier.height(12.dp))
+        Divider()
+        Title("Kĩ năng")
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = paddingHorizontal),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FieldTagText("C++", tempSkills) { tempSkills = it }
+            AddButton(
+                tempSkills,
+                onAdd = {
+                    if (it.isNotBlank() && !viewModel.skillsInput?.contains(Skill(name = it))!!) {
+                        viewModel.skillsInput = viewModel.skillsInput?.plus(Skill(name = it))
+                    }
+                    println("Viewmodel: " + viewModel.skillsInput)
+
+                }
+            )
         }
-    )
-    HorizontalDivider(thickness = 2.dp, color = Color.Gray)
 
-}
+        TagSkill(
+            title = "Kĩ năng đã thêm:",
+            tempSkills= viewModel.skillsInput,
+            onDelete = {
+                if (it.isNotBlank() && viewModel.skillsInput?.contains(Skill(name = it))!!) {
+                    viewModel.skillsInput =
+                        viewModel.skillsInput?.minus(Skill(name = it))
+                }
+            }
+        )
+        HorizontalDivider(thickness = 2.dp, color = Color.Gray)
+        Title("Chứng chỉ")
+        Row (
+            modifier = Modifier.fillMaxWidth().padding(horizontal = paddingHorizontal),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            FieldTagText("Đại học...", tempCertificate) { tempCertificate = it }
+            AddButton(
+                tempCertificate,
+                onAdd = {
+                    if (it.isNotBlank() && !viewModel.certificateInput?.contains(Certificate(name = it))!!) {
+                        viewModel.certificateInput =
+                            viewModel.certificateInput?.plus(Certificate(name = it))
+                    }
+                    println("Viewmodel: " + viewModel.certificateInput)
 
-@Composable
-fun AddSkillButton(tempSkills: String, onAddSkill: (String) -> Unit){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ){
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = "Add Skill",
-            modifier = Modifier.clickable{
-                onAddSkill(tempSkills)
+                }
+            )
+        }
+        TagCertificate(
+            title = "Chứng chỉ bằng cấp đã thêm:",
+            tempCertificate = viewModel.certificateInput,
+            onDelete = {
+                if (it.isNotBlank() && viewModel.certificateInput?.contains(Certificate(name = it))!!) {
+                    viewModel.certificateInput =
+                        viewModel.certificateInput?.minus(Certificate(name = it))
+                }
             }
         )
     }
 }
 
 @Composable
+fun Title(title: String) {
+    Column (
+        modifier = Modifier.fillMaxWidth().padding(16.dp)
+    ){
+        Text(
+            text = title,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+    }
+}
+
+
+@Composable
+fun AddButton(tempSkills: String, onAdd: (String) -> Unit){
+    Icon(
+        imageVector = Icons.Default.Add,
+        contentDescription = "Add Skill",
+        modifier = Modifier
+            .size(50.dp)
+            .background(Color.Gray)
+            .clickable{
+            onAdd(tempSkills)
+        }
+    )
+}
+
+
+
+
+@Composable
+fun TagSkill(title: String, tempSkills: List<Skill>?, onDelete: (String) -> Unit){
+    Column (
+        modifier = Modifier.padding(16.dp)
+    ) {
+        Text(
+            text = title,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        FlowRow (
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            tempSkills?.forEach { tag ->
+                TagEditableItem(text = tag.name, onDelete = onDelete)
+            }
+        }
+    }
+}
+
+
+@Composable
+fun TagCertificate(title: String, tempCertificate: List<Certificate>?, onDelete: (tagName: String) -> Unit){
+    Column (
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) {
+        Text(
+            text = title,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        FlowRow (
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            tempCertificate?.forEach { tag ->
+                TagEditableItem(text = tag.name, onDelete = onDelete)
+            }
+        }
+    }
+}
+
+@Composable
+fun TagEditableItem(text: String, onDelete: (tagName: String) -> Unit = {}) {
+    Box(
+        modifier = Modifier
+            .background(
+                color = Color.Cyan,
+                shape = RoundedCornerShape(50)
+            )
+            .width(100.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row {
+            Text(text = text, color = Color.DarkGray)
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Delete Skill",
+                modifier = Modifier.clickable {
+                    onDelete(text)
+                }
+            )
+        }
+    }
+}
+
+
+
+@Composable
 fun ButtonSaveModify(onSave: () -> Unit) {
-    Button(onClick = onSave, modifier = Modifier.padding(16.dp)) {
+    OutlinedButton (
+        onClick = onSave,
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,        // Màu nền (background)
+            contentColor = Color.White,         // Màu chữ / icon
+            disabledContainerColor = Color.Gray,  // Màu nền khi disabled
+            disabledContentColor = Color.LightGray // Màu chữ khi disabled
+        )
+    ) {
         Text("Lưu thay đổi")
     }
 }
@@ -265,7 +420,7 @@ fun FieldText(
     text: String,
     onTextChange: (String) -> Unit
 ) {
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.padding(paddingHorizontal)) {
         Text(
             text = title,
             fontWeight = FontWeight.Bold,
@@ -274,19 +429,38 @@ fun FieldText(
         )
         TextField(
             value = text,
+            placeholder = { Text(text = placeHolder) },
             onValueChange = onTextChange,
             modifier = Modifier.fillMaxWidth()
         )
     }
 }
 
+
+@Composable
+fun FieldTagText(
+    placeHolder: String,
+    text: String,
+    onTextChange: (String) -> Unit
+) {
+
+    TextField(
+        value = text,
+        placeholder = { Text(text = placeHolder) },
+        onValueChange = onTextChange,
+        modifier = Modifier.fillMaxWidth(0.8f)
+    )
+
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfile(
+    modifier: Modifier,
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
-    viewModel: EditProfileViewModel = viewModel()
 ) {
+    val viewModel: EditProfileViewModel by remember { mutableStateOf(EditProfileViewModel()) }
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
@@ -344,7 +518,7 @@ fun EditProfile(
                 .padding(innerPadding)
         ) {
             item {
-                EditProfileBody(userInfo, viewModel)
+                EditProfileBody(modifier, userInfo, viewModel)
             }
             item {
                 ButtonSaveModify {

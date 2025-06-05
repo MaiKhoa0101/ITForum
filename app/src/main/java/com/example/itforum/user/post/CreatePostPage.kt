@@ -85,7 +85,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
-import com.example.itforum.user.model.request.CreatePostRequest
+import com.example.itforum.user.modelData.request.CreatePostRequest
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.profile.viewmodel.UserViewModel
 

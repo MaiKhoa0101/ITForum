@@ -1,18 +1,18 @@
 package com.example.itforum.service;
-import com.example.itforum.user.model.request.CreatePostRequest
-import com.example.itforum.user.model.request.GetPostRequest
-import com.example.itforum.user.model.request.PostComment
-import com.example.itforum.user.model.request.PostReply
-import com.example.itforum.user.model.request.VoteRequest
-import com.example.itforum.user.model.response.CommentResponse
-import com.example.itforum.user.model.response.CreatePostResponse
-import com.example.itforum.user.model.response.GetVoteResponse
-import com.example.itforum.user.model.response.PostCommentResponse
-import com.example.itforum.user.model.response.PostListResponse
-import com.example.itforum.user.model.response.PostReplyResponse
-import com.example.itforum.user.model.response.ReplyResponse
+import com.example.itforum.user.modelData.request.CreatePostRequest
+import com.example.itforum.user.modelData.request.GetPostRequest
+import com.example.itforum.user.modelData.request.PostComment
+import com.example.itforum.user.modelData.request.PostReply
+import com.example.itforum.user.modelData.request.VoteRequest
+import com.example.itforum.user.modelData.response.CommentResponse
+import com.example.itforum.user.modelData.response.CreatePostResponse
+import com.example.itforum.user.modelData.response.GetVoteResponse
+import com.example.itforum.user.modelData.response.PostCommentResponse
+import com.example.itforum.user.modelData.response.PostListResponse
+import com.example.itforum.user.modelData.response.PostReplyResponse
+import com.example.itforum.user.modelData.response.ReplyResponse
 
-import com.example.itforum.user.model.response.VoteResponse
+import com.example.itforum.user.modelData.response.VoteResponse
 
 import retrofit2.Response
 import retrofit2.http.Body

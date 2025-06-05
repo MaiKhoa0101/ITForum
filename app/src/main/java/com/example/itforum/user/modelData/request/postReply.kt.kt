@@ -1,4 +1,4 @@
-package com.example.itforum.user.model.request
+package com.example.itforum.user.modelData.request
 
 data class PostReply(
     val userId: String,

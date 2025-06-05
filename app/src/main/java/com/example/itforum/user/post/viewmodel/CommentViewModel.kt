@@ -6,9 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.effect.model.UiStateComment
-import com.example.itforum.user.model.request.PostComment
-import com.example.itforum.user.model.response.Comment
-import com.example.itforum.user.model.response.Reply
+import com.example.itforum.user.modelData.request.PostComment
+import com.example.itforum.user.modelData.response.Comment
+import com.example.itforum.user.modelData.response.Reply
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

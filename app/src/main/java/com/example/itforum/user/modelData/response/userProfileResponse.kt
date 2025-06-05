@@ -1,4 +1,4 @@
-package com.example.itforum.user.model.response
+package com.example.itforum.user.modelData.response
 
 import com.google.gson.annotations.SerializedName
 
@@ -28,7 +28,7 @@ data class userUpdateResponse(
 )
 
 data class Certificate(
-    @SerializedName("_id") val id: String,
+    @SerializedName("_id") val id: String? = null,
     val name: String,
 )
 

@@ -1,7 +1,6 @@
 package com.example.itforum.user.post
 
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,8 +23,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.user.effect.model.UiStateComment
-import com.example.itforum.user.model.response.Comment
-import com.example.itforum.user.model.response.Reply
+import com.example.itforum.user.modelData.response.Comment
+import com.example.itforum.user.modelData.response.Reply
 import com.example.itforum.user.post.viewmodel.CommentViewModel
 
 @Composable

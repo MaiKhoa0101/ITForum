@@ -27,7 +27,6 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,9 +51,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.itforum.user.model.response.Skill
-import com.example.itforum.user.model.response.UserProfileResponse
-import com.example.itforum.user.model.response.UserResponse
+import com.example.itforum.user.modelData.response.Certificate
+import com.example.itforum.user.modelData.response.Skill
+import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.profile.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -263,22 +262,18 @@ fun UserInfoDetail(user: UserProfileResponse?) {
         Text(user?.introduce?:"Chưa có giới thiệu", fontSize = 15.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Bằng cấp & chứng chỉ", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        TagCertificateSection(title = "Chứng chỉ bằng cấp đã đạt:", tags = user?.certificate)
 
-        user?.certificate?.forEach {
-            Text(it.name?:"Chưa có chứng chỉ")
-        }
         Spacer(modifier = Modifier.height(16.dp))
 
-        val languages = user?.skill
-        TagSection(title = "Ngôn ngữ sử dụng:", tags = languages)
+        TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)
 
     }
 }
 
 
 @Composable
-fun TagSection(
+fun TagSkillSection(
     title: String,
     tags: List<Skill>?
 ) {
@@ -299,6 +294,30 @@ fun TagSection(
         }
     }
 }
+
+@Composable
+fun TagCertificateSection(
+    title: String,
+    tags: List<Certificate>?
+) {
+    Column () {
+        Text(
+            text = title,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        FlowRow (
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            tags?.forEach { tag ->
+                TagItem(text = tag.name)
+            }
+        }
+    }
+}
+
 
 @Composable
 fun TagItem(text: String) {

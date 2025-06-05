@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.auth0.android.jwt.JWT
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.effect.model.UiState
-import com.example.itforum.user.model.request.LoginUser
+import com.example.itforum.user.modelData.request.LoginUser
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

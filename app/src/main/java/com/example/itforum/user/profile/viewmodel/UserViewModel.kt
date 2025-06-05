@@ -8,19 +8,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.effect.model.UiState
-import com.example.itforum.user.model.request.UserUpdateRequest
-import com.example.itforum.user.model.response.UserProfileResponse
+import com.example.itforum.user.modelData.request.UserUpdateRequest
+import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
 import java.io.File
 
@@ -95,8 +93,8 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel(){
                 val introduce = userUpdateRequest.introduce?.let {
                     MultipartBody.Part.createFormData("introduce", it)
                 }
-                val skills = userUpdateRequest.skills?.let {
-                    MultipartBody.Part.createFormData("skills", Gson().toJson(it))
+                val skill = userUpdateRequest.skill?.let {
+                    MultipartBody.Part.createFormData("skill", Gson().toJson(it))
                 }
                 val certificate = userUpdateRequest.certificate?.let {
                     MultipartBody.Part.createFormData("certificate", Gson().toJson(it))
@@ -109,7 +107,7 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel(){
                     email = email,
                     username = username,
                     introduce = introduce,
-                    skills = skills,
+                    skill = skill,
                     certificate = certificate,
                     avatar = avatar
                 )

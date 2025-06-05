@@ -2,10 +2,12 @@ package com.example.itforum.user.root
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -93,7 +95,7 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
             OtherUserProfileScreen(sharePreferences, navHostController,modifier)
         }
         composable ("editprofile") {
-            EditProfile(sharePreferences,navHostController)
+            EditProfile(modifier,sharePreferences,navHostController)
         }
         composable("create_post") {
             CreatePostPage(modifier, navHostController, sharePreferences)

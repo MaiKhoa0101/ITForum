@@ -17,7 +17,7 @@ object RetrofitInstance {
 
 
 
-    private const val BASE_URL = "http://192.168.1.104:4000"
+    private const val BASE_URL = "http://192.168.0.119:4000"
 
     val okHttpClient = OkHttpClient.Builder()
             .connectTimeout(5, TimeUnit.SECONDS)

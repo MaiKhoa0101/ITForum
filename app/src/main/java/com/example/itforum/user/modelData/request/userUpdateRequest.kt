@@ -1,8 +1,8 @@
-package com.example.itforum.user.model.request
+package com.example.itforum.user.modelData.request
 
 import android.net.Uri
-import com.example.itforum.user.model.response.Certificate
-import com.example.itforum.user.model.response.Skill
+import com.example.itforum.user.modelData.response.Certificate
+import com.example.itforum.user.modelData.response.Skill
 
 
 data class UserUpdateRequest(
@@ -12,7 +12,7 @@ data class UserUpdateRequest(
     val password: String? ,
     val username: String?,
     val introduce: String?,
-    val skills: List<Skill>? = emptyList(),
+    val skill: List<Skill>? = emptyList(),
     val certificate: List<Certificate>? = emptyList(),
     val avatar: Uri?,
 )

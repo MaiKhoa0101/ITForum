@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.itforum.retrofit.RetrofitInstance
-import com.example.itforum.user.model.request.RegisterUser
+import com.example.itforum.user.modelData.request.RegisterUser
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
