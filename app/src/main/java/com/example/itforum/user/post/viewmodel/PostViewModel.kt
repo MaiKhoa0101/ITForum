@@ -16,6 +16,7 @@ import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.modelData.request.VoteRequest
 import com.example.itforum.user.modelData.response.GetVoteResponse
 import com.example.itforum.user.modelData.response.PostWithVote
+import com.example.itforum.user.modelData.response.VoteResponse
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -263,19 +264,21 @@ class PostViewModel(
             fetchPosts(GetPostRequest(page = currentPage), isLoadMore = true)
         }
     }
-    fun votePost(postId: String?, type: String) {
-        if (postId.isNullOrEmpty() || userId.isNullOrEmpty() || type.isEmpty()) return
-        viewModelScope.launch {
-            try {
-                val voteRequest = VoteRequest(userId = userId, type = type)
-                val response = RetrofitInstance.postService.votePost(postId, voteRequest)
-                if (response.isSuccessful) {
-                   //
-                }
-                // No return needed
-            } catch (e: Exception) {
-                // Handle error (optional: log or update error state)
+    suspend fun votePost(postId: String?, type: String, index: Int): VoteResponse? {
+        if (postId.isNullOrEmpty() || userId.isNullOrEmpty() || type.isEmpty()) return null
+        Log.d("Index of post", index.toString())
+
+        return try {
+            val voteRequest = VoteRequest(userId = userId, type = type)
+            val response = RetrofitInstance.postService.votePost(postId, voteRequest)
+            if (response.isSuccessful) {
+                response.body() // Return the VoteResponse
+            } else {
+                null
             }
+        } catch (e: Exception) {
+            Log.e("VotePost", "Error voting: ${e.message}")
+            null
         }
     }
 

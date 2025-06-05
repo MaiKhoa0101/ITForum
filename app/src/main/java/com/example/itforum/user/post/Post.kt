@@ -1,6 +1,7 @@
 package com.example.itforum.user.post
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -54,8 +55,10 @@ import java.time.Instant
 import java.time.Duration
 import com.example.itforum.user.modelData.response.GetVoteResponse
 import com.example.itforum.user.modelData.response.News
+import com.example.itforum.user.modelData.response.VoteResponse
 import com.example.itforum.user.news.viewmodel.NewsViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -178,15 +181,45 @@ fun PostListScreen(
                             items = postsWithVotes,
                             key = { _, postWithVote -> postWithVote.post.id ?: postWithVote.post.hashCode() }
                         ) { index, postWithVote ->
+                            val scope = rememberCoroutineScope()
                             PostCardWithVote(
                                 post = postWithVote.post,
                                 vote = postWithVote.vote,
-                                onUpvoteClick = { viewModel.votePost(postWithVote.post.id,"upvote")  },
-                                onDownvoteClick = { viewModel.votePost(postWithVote.post.id,"downvote") },
-                                onCommentClick = { navHostController.navigate("comment/${postWithVote.post.id}")  },
-                                onBookmarkClick = {  },
-                                onShareClick = {  },
+                                onUpvoteClick = {
+                                    scope.launch {
+                                        val voteResponse = viewModel.votePost(
+                                            postId = postWithVote.post.id,
+                                            type = "upvote",
+                                            index = index
+                                        )
 
+                                        // Update local data with response
+                                        voteResponse?.let { response ->
+                                            postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
+                                            postWithVote.vote?.data?.userVote = response.data?.userVote
+                                        }
+                                    }
+                                },
+                                onDownvoteClick = {
+                                    scope.launch {
+                                        val voteResponse = viewModel.votePost(
+                                            postId = postWithVote.post.id,
+                                            type = "downvote",
+                                            index = index
+                                        )
+
+                                        // Update local data with response
+                                        voteResponse?.let { response ->
+                                            postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
+                                            postWithVote.vote?.data?.userVote = response.data?.userVote
+                                        }
+                                    }
+                                },
+                                onCommentClick = {
+                                    navHostController.navigate("comment/${postWithVote.post.id}")
+                                },
+                                onBookmarkClick = { },
+                                onShareClick = { },
                             )
 
                             // Separator between posts
@@ -298,15 +331,10 @@ fun PostCardWithVote(
     var isChange by remember { mutableStateOf(false) }
     var upvotes by remember { mutableStateOf(vote?.data?.upVoteData?.total?: 0) }
     var isVote by remember { mutableStateOf(vote?.data?.userVote) }
+    Log.d("isChange", isChange.toString())
 
 
-    LaunchedEffect(isChange) {
-        if (isChange) {
 
-
-            isChange = false
-        }
-    }
     Card(
         elevation = 4.dp,
         modifier = Modifier
@@ -400,6 +428,7 @@ fun PostCardWithVote(
                             upvotes++
                             isVote = "upvote"
                         }
+                        isChange = true
                     } ) {
                         Icon(
                             painter = painterResource(id = R.drawable.upvote),
