@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [NoteEntity::class], version = 1)
+@Database(entities = [NoteEntity::class], version = 2) // 🔧 Tăng version lên mỗi khi thay đổi schema
 abstract class NoteDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDao
 
@@ -18,7 +18,9 @@ abstract class NoteDatabase : RoomDatabase() {
                     context.applicationContext,
                     NoteDatabase::class.java,
                     "note_database"
-                ).build().also { INSTANCE = it }
+                )
+                    .fallbackToDestructiveMigration(false) // 🔥 Xoá và tạo lại DB nếu schema thay đổi
+                    .build().also { INSTANCE = it }
             }
         }
     }

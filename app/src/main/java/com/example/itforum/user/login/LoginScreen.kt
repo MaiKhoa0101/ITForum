@@ -34,7 +34,7 @@ fun LoginScreen(
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences,
     onRegisterClick: () -> Unit = {},
-    onForgotPasswordClick: () -> Unit = {}
+    onForgotPasswordClick: () -> Unit = {},
 ) {
     val loginViewModel: LoginViewModel = viewModel(factory = viewModelFactory {
         initializer { LoginViewModel(sharedPreferences) }
@@ -49,12 +49,25 @@ fun LoginScreen(
     var canSubmit by remember {mutableStateOf(false)}
 
     val uiState by loginViewModel.uiState.collectAsState()
+//    LaunchedEffect(uiState) {
+//        if (uiState is UiState.Success) {
+//            println("uiState là success")
+//            navHostController.navigate("home")
+//        }
+//    }
     LaunchedEffect(uiState) {
         if (uiState is UiState.Success) {
-            println("uiState là success")
-            navHostController.navigate("home")
+            val role = sharedPreferences.getString("role", null)
+            if (role != null) {
+                val destination = if (role == "admin") "admin_root" else "home"
+                navHostController.navigate(destination)
+            } else {
+                println("Không tìm thấy role trong SharedPreferences.")
+            }
         }
     }
+
+
 
     Column(
         modifier = Modifier
