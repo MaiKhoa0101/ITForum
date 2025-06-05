@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [ChatSessionEntity::class, MessageEntity::class], version = 1)
+@Database(entities = [ChatSessionEntity::class, MessageEntity::class], version = 2)
 abstract class ChatDatabase : RoomDatabase() {
     abstract fun chatDao(): ChatDao
 
@@ -19,7 +19,9 @@ abstract class ChatDatabase : RoomDatabase() {
                     context.applicationContext,
                     ChatDatabase::class.java,
                     "chat_db"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration() // ✅ thêm dòng này nếu không dùng migration
+                    .build()
                 INSTANCE = instance
                 instance
             }

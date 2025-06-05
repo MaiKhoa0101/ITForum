@@ -85,6 +85,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
+import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.request.CreatePostRequest
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.profile.viewmodel.UserViewModel
@@ -100,6 +101,7 @@ fun CreatePostPage(
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences
 ) {
+    val context = LocalContext.current
     var userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
     })
@@ -109,12 +111,20 @@ fun CreatePostPage(
     })
 
     val userInfo by userViewModel.user.collectAsState()
+    val uiState by postViewModel.uiStateCreate.collectAsState()
 
+    LaunchedEffect(uiState) {
+        println("UI State duoc thay doi")
+        if (uiState is UiState.Success) {
+            println("uiState là success")
+            navHostController.navigate("home")
+        }
+    }
     LaunchedEffect(Unit) {
         userViewModel.getUser()
     }
 
-    var imageUrl by remember  { mutableStateOf<Uri?>(null) }
+    var imageUrls by remember  { mutableStateOf<List<Uri>?>(emptyList()) }
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var tags by remember { mutableStateOf(listOf<String?>(null)) }
@@ -131,14 +141,15 @@ fun CreatePostPage(
                 TopPost(navHostController){
                     postViewModel.createPost(
                         CreatePostRequest(
-                        imageUrl = imageUrl,
+                        imageUrls = imageUrls,
                         userId = userInfo?.id ?: "",
                         title = title,
                         content = content,
                         tags = tags,
                         isPublished = isPublished
-                    ))
-                    navHostController.navigate("home")
+                    ),
+                        context
+                    )
                 }
                 Column(
                     modifier = Modifier
@@ -151,7 +162,7 @@ fun CreatePostPage(
                         content = input
                     }
                     AddTagPost(){tags = it}
-                    AddMedia(){imageUrl = it}
+                    AddMedia(){imageUrls = it}
                     CustomPost()
                 }
             }
@@ -370,7 +381,7 @@ fun AddTagPost(
 
 @Composable
 fun TagChild(
-    item: Any,
+    item: String,
     items: List<String?>,
     icon: ImageVector? = null,
     removeTag: (List<String>) -> Unit
@@ -394,7 +405,7 @@ fun TagChild(
             )
         }
         Text(
-            text = item.toString(),
+            text = item,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             fontWeight = FontWeight.Bold,
@@ -409,7 +420,7 @@ fun TagChild(
                 .padding(end = 5.dp)
                 .size(17.dp)
                 .clickable {
-                    if (items.isNotEmpty() && items.first() is String) {
+                    if (items.isNotEmpty()) {
                         val newList = items - item
                         removeTag(newList as List<String>)
                     }
@@ -420,10 +431,10 @@ fun TagChild(
 
 @Composable
 fun AddMedia(
-    onChange: (Uri) -> Unit
+    onChange: (List<Uri>) -> Unit
 ) {
     val context = LocalContext.current
-    var imageUri by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var videoUri by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var applicationUri by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var mediaUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
@@ -436,8 +447,8 @@ fun AddMedia(
             val type =context.contentResolver.getType(uri) ?:""
             when{
                 type.startsWith("image") -> {
-                    imageUri = imageUri + uri
-                    onChange(uri)
+                    imageUris = imageUris + uri
+                    onChange(imageUris)
                 }
                 type.startsWith("video") -> videoUri = videoUri + uri
                 type.startsWith("application") -> applicationUri = applicationUri + uri
@@ -463,7 +474,7 @@ fun AddMedia(
                 .padding(top = 5.dp, end = 12.dp)
                 .align(Alignment.End)
         )
-        if(imageUri.isEmpty() && videoUri.isEmpty() && applicationUri.isEmpty()){
+        if(imageUris.isEmpty() && videoUri.isEmpty() && applicationUri.isEmpty()){
             IconButton(
                 onClick = {
                     launcher.launch(arrayOf("*/*"))  //Chọn tệp bất kì
@@ -492,9 +503,9 @@ fun AddMedia(
             }
         }else {
             Box(modifier = Modifier.fillMaxWidth()) {
-                if (imageUri.isNotEmpty()){
-                    imageUri.forEachIndexed(){index, uri ->
-                        ImgOrVdMedia("image",index, uri, imageUri, removeUri = {newList-> imageUri = newList})
+                if (imageUris.isNotEmpty()){
+                    imageUris.forEachIndexed(){index, uri ->
+                        ImgOrVdMedia("image",index, uri, imageUris, removeUri = {newList-> imageUris = newList})
                     }
                 }
             }

@@ -1,4 +1,4 @@
-package com.example.itforum.utilities.chat
+package com.example.itforum.user.utilities.chat
 
 import android.util.Log
 import okhttp3.Call
@@ -12,7 +12,11 @@ import org.json.JSONObject
 import java.io.IOException
 
 object OpenRouterApiClient {
-    private const val API_KEY = "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" // Thay bằng API Key của bạn
+    private const val API_KEY = ""
+
+
+
+
     private val client = OkHttpClient()
 
     fun generateText(prompt: String, callback: (String?) -> Unit) {
@@ -41,17 +45,17 @@ object OpenRouterApiClient {
 
 
             override fun onFailure(call: Call, e: IOException) {
-                Log.e("OpenRouter", "❌ API call failed: ${e.message}")
+                Log.e("OpenRouter", " API call failed: ${e.message}")
                 e.printStackTrace()
-                callback("❌ API lỗi: ${e.message}")
+                callback(" API lỗi: ${e.message}")
             }
 
             override fun onResponse(call: Call, response: Response) {
                 val bodyString = try {
                     response.body?.string()
                 } catch (e: Exception) {
-                    Log.e("OpenRouter", "❌ Lỗi đọc body: ${e.message}")
-                    callback("❌ Lỗi đọc phản hồi")
+                    Log.e("OpenRouter", " Lỗi đọc body: ${e.message}")
+                    callback("Lỗi đọc phản hồi")
                     return
                 }
 
@@ -59,7 +63,7 @@ object OpenRouterApiClient {
 
                 if (bodyString == null || !response.isSuccessful) {
                     Log.e("OpenRouter", "⚠️ API error: ${response.code} - ${response.message}")
-                    callback("❌ Lỗi API: ${response.code} - ${response.message}")
+                    callback(" Lỗi API: ${response.code} - ${response.message}")
                     return
                 }
 
@@ -74,10 +78,10 @@ object OpenRouterApiClient {
                     callback(reply)
 
                 } catch (e: Exception) {
-                    Log.e("OpenRouter", "❌ JSON parse error: ${e.message}")
-                    Log.e("OpenRouter", "❌ Body bị lỗi: $bodyString")
+                    Log.e("OpenRouter", " JSON parse error: ${e.message}")
+                    Log.e("OpenRouter", "Body bị lỗi: $bodyString")
                     e.printStackTrace()
-                    callback("❌ JSON lỗi")
+                    callback(" JSON lỗi")
                 }
             }
 
@@ -85,29 +89,6 @@ object OpenRouterApiClient {
 
 
 
-//            override fun onFailure(call: Call, e: IOException) {
-//                callback(null)
-//            }
-//
-//            override fun onResponse(call: Call, response: Response) {
-//                val responseBody = response.body?.string()
-//                if (!response.isSuccessful || responseBody == null) {
-//                    callback(null)
-//                    return
-//                }
-//
-//                try {
-//                    val jsonObj = JSONObject(responseBody)
-//                    val message = jsonObj
-//                        .getJSONArray("choices")
-//                        .getJSONObject(0)
-//                        .getJSONObject("message")
-//                        .getString("content")
-//                    callback(message)
-//                } catch (e: Exception) {
-//                    callback(null)
-//                }
-//            }
         })
     }
 }

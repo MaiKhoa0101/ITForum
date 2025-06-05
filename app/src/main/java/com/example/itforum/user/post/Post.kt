@@ -30,9 +30,11 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -73,22 +75,20 @@ fun PostListScreen(
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
             )
-            listNews?.forEach {news->
-                AdvancedMarqueeText(news,
-                    navHostController,
-                    modifier = Modifier
-                        .padding(horizontal = 30.dp)
-                        .width(300.dp)
-                        .height(40.dp)
-                )
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 50.dp)
-                        .fillMaxWidth()       // Chiều rộng 100%
-                        .height(1.dp)         // Độ dày của đường
-                        .background(Color.Black)
-                )
-            }
+            AdvancedMarqueeTextList(
+                listNews!!,navHostController,
+                modifier = Modifier
+                    .padding(horizontal = 30.dp)
+                    .width(300.dp)
+                    .height(40.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 50.dp)
+                    .fillMaxWidth()       // Chiều rộng 100%
+                    .height(1.dp)         // Độ dày của đường
+                    .background(Color.Black)
+            )
         }
     }
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
@@ -553,3 +553,98 @@ fun AdvancedMarqueeText(
         )
     }
 }
+
+@Composable
+fun AdvancedMarqueeTextList(
+    items: List<News>,
+    navHostController: NavHostController,
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = TextStyle.Default,
+    durationMillis: Int = 10000,
+    separator: String = "   •   "
+) {
+    var isPaused by remember { mutableStateOf(false) }
+    val animOffset = remember { Animatable(0f) }
+
+    var contentWidth by remember { mutableStateOf(0f) }
+    var containerWidth by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(isPaused, contentWidth) {
+        while (true) {
+            if (!isPaused && contentWidth > 0f && containerWidth > 0f) {
+                if (animOffset.value <= -contentWidth) {
+                    animOffset.snapTo(containerWidth)
+                }
+                animOffset.animateTo(
+                    targetValue = -contentWidth,
+                    animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing)
+                )
+            } else {
+                delay(100)
+            }
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .clipToBounds()
+            .onGloballyPositioned {
+                containerWidth = it.size.width.toFloat()
+            }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        isPaused = true
+                        tryAwaitRelease()
+                        isPaused = false
+                    }
+                )
+            },
+        contentAlignment = Alignment.CenterStart
+    ) {
+        SubcomposeLayout { constraints ->
+            val rowPlaceables = subcompose("content") {
+                Row(
+                    modifier = Modifier.wrapContentWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    items.forEachIndexed { index, news ->
+                        Text(
+                            text = news.title,
+                            style = textStyle,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Visible,
+                            modifier = Modifier
+                                .clickable {
+                                    navHostController.navigate("detail_news/${news.id}")
+                                }
+                        )
+                        if (index != items.lastIndex) {
+                            Text(
+                                text = separator,
+                                style = textStyle,
+                                overflow = TextOverflow.Visible
+                            )
+                        }
+                    }
+                }
+            }.map {
+                it.measure(constraints.copy(minWidth = 0, maxWidth = Constraints.Infinity))
+            }
+
+            val maxWidth = rowPlaceables.maxOfOrNull { it.width } ?: 0
+            val maxHeight = rowPlaceables.maxOfOrNull { it.height } ?: 0
+            contentWidth = maxWidth.toFloat()
+
+            layout(constraints.maxWidth, maxHeight) {
+                rowPlaceables.forEach {
+                    it.placeRelative(x = animOffset.value.toInt(), y = 0)
+                }
+            }
+        }
+    }
+}
+
+
+

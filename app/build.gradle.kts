@@ -1,5 +1,8 @@
 import org.gradle.kotlin.dsl.implementation
 
+import java.io.FileInputStream
+import java.util.Properties
+
 
 
 plugins {
@@ -12,8 +15,14 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
 
-}
 
+}
+//val localProperties = Properties().apply {
+//    load(FileInputStream(rootProject.file("local.properties")))
+//}
+//
+//val openAiKey = localProperties["OPENAI_API_KEY"]
+//    ?: throw GradleException("OPENAI_API_KEY not found in local.properties")
 android {
     namespace = "com.example.itforum"
     compileSdk = 35
@@ -25,8 +34,14 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        //key openAI
+//        buildConfigField("String", "OPENAI_API_KEY", "\"$openAiKey\"")
+
+
     }
+    android.sourceSets["main"].java.srcDirs("src/main/java", "src/main/kotlin")
 
     buildTypes {
         release {
@@ -51,6 +66,8 @@ android {
 
 dependencies {
     //
+
+
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
     implementation("androidx.compose.runtime:runtime-livedata:1.6.5")
     //roomdb

@@ -1,7 +1,9 @@
 package com.example.itforum.user.post.viewmodel
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,7 +23,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
 import java.io.IOException
+import com.google.gson.Gson
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.http.Part
+import java.io.File
+
 
 class PostViewModel(
     navHostController: NavHostController,
@@ -151,35 +160,104 @@ class PostViewModel(
             }
         }
     }
-    fun createPost(createPostRequest: CreatePostRequest) {
+
+    fun createPost(createPostRequest: CreatePostRequest, context: Context) {
         viewModelScope.launch {
+            _uiStateCreate.value = UiState.Loading
             try {
-                val response = RetrofitInstance.postService.createPost(createPostRequest)
-                if (response.isSuccessful) {
-                    _uiStateCreate.value = UiState.Success(
-                        response.body()?.message ?: "Đăng bài thành công"
+                Log.d("UserViewModel", "Request: $createPostRequest")
+
+                val imageUrls = createPostRequest.imageUrls?.mapNotNull { uri ->
+                    prepareFilePart(context, uri, "imageUrls")
+                }
+
+                // Chỉ tạo MultipartBody.Part cho các trường không null
+                val userId = createPostRequest.userId?.let {
+                    MultipartBody.Part.createFormData("userId", it)
+                }
+                val title = createPostRequest.title?.let {
+                    MultipartBody.Part.createFormData("title", it)
+                }
+                val content = createPostRequest.content?.let {
+                    MultipartBody.Part.createFormData("content", it)
+                }
+                val isPublished = createPostRequest.isPublished?.let {
+                    MultipartBody.Part.createFormData("isPublished", it)
+                }
+                val tags = createPostRequest.tags?.let {
+                    MultipartBody.Part.createFormData("tags", Gson().toJson(it))
+                }
+
+                val response = imageUrls?.let {
+                    RetrofitInstance.postService.createPost(
+                        userId = userId,
+                        title = title,
+                        content = content,
+                        tags = tags,
+                        isPublished = isPublished,
+                        imageUrls = it
                     )
-                    delay(2000)
-                    _uiStateCreate.value = UiState.Idle
-                } else {
-                    showError("Đăng ký thất bại: ${response.message()}")
-                    _uiStateCreate.value = UiState.Error(response.message())
+                }
+
+
+                if (response != null) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body()
+                        Log.d("PostViewModel", "Success Response: ${responseBody?.message}")
+                        _uiStateCreate.value = UiState.Success(
+                            responseBody?.message ?: "Đăng bài thành công"
+                        )
+                        delay(500) // Cho Compose thời gian phản ứng trước khi đổi trạng thái
+                        _uiStateCreate.value = UiState.Idle
+                    } else {
+                        // Get error details from response body
+                        val errorBody = response.errorBody()?.string()
+                        Log.e("PostViewModel", "Error Response Body: $errorBody")
+
+                        val errorMessage = when (response.code()) {
+                            400 -> "Dữ liệu không hợp lệ: $errorBody"
+                            404 -> "Không tìm thấy người dùng"
+                            500 -> "Lỗi server: $errorBody"
+                            else -> "Lỗi không xác định (${response.code()}): $errorBody"
+                        }
+
+                        showError(errorMessage)
+                        _uiStateCreate.value = UiState.Error(errorMessage)
+                    }
                 }
             } catch (e: IOException) {
-                _uiStateCreate.value = UiState.Error("Lỗi phản hồi từ server")
-                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+                val errorMsg = "Lỗi kết nối mạng: ${e.localizedMessage}"
+                Log.e("PostViewModel", errorMsg, e)
+                _uiStateCreate.value = UiState.Error(errorMsg)
+                showError("Không thể kết nối máy chú, vui lòng kiểm tra mạng.")
             } catch (e: Exception) {
-                _uiStateCreate.value = UiState.Error("Lỗi không xác định: ${e.message}")
-                showError("Lỗi không xác định: ${e.localizedMessage ?: "Không rõ"}")
+                val errorMsg = "Lỗi hệ thống: ${e.message ?: e.localizedMessage}"
+                Log.e("PostViewModel", errorMsg, e)
+                _uiStateCreate.value = UiState.Error(errorMsg)
+                showError("Lỗi bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
             }
         }
     }
+    private fun prepareFilePart(
+        context: Context,
+        fileUri: Uri,
+        partName: String
+    ): MultipartBody.Part? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(fileUri)
+            val tempFile = File.createTempFile("upload_", ".jpg", context.cacheDir)
+            tempFile.outputStream().use { outputStream ->
+                inputStream?.copyTo(outputStream)
+            }
 
-
-    private fun showError(message: String) {
-        // TODO: Hiển thị lỗi lên UI, ví dụ Toast, Snackbar, hoặc cập nhật LiveData
-        Log.e("Register", message)
+            val requestFile = tempFile.asRequestBody("image/*".toMediaTypeOrNull())
+            MultipartBody.Part.createFormData(partName, tempFile.name, requestFile)
+        } catch (e: Exception) {
+            Log.e("PostViewModel", "Error preparing file part", e)
+            null
+        }
     }
+
     fun loadMorePosts() {
         if (canLoadMore && !_isLoadingMore.value) {
             fetchPosts(GetPostRequest(page = currentPage), isLoadMore = true)
@@ -208,6 +286,10 @@ class PostViewModel(
 
     fun getStoredUserId(): String? {
         return sharedPreferences.getString("userId", null)
+    }
+
+    private fun showError(message: String) {
+        Log.e("Register", message)
     }
 
     private fun logError(msg: String) {

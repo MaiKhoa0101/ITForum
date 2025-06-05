@@ -33,37 +33,30 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
+import androidx.navigation.compose.rememberNavController
+import com.example.itforum.admin.AdminRoot.AdminRoot
+import com.example.itforum.user.login.LoginScreen
+import kotlinx.coroutines.launch
+//import com.example.itforum.admin.
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.itforum.admin.adminReport.ReportAccount.view.ReportedAccountDetailScreen
-import com.example.itforum.admin.adminReport.ReportAccount.view.ReportedAccountScreen
-import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportViewModelFactory
-import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportedAccountDetailViewModel
-import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportedAccountDetailViewModelFactory
-import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportedUserViewModel
-import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailScreen
-import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostScreen
-import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
-import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostViewModel
-import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostViewModelFactory
-import com.example.itforum.repository.ReportPostRepository
-import com.example.itforum.repository.ReportRepository
-import com.example.itforum.retrofit.RetrofitInstance
-import kotlinx.coroutines.launch
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
+        val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
         setContent {
-            val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-            Root(sharedPreferences)
+            ITForumTheme {
+                Root(sharedPreferences)
+
+            }
         }
-    }}    
+    }}
 
 
 
@@ -126,8 +119,7 @@ fun Root(sharedPreferences:SharedPreferences) {
                 BodyRoot(
                     sharedPreferences,
                     navHostController,
-                    modifier = Modifier
-                        .padding(innerPadding)
+                    modifier = Modifier.padding(innerPadding)
                 )
             }
         }

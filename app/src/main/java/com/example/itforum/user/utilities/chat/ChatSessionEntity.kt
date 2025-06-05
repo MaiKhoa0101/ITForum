@@ -5,7 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "chat_sessions")
 data class ChatSessionEntity(
-    @PrimaryKey val id: String,
+    @PrimaryKey val sessionId: String,
     val title: String,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long,
+    val userId: String // ✅ Thêm userId
 )

@@ -1,10 +1,6 @@
 package com.example.itforum.retrofit
 
 
-import com.example.itforum.service.NewsService
-import com.example.itforum.service.PostService
-import com.example.itforum.service.ReportAccountService
-import com.example.itforum.service.ReportPostService
 import com.example.itforum.service.UserService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -13,6 +9,11 @@ import java.util.concurrent.TimeUnit
 import kotlin.getValue
 import kotlin.jvm.java
 
+import com.example.itforum.service.ReportPostService
+import com.example.itforum.service.NewsService
+import com.example.itforum.service.PostService
+import com.example.itforum.service.ReportAccountService
+
 object RetrofitInstance {
 
 
@@ -20,7 +21,7 @@ object RetrofitInstance {
     private const val BASE_URL = "http://192.168.0.119:4000"
 
     val okHttpClient = OkHttpClient.Builder()
-            .connectTimeout(5, TimeUnit.SECONDS)
+        .connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(5, TimeUnit.SECONDS)
         .writeTimeout(5, TimeUnit.SECONDS)
         .build()

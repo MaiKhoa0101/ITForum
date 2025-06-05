@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.itforum.admin.AdminRoot.AdminRoot
 import com.example.itforum.user.home.HomePage
 import com.example.itforum.user.home.bookmark.BookMarkScreen
 import com.example.itforum.user.home.follow.FollowScreen
@@ -111,12 +112,15 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
         }
         composable("login") {
             LoginScreen(
-                navHostController= navHostController,
+                navHostController = navHostController,
                 sharedPreferences = sharePreferences,
                 onRegisterClick = { navHostController.navigate("register") },
-                onForgotPasswordClick = { navHostController.navigate("forgot_password") }
+                onForgotPasswordClick = { navHostController.navigate("forgot_password") },
             )
         }
+
+
+
         composable("forgot_password") {
             ForgotPasswordScreen(
                 onBackClick = { navHostController.popBackStack() },
@@ -148,6 +152,10 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
                 navHostController,
                 sharedPreferences=sharePreferences,
             ) // Màn hình đăng ký mới thêm
+        }
+
+        composable ("admin_root"){
+            AdminRoot(navHostController,sharePreferences, sharePreferences.getString("access_token", "") ?: "")
         }
 
         composable("otp") {
