@@ -18,7 +18,8 @@ object RetrofitInstance {
 
 
 
-    private const val BASE_URL = "http://192.168.1.3:4000"
+
+    private const val BASE_URL = "http://192.168.1.4:4000"
 
 
     val okHttpClient = OkHttpClient.Builder()

@@ -1,4 +1,5 @@
 package com.example.itforum.service;
+import android.net.Uri
 import com.example.itforum.user.model.request.CreatePostRequest
 import com.example.itforum.user.model.request.GetPostRequest
 import com.example.itforum.user.model.request.PostComment
@@ -13,12 +14,15 @@ import com.example.itforum.user.model.response.PostReplyResponse
 import com.example.itforum.user.model.response.ReplyResponse
 
 import com.example.itforum.user.model.response.VoteResponse
+import okhttp3.MultipartBody
 
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 
 import retrofit2.http.POST
+import retrofit2.http.Part
 
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -50,8 +54,16 @@ interface PostService {
     @POST("posts/create")
     suspend fun postComment(@Body postComment: PostComment): Response<PostCommentResponse>
 
+    @Multipart
     @POST("posts/create")
-    suspend fun createPost(@Body createPostRequest: CreatePostRequest): Response<CreatePostResponse>
+    suspend fun createPost(
+        @Part userId: MultipartBody.Part?,
+        @Part title: MultipartBody.Part?,
+        @Part content: MultipartBody.Part?,
+        @Part tags: MultipartBody.Part?,
+        @Part isPublished: MultipartBody.Part?,
+        @Part imageUrls: List<MultipartBody.Part?>
+    ): Response<CreatePostResponse>
 
     @POST("posts/reply")
     suspend fun postReply(@Body postReply : PostReply): Response<PostReplyResponse>
