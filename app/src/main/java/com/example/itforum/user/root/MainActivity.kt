@@ -3,6 +3,7 @@ package com.example.itforum.user.root
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,6 +44,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.tasks.await
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,6 +75,14 @@ fun Root(sharedPreferences:SharedPreferences) {
     //thay doi ơ day
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        try {
+            val token = FirebaseMessaging.getInstance().token.await()
+            Log.d("FCM", "Token from Composable: $token")
+        } catch (e: Exception) {
+            Log.e("FCM", "Token fetch failed", e)
+        }
+    }
     ITForumTheme(darkTheme = darkTheme)
     {
         ModalNavigationDrawer(

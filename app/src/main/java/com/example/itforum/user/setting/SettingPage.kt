@@ -36,25 +36,36 @@ fun Setting(navHostController: NavHostController,onToggleTheme:()->Unit, darkThe
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Row (
+        Box (
             modifier =  Modifier
+                .background(MaterialTheme.colorScheme.primaryContainer)
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(top = 30.dp)
+                .padding(horizontal = 10.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBackIosNew,
-                contentDescription = "Settings",
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable {
-                        navHostController.popBackStack()
-                    }
-            )
-            Box(
+            Row(
                 modifier = Modifier
                     .padding(vertical = 30.dp, horizontal = 10.dp)
                     .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = "Settings",
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clickable {
+                            navHostController.popBackStack()
+                        }
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 30.dp, horizontal = 10.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     "Cài đặt",
