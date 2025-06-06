@@ -52,7 +52,7 @@ interface PostService {
         @Query("limit") limit: Int
     ): Response<ReplyResponse>
 
-    @POST("posts/create")
+    @POST("comments")
     suspend fun postComment(@Body postComment: PostComment): Response<PostCommentResponse>
 
     @Multipart
@@ -66,6 +66,6 @@ interface PostService {
         @Part imageUrls: List<MultipartBody.Part?>
     ): Response<CreatePostResponse>
 
-    @POST("posts/reply")
+    @POST("comments/reply")
     suspend fun postReply(@Body postReply : PostReply): Response<PostReplyResponse>
 }
