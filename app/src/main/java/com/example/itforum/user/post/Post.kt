@@ -66,11 +66,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun PostListScreen(
     sharedPreferences: SharedPreferences,
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    getPostRequest: GetPostRequest
 ) {
     val newsViewModel: NewsViewModel = viewModel(factory = viewModelFactory {
         initializer { NewsViewModel(sharedPreferences) }
     })
+
     LaunchedEffect(Unit) {
         newsViewModel.getNews()
     }
@@ -79,14 +81,14 @@ fun PostListScreen(
     Column(
         modifier = Modifier.padding(10.dp)
     ) {
-        if(listNews != null){
+        if (listNews != null) {
             Text(
                 text = "Tin tức",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
             )
             AdvancedMarqueeTextList(
-                listNews!!,navHostController,
+                listNews!!, navHostController,
                 modifier = Modifier
                     .padding(horizontal = 30.dp)
                     .width(300.dp)
@@ -95,17 +97,18 @@ fun PostListScreen(
             Box(
                 modifier = Modifier
                     .padding(horizontal = 50.dp)
-                    .fillMaxWidth()       // Chiều rộng 100%
-                    .height(1.dp)         // Độ dày của đường
+                    .fillMaxWidth()
+                    .height(1.dp)
                     .background(Color.Black)
             )
         }
     }
+
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(navHostController,sharedPreferences) }
+        initializer { PostViewModel(navHostController, sharedPreferences) }
     })
 
-    val uiState by viewModel.uiState.collectAsState()
+    val postsWithVotes by viewModel.postsWithVotes.collectAsState() // <-- new data flow
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoadingMore by viewModel.isLoadingMore.collectAsState()
     var showCommentDialog by remember { mutableStateOf(false) }
@@ -113,7 +116,7 @@ fun PostListScreen(
 
     // Fetch posts when screen loads
     LaunchedEffect(Unit) {
-        viewModel.fetchPosts(GetPostRequest(page = 1))
+        viewModel.fetchPosts(getPostRequest)
     }
 
     // Pull to refresh state
@@ -122,196 +125,146 @@ fun PostListScreen(
         onRefresh = { viewModel.refreshPosts() }
     )
 
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .pullRefresh(pullRefreshState)
     ) {
-        when (uiState) {
-            is UiStatePost.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+        if (postsWithVotes.isEmpty() && !isRefreshing && !isLoadingMore) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Đang tải bài viết...",
-                            color = Color.Gray
-                        )
-                    }
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Đang tải bài viết...",
+                        color = Color.Gray
+                    )
                 }
             }
+        } else if (postsWithVotes.isEmpty() && !isRefreshing && !isLoadingMore) {
+            // Empty state
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Chưa có bài viết nào",
+                        fontSize = 18.sp,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Hãy thử làm mới trang",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+            }
+        } else {
+            // Posts list with infinite scroll
+            val listState = rememberLazyListState()
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
+                itemsIndexed(
+                    items = postsWithVotes,
+                    key = { _, postWithVote -> postWithVote.post.id ?: postWithVote.post.hashCode() }
+                ) { index, postWithVote ->
+                    val scope = rememberCoroutineScope()
+                    PostCardWithVote(
+                        post = postWithVote.post,
+                        vote = postWithVote.vote,
+                        onUpvoteClick = {
+                            scope.launch {
+                                val voteResponse = viewModel.votePost(
+                                    postId = postWithVote.post.id,
+                                    type = "upvote",
+                                    index = index
+                                )
 
-
-            is UiStatePost.SuccessWithVotes -> {
-                val postsWithVotes = (uiState as UiStatePost.SuccessWithVotes).posts
-                if (postsWithVotes.isEmpty()) {
-                    // Empty state
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Chưa có bài viết nào",
-                                fontSize = 18.sp,
-                                color = Color.Gray
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Hãy thử làm mới trang",
-                                fontSize = 14.sp,
-                                color = Color.Gray
-                            )
-                        }
-                    }
-                } else {
-                    // Posts list with infinite scroll
-                    val listState = rememberLazyListState()
-
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 16.dp)
-                    ) {
-                        itemsIndexed(
-                            items = postsWithVotes,
-                            key = { _, postWithVote -> postWithVote.post.id ?: postWithVote.post.hashCode() }
-                        ) { index, postWithVote ->
-                            val scope = rememberCoroutineScope()
-                            PostCardWithVote(
-                                post = postWithVote.post,
-                                vote = postWithVote.vote,
-                                onUpvoteClick = {
-                                    scope.launch {
-                                        val voteResponse = viewModel.votePost(
-                                            postId = postWithVote.post.id,
-                                            type = "upvote",
-                                            index = index
-                                        )
-
-                                        // Update local data with response
-                                        voteResponse?.let { response ->
-                                            postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
-                                            postWithVote.vote?.data?.userVote = response.data?.userVote
-                                        }
-                                    }
-                                },
-                                onDownvoteClick = {
-                                    scope.launch {
-                                        val voteResponse = viewModel.votePost(
-                                            postId = postWithVote.post.id,
-                                            type = "downvote",
-                                            index = index
-                                        )
-
-                                        // Update local data with response
-                                        voteResponse?.let { response ->
-                                            postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
-                                            postWithVote.vote?.data?.userVote = response.data?.userVote
-                                        }
-                                    }
-                                },
-                                onCommentClick = {
-                                    selectedPostId = postWithVote.post.id
-                                    showCommentDialog = true
-                                },
-                                onBookmarkClick = { },
-                                onShareClick = { },
-                            )
-
-                            // Separator between posts
-                            Divider(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                color = Color.Gray.copy(alpha = 0.3f),
-                                thickness = 0.5.dp
-                            )
-
-                            // Load more when reaching near the end
-                            if (index >= postsWithVotes.size - 3 && !isLoadingMore) {
-                                LaunchedEffect(index) {
-                                    viewModel.loadMorePosts()
+                                // Update local data with response
+                                voteResponse?.let { response ->
+                                    postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
+                                    postWithVote.vote?.data?.userVote = response.data?.userVote
                                 }
                             }
-                        }
+                        },
+                        onDownvoteClick = {
+                            scope.launch {
+                                val voteResponse = viewModel.votePost(
+                                    postId = postWithVote.post.id,
+                                    type = "downvote",
+                                    index = index
+                                )
 
-                        // Load more indicator at the bottom
-                        if (isLoadingMore) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(20.dp),
-                                            strokeWidth = 2.dp
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            text = "Đang tải thêm...",
-                                            fontSize = 14.sp,
-                                            color = Color.Gray
-                                        )
-                                    }
+                                // Update local data with response
+                                voteResponse?.let { response ->
+                                    postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
+                                    postWithVote.vote?.data?.userVote = response.data?.userVote
                                 }
                             }
+                        },
+                        onCommentClick = {
+                            selectedPostId = postWithVote.post.id
+                            showCommentDialog = true
+                        },
+                        onBookmarkClick = { },
+                        onShareClick = { },
+                    )
+
+                    // Separator between posts
+                    Divider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = Color.Gray.copy(alpha = 0.3f),
+                        thickness = 0.5.dp
+                    )
+
+                    // Load more when reaching near the end
+                    if (index >= postsWithVotes.size - 3 && !isLoadingMore) {
+                        LaunchedEffect(index) {
+                            viewModel.loadMorePosts()
                         }
-
                     }
-
                 }
-            }
-            is UiStatePost.SuccessWithVotes -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Không có dữ liệu bình chọn cho bài viết.", color = Color.Gray)
-                }
-            }
 
-            is UiStatePost.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "⚠️",
-                            fontSize = 48.sp
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = (uiState as UiStatePost.Error).message,
-                            fontSize = 16.sp,
-                            color = Color.Red
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = { viewModel.refreshPosts() }
+                // Load more indicator at the bottom
+                if (isLoadingMore) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text("Thử lại")
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Đang tải thêm...",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
+                            }
                         }
                     }
                 }
             }
-
-            is UiStatePost.Idle -> {
-                // Handle idle state - maybe same as Success but without loading
-            }
-
         }
 
         // Pull refresh indicator
@@ -320,6 +273,7 @@ fun PostListScreen(
             state = pullRefreshState,
             modifier = Modifier.align(Alignment.TopCenter)
         )
+
         if (showCommentDialog && selectedPostId != null) {
             Dialog(
                 onDismissRequest = {

@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavController
+import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.post.PostListScreen
 
 @Composable
@@ -22,6 +23,6 @@ fun HomePage(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        PostListScreen(sharePreferences, navHostController);
+        PostListScreen(sharePreferences, navHostController, GetPostRequest(page = 1));
     }
 }

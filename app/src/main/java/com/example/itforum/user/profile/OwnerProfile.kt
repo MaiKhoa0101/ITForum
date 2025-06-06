@@ -59,6 +59,7 @@ import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.modelData.response.Certificate
 import com.example.itforum.user.modelData.response.Skill
 import com.example.itforum.user.modelData.response.UserProfileResponse
+import com.example.itforum.user.post.PostListScreen
 import com.example.itforum.user.profile.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -123,7 +124,8 @@ fun UserProfileScreen(
             onTabSelected = { selectedTabIndex = it },
             navController = navHostController,
             modifier = Modifier.padding(innerPadding),
-            tabs = tabs
+            tabs = tabs,
+            sharedPreferences = sharedPreferences
         )
     }
 }
@@ -135,28 +137,26 @@ fun ProfileContent(
     onTabSelected: (Int) -> Unit,
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    tabs: List<String>
+    tabs: List<String>,
+    sharedPreferences: SharedPreferences
 ) {
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        item { UserHeader(user) }
+    Column(modifier = modifier.fillMaxSize()) {
+        UserHeader(user)
 
-        stickyHeader {
-            UserTabRow(
-                tabs = tabs,
-                selectedTabIndex = selectedTabIndex,
-                onTabSelected = onTabSelected
-            )
-        }
+
+        UserTabRow(
+            tabs = tabs,
+            selectedTabIndex = selectedTabIndex,
+            onTabSelected = onTabSelected
+        )
 
         when (selectedTabIndex) {
             0 -> {
-                item { UserInfoOverview(navController) }
-                item { UserInfoDetail(user) }
+                UserInfoOverview(navController)
+                UserInfoDetail(user)
             }
             1 -> {
-                item {
-                    Text("Bài viết sẽ hiển thị ở đây", modifier = Modifier.padding(16.dp))
-                }
+                PostListScreen(sharedPreferences, navController, GetPostRequest(page = 1, userId = sharedPreferences.getString("userId", null) ))
             }
         }
     }
