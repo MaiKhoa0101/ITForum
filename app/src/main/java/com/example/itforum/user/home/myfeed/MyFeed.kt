@@ -183,7 +183,7 @@ fun TagChip(
         modifier = modifier
             .clip(RoundedCornerShape(50))
             .clickable { onSelected(!selected) },
-        color = if (selected) Color(0xFF1CC3FF) else Color(0xFF1CC3FF),
+        color = MaterialTheme.colorScheme.secondaryContainer,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -192,7 +192,7 @@ fun TagChip(
         ) {
             Text(
                 text = text,
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier.padding(end = 4.dp),
                 fontWeight = FontWeight.Bold
             )

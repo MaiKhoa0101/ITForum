@@ -13,18 +13,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    //Màu chủ đạo app xanh
-    primaryContainer = MainTheme,
+    //Màu chủ đạo app chế độ tối (xám đen)
+    primaryContainer = BoxGrey,
     //Đối tượng trên nền màu chủ đạo
-    onPrimaryContainer = Color.Black,
-    //Màu nền phần nội dung
+    onPrimaryContainer = Color.White,
+    //Màu nền phần nội dung (xám đen tối)
     background = Color(0xFF2A2A2A),
-    //Đối tượng trên background
+    //Đối tượng trên background (trắng)
     onBackground = Color(0xFFFFFFFF),
     //Màu nền nội dung cấp 2
-    secondary = BoxGrey,
-    onSecondary = secondDarkContainer,
-    secondaryContainer = Color.White,
+//    secondary = BoxGrey,
+//    onSecondary = Color.DarkGray,
+    //Màu nền nội dung cấp 2 (xám tối) thường dùng cho các card nằm trên background
+    secondaryContainer = secondDarkContainer,
+    // Nội dung trên card
+    onSecondaryContainer = Color.White,
+    //Màu nền nội dung cấp 3 (xanh mờ) thường dùng cho các component như thông báo chưa xem
+    tertiaryContainer = LightTheme
     )
 
 private val LightColorScheme = lightColorScheme(
@@ -32,16 +37,20 @@ private val LightColorScheme = lightColorScheme(
     primaryContainer = MainTheme,
     //Đối tượng trên nền màu chủ đạo
     onPrimaryContainer = Color.Black,
-    //Màu nền phần nội dung
+    //Màu nền phần nội dung (trắng)
     background = Color.White,
-    //Đối tượng trên background
+    //Đối tượng trên background (đen)
     onBackground = Color.Black,
-    //Màu nền nội dung cấp 2
-    secondary = BoxLightGrey,
-    onSecondary = Color.Black,
+    //Màu nền nội dung cấp 2 (xám sáng) thường dùng cho các card nằm trên background
+//    secondary = BoxLightGrey,
+//    // Nội dung trên card
+//    onSecondary = Color.Gray,
+    //Màu nền nội dung cấp 2 (xám sáng) thường dùng cho các card nằm trên background
     secondaryContainer = secondContainer,
-    onSecondaryContainer = Color.White,
-
+    // Nội dung trên card
+    onSecondaryContainer = Color.DarkGray,
+    //Màu nền nội dung cấp 3 (xanh mờ) thường dùng cho các component như thông báo chưa xem
+    tertiaryContainer = LightTheme
 
 )
 

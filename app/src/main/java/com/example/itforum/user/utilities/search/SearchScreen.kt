@@ -93,12 +93,14 @@ fun SearchScreen(modifier: Modifier = Modifier) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 10.dp)
         ) {
             item {
                 Text(
                     text = "Lịch sử tìm kiếm",
-                    modifier = Modifier.padding(top = 16.dp),
+                    modifier = Modifier
+                        .padding(top = 16.dp),
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     color = MaterialTheme.colorScheme.onBackground
@@ -137,7 +139,8 @@ fun SearchScreen(modifier: Modifier = Modifier) {
                     text = "Hashtags",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 

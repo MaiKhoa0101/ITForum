@@ -160,7 +160,7 @@ fun CreatePostPage(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.secondary),
+                        .background(MaterialTheme.colorScheme.secondaryContainer),
                 ) {
                     userInfo?.let { IconWithText(it.avatar, it.name) }
                     WritePost(){input ->
@@ -268,7 +268,7 @@ fun IconWithText(
 fun WritePost(onChange: (String) -> Unit) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.secondary)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .TopBorder()
             .BottomBorder(),
     ) {
@@ -320,7 +320,7 @@ fun AddTagPost(
 ) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.secondary)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(10.dp)
             .clip(RoundedCornerShape(10.dp))
     ) {
@@ -343,7 +343,7 @@ fun AddTagPost(
                 placeholder = { Text("Nhập tag", color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp) },
                 shape = RoundedCornerShape(7.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer
                 ),
                 textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground),
                 modifier = Modifier
@@ -371,7 +371,7 @@ fun AddTagPost(
                     .weight(1f)
                     .border(
                         width = 1.dp,
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
                         shape = RoundedCornerShape(7.dp)
                     )
             ) {
@@ -380,7 +380,7 @@ fun AddTagPost(
                     contentDescription = "Nút add tag",
                     modifier = Modifier
                         .size(40.dp),
-                    tint = MaterialTheme.colorScheme.onSecondary
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
         }
@@ -585,7 +585,7 @@ fun AddMedia(
                     .clickable {
                         launcher.launch(arrayOf("image/*", "video/*"))  //Chọn ảnh, video
                     },
-                tint = MaterialTheme.colorScheme.onSecondary
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
             Icon(
                 imageVector = Icons.Default.UploadFile,
@@ -595,7 +595,7 @@ fun AddMedia(
                     .clickable {
                         launcher.launch(arrayOf("application/*"))  //Chọn ảnh file
                     },
-                tint = MaterialTheme.colorScheme.onSecondary
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
     }
@@ -721,7 +721,7 @@ fun RadioOption(img: ImageVector, text: String) {
 
 @Composable
 fun Modifier.TopBorder(
-    color: Color = MaterialTheme.colorScheme.secondary,
+    color: Color = MaterialTheme.colorScheme.secondaryContainer,
     thickness: Dp = 1.dp
 ): Modifier = this.then(
     Modifier.drawBehind {
@@ -739,7 +739,7 @@ fun Modifier.TopBorder(
 
 @Composable
 fun Modifier.BottomBorder(
-    color: Color = MaterialTheme.colorScheme.secondary,
+    color: Color = MaterialTheme.colorScheme.secondaryContainer,
     thickness: Dp = 1.dp
 ): Modifier = this.then(
     Modifier.drawBehind {

@@ -1,6 +1,7 @@
 package com.example.itforum.user.profile
 
 import android.content.SharedPreferences
+import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -103,9 +104,12 @@ fun UserProfileScreen(
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = null,
-                            modifier = Modifier.align(Alignment.CenterEnd)
-                            .clickable {
-                                navHostController.navigate("settings")
+                            modifier = Modifier
+                                .size(70.dp)
+                                .padding(horizontal = 20.dp)
+                                .align(Alignment.CenterEnd)
+                                .clickable {
+                                    navHostController.navigate("settings")
                             }
                         )
                     }
@@ -150,7 +154,6 @@ fun ProfileContent(
 
         when (selectedTabIndex) {
             0 -> {
-                item { UserInfoOverview(navController) }
                 item { UserInfoDetail(user) }
             }
             1 -> {
@@ -222,11 +225,12 @@ fun UserStats(user: UserProfileResponse?) {
 fun UserTabRow(
     tabs: List<String>,
     selectedTabIndex: Int,
-    onTabSelected: (Int) -> Unit
-) {
+    onTabSelected: (Int) -> Unit,
+    ) {
     TabRow(
         selectedTabIndex = selectedTabIndex,
-        containerColor = MaterialTheme.colorScheme.primaryContainer
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        indicator = {} // không vẽ gì cả
     ) {
         tabs.forEachIndexed { index, title ->
             Tab(
@@ -255,39 +259,6 @@ fun UserTabRow(
 
 
 @Composable
-fun UserInfoOverview(navHostController: NavHostController) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            "Chi tiết Thông tin",
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Box(modifier = Modifier
-            .clip(CircleShape)
-            .clickable(onClick = { navHostController.navigate("editprofile") })
-            .width(150.dp)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(vertical = 10.dp)
-        ) {
-            Text("Chỉnh sửa", modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        Divider(thickness = 1.dp)
-
-    }
-}
-
-@Composable
 fun UserInfoDetail(user: UserProfileResponse?) {
     Column(
         modifier = Modifier
@@ -297,7 +268,8 @@ fun UserInfoDetail(user: UserProfileResponse?) {
         Spacer(modifier = Modifier.height(10.dp))
 
         Text("Giới thiệu", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text(user?.introduce?:"Chưa có giới thiệu", fontSize = 15.sp)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(user?.introduce?:"Chưa có giới thiệu", fontSize = 18.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
         TagCertificateSection(title = "Chứng chỉ bằng cấp đã đạt:", tags = user?.certificate)
