@@ -318,11 +318,15 @@ fun TagEditableItem(text: String, onDelete: (tagName: String) -> Unit = {}) {
             .padding(horizontal = 16.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
-        Row {
+        Row (
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ){
             Text(text = text, color = Color.DarkGray)
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Delete Skill",
+                tint = Color.DarkGray,
                 modifier = Modifier.clickable {
                     onDelete(text)
                 }

@@ -1,18 +1,18 @@
 package com.example.itforum.user.modelData.response
 
 data class GetVoteResponse(
-    val statusCode: Int? = null,
-    val message: String? = null,
-    val data: GetVoteData? = null
+    var statusCode: Int? = null,
+    var message: String? = null,
+    var data: GetVoteData? = null
 )
 
 data class GetVoteData(
-    val userVote: String? = null,
-    val upVoteData: VoteDetail? = null,
-    val downVoteData: VoteDetail? = null
+    var userVote: String? = null,
+    var upVoteData: VoteDetail? = null,
+    var downVoteData: VoteDetail? = null
 )
 
 data class VoteDetail(
-    val userId: List<String>? = null,
-    val total: Int? = null
+    var userId: List<String>? = null,
+    var total: Int? = null
 )

@@ -48,11 +48,12 @@ import com.example.itforum.user.post.ContentPost
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.profile.OtherUserProfileScreen
 import com.example.itforum.user.profile.UserProfileScreen
+import com.example.itforum.user.setting.Setting
 import com.example.itforum.user.utilities.chat.ChatAIApp
 import com.example.itforum.user.utilities.chat.ChatAIApp
 
 @Composable
-fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier){
+fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier, onToggleTheme: () -> Unit, darkTheme: Boolean = false){
     NavHost(navHostController, startDestination = "login") {
         composable ("home") {
             HomePage(navHostController,modifier,sharePreferences)
@@ -90,7 +91,7 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
             ToolPage(modifier)
         }
         composable ("personal") {
-            UserProfileScreen(sharePreferences, navHostController,modifier)
+            UserProfileScreen(sharePreferences, navHostController)
         }
         composable ("otherprofile") {
             OtherUserProfileScreen(sharePreferences, navHostController,modifier)
@@ -118,9 +119,9 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
                 onForgotPasswordClick = { navHostController.navigate("forgot_password") },
             )
         }
-
-
-
+        composable ("settings"){
+            Setting(navHostController, onToggleTheme = onToggleTheme, darkTheme = darkTheme)
+        }
         composable("forgot_password") {
             ForgotPasswordScreen(
                 onBackClick = { navHostController.popBackStack() },

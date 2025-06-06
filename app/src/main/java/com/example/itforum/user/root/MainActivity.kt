@@ -92,14 +92,12 @@ fun Root(sharedPreferences:SharedPreferences) {
             },
             scrimColor = Color.Transparent
         ) {
-            println(darkTheme)
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 topBar = {
                     if (showTopBars) {
                         TopBarRoot(
                             navHostController,
-                            onToggleTheme = { darkTheme = !darkTheme },
                             onMenuClick = {
                                 coroutineScope.launch {
                                     drawerState.open()
@@ -119,7 +117,11 @@ fun Root(sharedPreferences:SharedPreferences) {
                 BodyRoot(
                     sharedPreferences,
                     navHostController,
-                    modifier = Modifier.padding(innerPadding)
+                    modifier = Modifier.padding(innerPadding),
+                    onToggleTheme = {
+                        darkTheme = !darkTheme
+                    },
+                    darkTheme = darkTheme
                 )
             }
         }

@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
@@ -60,8 +61,7 @@ fun FootBarRoot(currentRoute:String?,navHostController: NavHostController) {
                 .fillMaxWidth()
                 .height(110.dp)
                 .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(horizontal = 16.dp)
-                .padding(top=10.dp),
+                .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.Top,
 
@@ -135,7 +135,7 @@ fun BoxItem(
     ) {
         Column(
             modifier = modifier
-                .clip(CircleShape)
+                .clip(RoundedCornerShape(bottomEnd = 30.dp, bottomStart = 30.dp))
                 .background(backgroundColor)
                 .size(70.dp)
                 .clickable {

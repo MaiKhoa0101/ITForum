@@ -6,13 +6,13 @@ data class PostResponse(
     @SerializedName("_id")
     val id: String? = null,
     val userId: String? = null,
-    val title: String? = null,
+    var title: String? = null,
     val content: String? = null,
-    val imageUrl: String? = null,
+    val imageUrls: List<String>? = null,
     val tags: List<String>? = null,
     val isPublished: String? = null,
-    val totalUpvotes: Int? = null,
-    val totalDownvotes: Int? = null,
+    var totalUpvotes: Int? = null,
+    var totalDownvotes: Int? = null,
     val __v: Int? = null,
     val createdAt : String? = null,
     val userName : String? = null

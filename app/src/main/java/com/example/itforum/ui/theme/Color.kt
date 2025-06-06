@@ -12,4 +12,10 @@ val Pink40 = Color(0xFF7D5260)
 
 val MainTheme = Color(0XFF00AEFF)
 
-val BoxGrey = Color(0xFFD2D2D2)
+val BoxGrey = Color(0xFF4a4a4a)
+val BoxLightGrey = Color(0xFFf1f1f1)
+
+val secondContainer = Color(0xFFa2a2a2)
+val secondDarkContainer = Color(0xFF535353)
+
+

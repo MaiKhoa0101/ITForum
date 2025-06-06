@@ -32,7 +32,6 @@ import com.example.itforum.R
 @Composable
 fun TopBarRoot(
     navHostController : NavHostController,
-    onToggleTheme: () -> Unit,
     onMenuClick: () -> Unit
 ) {
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -73,27 +72,7 @@ fun TopBarRoot(
                 color = MaterialTheme.colorScheme.onPrimary
             )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.tool),
-                    contentDescription = "Toggle Theme",
-                    modifier = Modifier
-                        .size(30.dp)
-                        .clickable {navHostController.navigate("myfeed")}
-                )
-//                Spacer(modifier = Modifier.width(16.dp))
-//                Icon(
-//                    painter = painterResource(R.drawable.searchicon),
-//                    contentDescription = "Search",
-//                    modifier = Modifier
-//                        .size(25.dp)
-//                        .clickable {
-//                            // TODO: Implement search
-//                        }
-//                )
-            }
+
         }
 
         // Tab Bar
