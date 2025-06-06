@@ -42,6 +42,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -106,6 +108,8 @@ fun PostListScreen(
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoadingMore by viewModel.isLoadingMore.collectAsState()
+    var showCommentDialog by remember { mutableStateOf(false) }
+    var selectedPostId by remember { mutableStateOf<String?>(null) }
 
     // Fetch posts when screen loads
     LaunchedEffect(Unit) {
@@ -216,7 +220,8 @@ fun PostListScreen(
                                     }
                                 },
                                 onCommentClick = {
-                                    navHostController.navigate("comment/${postWithVote.post.id}")
+                                    selectedPostId = postWithVote.post.id
+                                    showCommentDialog = true
                                 },
                                 onBookmarkClick = { },
                                 onShareClick = { },
@@ -264,7 +269,9 @@ fun PostListScreen(
                                 }
                             }
                         }
+
                     }
+
                 }
             }
             is UiStatePost.SuccessWithVotes -> {
@@ -313,6 +320,31 @@ fun PostListScreen(
             state = pullRefreshState,
             modifier = Modifier.align(Alignment.TopCenter)
         )
+        if (showCommentDialog && selectedPostId != null) {
+            Dialog(
+                onDismissRequest = {
+                    showCommentDialog = false
+                    selectedPostId = null
+                },
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false
+                )
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.9f)
+                ) {
+                    PostCommentScreen(
+                        navController = navHostController,
+                        postId = selectedPostId!!,
+                        sharedPreferences = sharedPreferences
+                    )
+                }
+            }
+        }
     }
 }
 
