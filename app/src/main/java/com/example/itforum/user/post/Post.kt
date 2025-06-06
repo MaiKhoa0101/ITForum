@@ -69,40 +69,6 @@ fun PostListScreen(
     navHostController: NavHostController,
     getPostRequest: GetPostRequest
 ) {
-    val newsViewModel: NewsViewModel = viewModel(factory = viewModelFactory {
-        initializer { NewsViewModel(sharedPreferences) }
-    })
-
-    LaunchedEffect(Unit) {
-        newsViewModel.getNews()
-    }
-    val listNews by newsViewModel.listNews.collectAsState()
-
-    Column(
-        modifier = Modifier.padding(10.dp)
-    ) {
-        if (listNews != null) {
-            Text(
-                text = "Tin tức",
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold
-            )
-            AdvancedMarqueeTextList(
-                listNews!!, navHostController,
-                modifier = Modifier
-                    .padding(horizontal = 30.dp)
-                    .width(300.dp)
-                    .height(40.dp)
-            )
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 50.dp)
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(Color.Black)
-            )
-        }
-    }
 
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(navHostController, sharedPreferences) }
