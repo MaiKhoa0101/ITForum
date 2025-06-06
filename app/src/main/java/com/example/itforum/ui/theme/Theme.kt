@@ -23,6 +23,8 @@ private val DarkColorScheme = darkColorScheme(
     onBackground = Color(0xFFFFFFFF),
     //Màu nền nội dung cấp 2
     secondary = BoxGrey,
+    onSecondary = secondDarkContainer,
+    secondaryContainer = Color.White,
     )
 
 private val LightColorScheme = lightColorScheme(
@@ -35,16 +37,11 @@ private val LightColorScheme = lightColorScheme(
     //Đối tượng trên background
     onBackground = Color.Black,
     //Màu nền nội dung cấp 2
-    secondary = BoxGrey,
+    secondary = BoxLightGrey,
+    onSecondary = Color.Black,
+    secondaryContainer = secondContainer,
+    onSecondaryContainer = Color.White,
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-     */
 
 )
 

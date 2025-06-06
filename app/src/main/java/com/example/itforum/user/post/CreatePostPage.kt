@@ -48,6 +48,7 @@ import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
@@ -61,6 +62,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
@@ -72,6 +74,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -132,29 +135,32 @@ fun CreatePostPage(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF00AEFF))
     ) {
         LazyColumn (
             modifier = Modifier.fillMaxSize()
         ) {
-            item {
-                TopPost(navHostController){
+
+            stickyHeader {
+                TopPost(navHostController) {
                     postViewModel.createPost(
                         CreatePostRequest(
-                        imageUrls = imageUrls,
-                        userId = userInfo?.id ?: "",
-                        title = title,
-                        content = content,
-                        tags = tags,
-                        isPublished = isPublished
-                    ),
+                            imageUrls = imageUrls,
+                            userId = userInfo?.id ?: "",
+                            title = title,
+                            content = content,
+                            tags = tags,
+                            isPublished = isPublished
+                        ),
                         context
                     )
                 }
+            }
+            item {
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.White)
+                        .background(MaterialTheme.colorScheme.secondary),
                 ) {
                     userInfo?.let { IconWithText(it.avatar, it.name) }
                     WritePost(){input ->
@@ -175,45 +181,53 @@ fun TopPost(
     navHostController: NavHostController,
     onClickPush: () -> Unit = {}
 ) {
-    Spacer(modifier = Modifier.height(30.dp))
-    Row(
+    Column(
         modifier = Modifier
-            .padding(horizontal = 13.dp, vertical = 10.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.primaryContainer)
     ) {
-        IconButton(onClick = {navHostController.popBackStack()}) {
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowLeft,
-                contentDescription = "Quay lại",
-                tint = Color.White,
-                modifier = Modifier.size(40.dp)
-            )
-        }
+        Spacer(modifier = Modifier.height(30.dp))
 
-        Text(
-            "Bài viết mới",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-        Button(
-            onClick = {
-                onClickPush()
-            },
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.White,
-                contentColor = Color(0xFF00AEFF)
-            )
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 13.dp, vertical = 10.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+
+            IconButton(onClick = { navHostController.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowLeft,
+                    contentDescription = "Quay lại",
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+
             Text(
-                "Đăng",
-                fontSize = 19.sp,
+                "Bài viết mới",
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(3.dp),
+                color = MaterialTheme.colorScheme.onBackground
             )
+            Button(
+                onClick = {
+                    onClickPush()
+                },
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color.White,
+                    contentColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Text(
+                    "Đăng",
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(3.dp),
+                )
+            }
         }
     }
 }
@@ -225,11 +239,14 @@ fun IconWithText(
     sizeIcon: Dp = 45.dp,
     textStyle: TextStyle = TextStyle(fontSize = 20.sp),
     modifier: Modifier = Modifier
-        .padding(horizontal = 13.dp, vertical = 6.dp)
+        .padding(vertical = 6.dp)
         .fillMaxWidth(),
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .padding(horizontal = 10.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.background),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
@@ -241,6 +258,8 @@ fun IconWithText(
         Text(
             text = name,
             style = textStyle,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -249,8 +268,9 @@ fun IconWithText(
 fun WritePost(onChange: (String) -> Unit) {
     Column(
         modifier = Modifier
+            .background(MaterialTheme.colorScheme.secondary)
             .TopBorder()
-            .BottomBorder()
+            .BottomBorder(),
     ) {
         var textPost by remember { mutableStateOf("") }
         TextField(
@@ -263,16 +283,20 @@ fun WritePost(onChange: (String) -> Unit) {
             },
             placeholder = { Text(
                 "Nhập mô tả...",
-                fontSize = 20.sp,
-                color = Color(0x4C000000)
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Light,
+                fontStyle = FontStyle.Italic,
+                color = MaterialTheme.colorScheme.onBackground
             ) },
             textStyle = TextStyle(fontSize = 20.sp),
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(10.dp)
+                .clip(RoundedCornerShape(10.dp))
                 .heightIn(min = 230.dp, max = 230.dp),
             singleLine = false,
             colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = Color.Transparent,
+                backgroundColor = MaterialTheme.colorScheme.background,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
             )
@@ -280,9 +304,9 @@ fun WritePost(onChange: (String) -> Unit) {
         Text(
             "${textPost.length}/10000 kí tự",
             fontSize = 16.sp,
-            color = Color(0x80000000),
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
-                .padding(end = 20.dp, top = 10.dp, bottom = 15.dp)
+                .padding(horizontal = 20.dp)
                 .align(Alignment.End)
         )
     }
@@ -295,14 +319,19 @@ fun AddTagPost(
     onChange: (List<String?>) -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(top = 30.dp, start = 25.dp, end = 25.dp)
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.secondary)
+            .padding(10.dp)
+            .clip(RoundedCornerShape(10.dp))
     ) {
         var items by remember { mutableStateOf(listOf<String?>(null)) }
         var textTag by remember { mutableStateOf("") }
         var isError by remember { mutableStateOf(false) }
         var isFocused by remember { mutableStateOf(false) }
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .height(130.dp)
+                .background(MaterialTheme.colorScheme.background),
             verticalAlignment = Alignment.CenterVertically
         ){
             OutlinedTextField(
@@ -311,14 +340,14 @@ fun AddTagPost(
                     textTag = it
                     isError = it.trim().isEmpty()
                 },
-                placeholder = { Text("Nhập tag", color = Color(0x80000000), fontSize = 16.sp) },
+                placeholder = { Text("Nhập tag", color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp) },
                 shape = RoundedCornerShape(7.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0x33544C4C)
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary
                 ),
-                textStyle = TextStyle(color = Color.Black),
+                textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground),
                 modifier = Modifier
-                    .weight(4f)
+                    .padding(horizontal = 10.dp)
                     .onFocusChanged { focusState ->
                         isFocused = focusState.isFocused
                         // Khi mất focus, reset lỗi
@@ -337,19 +366,21 @@ fun AddTagPost(
                         isError = true
                 },
                 modifier = Modifier
-                    .padding(start = 10.dp)
+                    .padding(horizontal = 10.dp)
                     .size(54.dp)
                     .weight(1f)
                     .border(
                         width = 1.dp,
-                        color = Color(0x33544C4C),
+                        color = MaterialTheme.colorScheme.onSecondary,
                         shape = RoundedCornerShape(7.dp)
                     )
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Nút add tag",
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(40.dp),
+                    tint = MaterialTheme.colorScheme.onSecondary
                 )
             }
         }
@@ -461,14 +492,16 @@ fun AddMedia(
     }
     Column(
         modifier = Modifier
-            .padding(vertical = 10.dp)
+            .padding(horizontal = 10.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(color = MaterialTheme.colorScheme.background)
             .fillMaxWidth()
             .TopBorder()
             .BottomBorder()
     ) {
         Text(
             "Tối đa: 3GB",
-            color = Color(0x4C000000),
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .padding(top = 5.dp, end = 12.dp)
@@ -481,19 +514,21 @@ fun AddMedia(
                 }
             ){
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.DriveFileMoveRtl,
                         contentDescription = "Thêm tệp",
-                        tint = Color(0x80909090),
+                        tint = MaterialTheme.colorScheme.secondaryContainer,
                         modifier = Modifier.size(130.dp)
                     )
                     Text(
                         "Chưa có tệp, ảnh hoặc video",
-                        color = Color(0x80909090),
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -537,15 +572,6 @@ fun AddMedia(
 
             }
         }
-//        if (mediaUris.isNotEmpty()){
-//            Image(
-//                painter = rememberAsyncImagePainter(mediaUris),
-//                contentDescription = null,
-//                contentScale = ContentScale.Inside,
-//                modifier = Modifier.sizeIn(maxWidth = 150.dp, maxHeight = 200.dp)
-//                    .padding(3.dp)
-//            )
-//        }
         Row(
             modifier = Modifier.padding(10.dp),
             horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -558,7 +584,8 @@ fun AddMedia(
                     .size(30.dp)
                     .clickable {
                         launcher.launch(arrayOf("image/*", "video/*"))  //Chọn ảnh, video
-                    }
+                    },
+                tint = MaterialTheme.colorScheme.onSecondary
             )
             Icon(
                 imageVector = Icons.Default.UploadFile,
@@ -567,7 +594,8 @@ fun AddMedia(
                     .size(30.dp)
                     .clickable {
                         launcher.launch(arrayOf("application/*"))  //Chọn ảnh file
-                    }
+                    },
+                tint = MaterialTheme.colorScheme.onSecondary
             )
         }
     }
@@ -638,38 +666,23 @@ fun ImgOrVdMedia(type: String, index: Int = 0, uri: Uri, ListUri: List<Uri>, rem
     }
 }
 
-//@Preview (showBackground = true)
-@Composable
-fun abc() {
-    LazyRow(modifier = Modifier.fillMaxSize()) {
-        item{
-            Box(modifier = Modifier.fillMaxWidth()) {
-//                ImgOrVdMedia(0)
-//                ImgOrVdMedia(1)
-//                ImgOrVdMedia(2)
-//                ImgOrVdMedia(3)
-//                ImgOrVdMedia(4)
-//                ImgOrVdMedia(5)
-//                ImgOrVdMedia(6)
-//                ImgOrVdMedia(7)
-            }
-        }
-    }
-
-}
 
 @Composable
 fun CustomPost() {
     Spacer(modifier = Modifier.height(15.dp))
     Column(
         modifier = Modifier
-            .padding(vertical = 10.dp, horizontal = 15.dp)
+            .padding(vertical = 10.dp, horizontal = 10.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.background)
+            .padding(10.dp)
             .fillMaxWidth()
     ) {
         Text(
             "Tùy chỉnh",
             fontSize = 17.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
         )
         RadioOption(Icons.Default.CommentsDisabled, "Tắt bình luận")
         RadioOption(Icons.Default.LinkOff, "Tắt chia sẻ")
@@ -694,18 +707,21 @@ fun RadioOption(img: ImageVector, text: String) {
         )
         Icon(
             imageVector = img,
-            contentDescription = "Icon "+text
+            contentDescription = "Icon "+text,
+            tint = MaterialTheme.colorScheme.onBackground,
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = text,
-            fontSize = 16.sp
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
 
+@Composable
 fun Modifier.TopBorder(
-    color: Color = Color(0x33544C4C),
+    color: Color = MaterialTheme.colorScheme.secondary,
     thickness: Dp = 1.dp
 ): Modifier = this.then(
     Modifier.drawBehind {
@@ -721,8 +737,9 @@ fun Modifier.TopBorder(
     }
 )
 
+@Composable
 fun Modifier.BottomBorder(
-    color: Color = Color(0x33544C4C),
+    color: Color = MaterialTheme.colorScheme.secondary,
     thickness: Dp = 1.dp
 ): Modifier = this.then(
     Modifier.drawBehind {
