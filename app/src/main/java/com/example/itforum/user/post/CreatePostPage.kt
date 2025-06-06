@@ -141,7 +141,7 @@ fun CreatePostPage(
         ) {
 
             stickyHeader {
-                TopPost(navHostController) {
+                TopPost("Bài viết mới", "Đăng",navHostController) {
                     postViewModel.createPost(
                         CreatePostRequest(
                             imageUrls = imageUrls,
@@ -178,6 +178,8 @@ fun CreatePostPage(
 
 @Composable
 fun TopPost(
+    title: String,
+    nameButton: String,
     navHostController: NavHostController,
     onClickPush: () -> Unit = {}
 ) {
@@ -206,7 +208,7 @@ fun TopPost(
             }
 
             Text(
-                "Bài viết mới",
+                text = title,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -222,7 +224,7 @@ fun TopPost(
                 )
             ) {
                 Text(
-                    "Đăng",
+                    text = nameButton,
                     fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(3.dp),

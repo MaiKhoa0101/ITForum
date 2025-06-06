@@ -40,6 +40,8 @@ import com.example.itforum.utilities.note.NotesApp
 
 
 import com.example.itforum.admin.adminAccount.AccountDetailScreen
+import com.example.itforum.admin.adminComplaint.ManagementComplaintDetailScreen
+import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
 import com.example.itforum.admin.adminReport.ReportPost.model.request.ReportedPost
 import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailScreen
 import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
@@ -184,6 +186,12 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
         composable ("searchscreen"){
             SearchScreen(modifier)
         }
+        composable("detail_news/{newsId}") { backStackEntry ->
+            val newsId = backStackEntry.arguments?.getString("newsId")
+            if (newsId != null) {
+                DetailNewsPage(newsId,modifier,navHostController, sharePreferences)
+            }
+        }
         composable("account_detail/{accountId}") { backStackEntry ->
             val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
             if (accountId != null) {
@@ -192,10 +200,15 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
                 Text("Không tìm thấy tài khoản.")
             }
         }
-        composable("detail_news/{newsId}") { backStackEntry ->
-            val newsId = backStackEntry.arguments?.getString("newsId")
-            if (newsId != null) {
-                DetailNewsPage(newsId,modifier,navHostController, sharePreferences)
+        composable("manager_complaint"){
+            ManagementComplaintScreen(navHostController)
+        }
+        composable("complaint_detail/{complaintId}"){ backStackEntry ->
+            val complaintId = backStackEntry.arguments?.getString("complaintId")
+            if (complaintId != null) {
+                ManagementComplaintDetailScreen(modifier,navHostController,complaintId)
+            } else {
+                Text("Không tìm thấy khiếu nại.")
             }
         }
     }
