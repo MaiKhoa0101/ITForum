@@ -108,7 +108,8 @@ fun PostListScreen(
         initializer { PostViewModel(navHostController, sharedPreferences) }
     })
 
-    val postsWithVotes by viewModel.postsWithVotes.collectAsState() // <-- new data flow
+    val postsFromVm by viewModel.postsWithVotes.collectAsState()
+    var postsWithVotes by remember { mutableStateOf(postsFromVm) }
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoadingMore by viewModel.isLoadingMore.collectAsState()
     var showCommentDialog by remember { mutableStateOf(false) }
@@ -118,6 +119,9 @@ fun PostListScreen(
     LaunchedEffect(Unit) {
         viewModel.fetchPosts(getPostRequest)
     }
+    LaunchedEffect(postsFromVm) {
+        postsWithVotes = postsFromVm
+    }// keep local data async
 
     // Pull to refresh state
     val pullRefreshState = rememberPullRefreshState(
