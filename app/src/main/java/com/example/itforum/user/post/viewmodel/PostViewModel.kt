@@ -15,7 +15,9 @@ import com.example.itforum.user.modelData.request.CreatePostRequest
 import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.modelData.request.VoteRequest
 import com.example.itforum.user.modelData.response.GetVoteResponse
+import com.example.itforum.user.modelData.response.PostResponse
 import com.example.itforum.user.modelData.response.PostWithVote
+import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.modelData.response.VoteResponse
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -59,6 +61,9 @@ class PostViewModel(
         userId = sharedPreferences.getString("userId", null)
     }
 
+    private val _postsWithVotes = MutableStateFlow<List<PostWithVote>>(emptyList())
+    val postsWithVotes: StateFlow<List<PostWithVote>> = _postsWithVotes
+
 
     private suspend fun getVoteDataByPostId(postId: String?, userId: String?): GetVoteResponse? {
         if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) return null
@@ -75,7 +80,6 @@ class PostViewModel(
     @SuppressLint("SuspiciousIndentation")
     fun fetchPosts(getPostRequest: GetPostRequest, isRefresh: Boolean = false, isLoadMore: Boolean = false) {
         if (isRefresh) {
-
             allPostsWithVotes.clear()
             _isRefreshing.value = true
             currentPage = 1
@@ -84,9 +88,7 @@ class PostViewModel(
             if (!canLoadMore || _isLoadingMore.value) return
             _isLoadingMore.value = true
         } else {
-
             allPostsWithVotes.clear()
-            _uiState.value = UiStatePost.Loading
             currentPage = 1
             canLoadMore = true
             Log.d("load state", canLoadMore.toString())
@@ -113,25 +115,21 @@ class PostViewModel(
                     }
 
                     if (isRefresh || !isLoadMore) {
-                        // Fresh load or refresh: both lists cleared above
-
                         allPostsWithVotes.addAll(postsWithVotes)
                         if (newPosts.isNotEmpty()) currentPage = 2
                     } else if (isLoadMore) {
-                        // Load more: append new data
-
                         allPostsWithVotes.addAll(postsWithVotes)
                         if (newPosts.isNotEmpty()) currentPage++
                     }
 
-                    // Always update the UI with all accumulated posts
-                    _uiState.value = UiStatePost.SuccessWithVotes(allPostsWithVotes)
+                    // Always update posts flow
+                    _postsWithVotes.value = allPostsWithVotes
                 } else {
                     if (isLoadMore) {
                         canLoadMore = false
                         logError("Load more failed: ${response.message()}")
                     } else {
-                        _uiState.value = UiStatePost.Error("Lỗi: ${response.message()}")
+                        // Optionally emit error to another error flow/UI state
                         logError("Get post failed: ${response.message()}")
                     }
                 }
@@ -140,7 +138,7 @@ class PostViewModel(
                     canLoadMore = false
                     logError("Load more - Server unreachable: ${e.message}")
                 } else {
-                    _uiState.value = UiStatePost.Error("Không thể kết nối server.")
+                    // Optionally emit error to another error flow/UI state
                     logError("Server unreachable: ${e.message}")
                 }
             } catch (e: Exception) {
@@ -148,7 +146,7 @@ class PostViewModel(
                     canLoadMore = false
                     logError("Load more exception: ${e.localizedMessage}")
                 } else {
-                    _uiState.value = UiStatePost.Error("Lỗi không xác định: ${e.message}")
+                    // Optionally emit error to another error flow/UI state
                     logError("Exception: ${e.localizedMessage}")
                 }
             } finally {

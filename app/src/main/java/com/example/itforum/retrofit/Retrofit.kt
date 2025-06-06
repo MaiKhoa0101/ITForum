@@ -1,6 +1,7 @@
 package com.example.itforum.retrofit
 
 
+import com.example.itforum.service.ComplaintService
 import com.example.itforum.service.UserService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -18,7 +19,7 @@ object RetrofitInstance {
 
 
 
-    private const val BASE_URL = "http://192.168.173.22:4000"
+    private const val BASE_URL = "http://192.168.1.7:4000"
 
     val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(5, TimeUnit.SECONDS)
@@ -37,5 +38,5 @@ object RetrofitInstance {
     val reportPostService: ReportPostService by lazy { retrofit.create(ReportPostService::class.java) }
     val newsService: NewsService by lazy { retrofit.create(NewsService::class.java) }
     val postService: PostService by lazy {retrofit.create(PostService::class.java) }
-
+    val complaintService: ComplaintService by lazy {retrofit.create(ComplaintService::class.java) }
 }

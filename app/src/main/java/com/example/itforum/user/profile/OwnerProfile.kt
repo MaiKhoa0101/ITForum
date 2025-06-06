@@ -60,6 +60,7 @@ import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.modelData.response.Certificate
 import com.example.itforum.user.modelData.response.Skill
 import com.example.itforum.user.modelData.response.UserProfileResponse
+import com.example.itforum.user.post.PostListScreen
 import com.example.itforum.user.profile.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,7 +128,8 @@ fun UserProfileScreen(
             onTabSelected = { selectedTabIndex = it },
             navController = navHostController,
             modifier = Modifier.padding(innerPadding),
-            tabs = tabs
+            tabs = tabs,
+            sharedPreferences = sharedPreferences
         )
     }
 }
@@ -139,7 +141,8 @@ fun ProfileContent(
     onTabSelected: (Int) -> Unit,
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    tabs: List<String>
+    tabs: List<String>,
+    sharedPreferences: SharedPreferences
 ) {
     LazyColumn(modifier = modifier.fillMaxSize()) {
         item { UserHeader(user) }
@@ -154,12 +157,20 @@ fun ProfileContent(
 
         when (selectedTabIndex) {
             0 -> {
-                item { UserInfoDetail(user) }
+                item {UserInfoDetail(user) }
             }
             1 -> {
-                item {
-                    Text("Bài viết sẽ hiển thị ở đây", modifier = Modifier.padding(16.dp))
-                }
+               item {
+                   PostListScreen(
+                       sharedPreferences,
+                       navController,
+                       GetPostRequest(
+                           page = 1,
+                           userId = sharedPreferences
+                               .getString("userId", null)
+                       )
+                   )
+               }
             }
         }
     }
@@ -225,8 +236,8 @@ fun UserStats(user: UserProfileResponse?) {
 fun UserTabRow(
     tabs: List<String>,
     selectedTabIndex: Int,
-    onTabSelected: (Int) -> Unit,
-    ) {
+    onTabSelected: (Int) -> Unit
+) {
     TabRow(
         selectedTabIndex = selectedTabIndex,
         containerColor = MaterialTheme.colorScheme.primaryContainer,
