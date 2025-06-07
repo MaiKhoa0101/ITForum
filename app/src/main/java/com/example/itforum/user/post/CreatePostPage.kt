@@ -314,8 +314,6 @@ fun WritePost(onChange: (String) -> Unit) {
     }
 }
 
-
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AddTagPost(
     onChange: (List<String?>) -> Unit
@@ -501,14 +499,6 @@ fun AddMedia(
             .TopBorder()
             .BottomBorder()
     ) {
-        Text(
-            "Tối đa: 3GB",
-            color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .padding(top = 5.dp, end = 12.dp)
-                .align(Alignment.End)
-        )
         if(imageUris.isEmpty() && videoUri.isEmpty() && applicationUri.isEmpty()){
             IconButton(
                 onClick = {

@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -86,6 +87,12 @@ fun Setting(navHostController: NavHostController,onToggleTheme:()->Unit, darkThe
             "Đánh giá ứng dụng",
             iconVector = Icons.Default.StarRate,
             onPress = {})
+        SectionSetting(
+            "Góp ý về ứng dụng",
+            iconVector = Icons.Default.QuestionMark,
+            onPress = {
+                navHostController.navigate("complaint")
+            })
     }
 }
 

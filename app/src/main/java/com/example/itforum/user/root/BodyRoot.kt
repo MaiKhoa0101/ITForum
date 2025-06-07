@@ -45,6 +45,7 @@ import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
 import com.example.itforum.admin.adminReport.ReportPost.model.request.ReportedPost
 import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailScreen
 import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
+import com.example.itforum.user.complaint.ComplaintPage
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.ContentPost
 import com.example.itforum.user.post.PostCommentScreen
@@ -192,6 +193,9 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
                 DetailNewsPage(newsId,modifier,navHostController, sharePreferences)
             }
         }
+        composable("complaint") {
+                ComplaintPage(navHostController, sharePreferences)
+        }
         composable("account_detail/{accountId}") { backStackEntry ->
             val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
             if (accountId != null) {
@@ -201,12 +205,12 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
             }
         }
         composable("manager_complaint"){
-            ManagementComplaintScreen(navHostController)
+            ManagementComplaintScreen(navHostController,sharePreferences)
         }
         composable("complaint_detail/{complaintId}"){ backStackEntry ->
             val complaintId = backStackEntry.arguments?.getString("complaintId")
             if (complaintId != null) {
-                ManagementComplaintDetailScreen(modifier,navHostController,complaintId)
+                ManagementComplaintDetailScreen(modifier,navHostController,sharePreferences,complaintId)
             } else {
                 Text("Không tìm thấy khiếu nại.")
             }

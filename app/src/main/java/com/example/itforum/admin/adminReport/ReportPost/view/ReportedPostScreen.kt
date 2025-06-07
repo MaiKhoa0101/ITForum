@@ -1,5 +1,6 @@
 package com.example.itforum.admin.adminReport.ReportPost.view
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
@@ -23,7 +24,8 @@ import com.example.itforum.user.post.icontext
 @Composable
 fun ReportedPostScreen(
     viewModel: ReportedPostViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    sharedPreferences: SharedPreferences
 ) {
     val posts by viewModel.posts.collectAsState()
     val error by viewModel.error.collectAsState()
@@ -56,6 +58,7 @@ fun ReportedPostScreen(
             headers = listOf("ID", "Post ID", "User ID", "Lý do", "Ngày tạo"),
             rows = convertReportedPostsToRows(filteredPosts),
             menuOptions = menuOptions,
+            sharedPreferences = sharedPreferences,
             onClickOption = { reportId ->
                 navController.navigate("post_detail/$reportId")
             }

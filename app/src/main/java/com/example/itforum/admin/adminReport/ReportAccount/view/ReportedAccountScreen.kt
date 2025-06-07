@@ -1,5 +1,6 @@
 package com.example.itforum.admin.adminReport.ReportAccount.view
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,7 +19,8 @@ import androidx.compose.material.icons.filled.Visibility
 @Composable
 fun ReportedAccountScreen(
     viewModel: ReportedUserViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    sharedPreferences: SharedPreferences
 ) {
     val users by viewModel.users.collectAsState()
     val error by viewModel.error.collectAsState()
@@ -50,6 +52,7 @@ fun ReportedAccountScreen(
             headers = listOf("ID", "Tên", "Email", "Số báo cáo"),
             rows = convertReportedUsersToRows(filteredUsers),
             menuOptions = menuOptions,
+            sharedPreferences = sharedPreferences,
             onClickOption = { accountId ->
                 navController.navigate("account_detail/$accountId")
             }

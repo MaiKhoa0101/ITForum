@@ -1,5 +1,6 @@
 package com.example.itforum.admin.adminComplaint
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,24 +23,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.admin.adminComplaint.viewmodel.ComplaintViewModel
 import com.example.itforum.user.modelData.response.Complaint
 import com.example.itforum.user.post.IconWithText
 import com.example.itforum.user.post.TopPost
+import com.example.itforum.user.post.getTimeAgo
+import com.example.itforum.user.profile.viewmodel.UserViewModel
 
 @Composable
 fun ManagementComplaintDetailScreen(
     modifier: Modifier,
     navHostController: NavHostController,
+    sharedPreferences: SharedPreferences,
     complaintId: String
 ){
+
     var complaintViewModel: ComplaintViewModel = viewModel()
     LaunchedEffect(Unit) {
         complaintViewModel.getByIdComplaint(complaintId)
     }
+
     val complaint by complaintViewModel.complaint.collectAsState()
+
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -51,15 +60,23 @@ fun ManagementComplaintDetailScreen(
                 .fillMaxSize()
                 .background(Color(0xFFEEEEEE))
         ) {
-            complaint?.let { FormComplaint(it) }
+            complaint?.let { FormComplaint(it,sharedPreferences) }
         }
     }
 }
 
 @Composable
 fun FormComplaint(
-    complaint: Complaint
+    complaint: Complaint,
+    sharedPreferences: SharedPreferences
 ) {
+    var userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
+        initializer { UserViewModel(sharedPreferences) }
+    })
+    LaunchedEffect(complaint) {
+         userViewModel.getUser(complaint.userId)
+    }
+    val user by userViewModel.user.collectAsState()
     Card(
         modifier = Modifier.padding(horizontal = 15.dp, vertical = 20.dp),
         shape = RoundedCornerShape(12.dp),
@@ -79,12 +96,12 @@ fun FormComplaint(
                 )
                 IconWithText(
                     "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
-                    "Ngày: ${complaint.createdAt}",
+                    "Ngày: ${ getTimeAgo(complaint.createdAt) } • ${""}",
                     sizeIcon = 35.dp
                 )
                 IconWithText(
                     "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
-                    "Từ: ${complaint.userId}",
+                    "Từ: ${user?.name}",
                     sizeIcon = 35.dp
                 )
                 IconWithText(

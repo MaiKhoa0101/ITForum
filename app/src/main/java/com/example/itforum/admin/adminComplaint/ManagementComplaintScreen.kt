@@ -1,5 +1,6 @@
 package com.example.itforum.admin.adminComplaint
 
+import android.content.SharedPreferences
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Edit
@@ -17,7 +18,8 @@ import com.example.itforum.user.post.icontext
 
 @Composable
 fun ManagementComplaintScreen (
-    navController: NavHostController
+    navController: NavHostController,
+    sharedPreferences: SharedPreferences
 ) {
     var complaintViewModel: ComplaintViewModel = viewModel()
     LaunchedEffect(Unit) {
@@ -38,9 +40,10 @@ fun ManagementComplaintScreen (
                     it.status.contains(searchText, ignoreCase = true)
         }
         TableData(
-            headers = listOf("ID", "Người gửi", "Tiêu đề", "Lý do", "Thời gian", "Trạng thái", "Tùy chỉnh"),
+            headers = listOf("ID", "Người dùng", "Tiêu đề", "Lý do", "Thời gian", "Trạng thái", "Tùy chỉnh"),
             rows = convertToTableRows(filteredUsers),
             menuOptions = menuOptions,
+            sharedPreferences = sharedPreferences,
             onClickOption = { complaintId ->
                 navController.navigate("complaint_detail/$complaintId")
             }
