@@ -36,9 +36,18 @@ import com.example.itforum.utilities.note.NotesApp
 
 
 import com.example.itforum.admin.adminAccount.AccountDetailScreen
+<<<<<<< HEAD
 import com.example.itforum.admin.adminAccount.AccountManagementScreen
 import com.example.itforum.admin.adminController.ControllerManagerScreen
 import com.example.itforum.admin.postManagement.PostManagementScreen
+=======
+import com.example.itforum.admin.adminComplaint.ManagementComplaintDetailScreen
+import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
+import com.example.itforum.admin.adminReport.ReportPost.model.request.ReportedPost
+import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailScreen
+import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
+import com.example.itforum.user.complaint.ComplaintPage
+>>>>>>> 8722b6b3f52743fe4b18cd40ece20b93f5302e4c
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.profile.OtherUserProfileScreen
@@ -166,13 +175,22 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             MyFeedScreen(modifier)
         }
         composable("bookmark"){
-            BookMarkScreen()
+            BookMarkScreen(navHostController,sharePreferences)
         }
         composable("follow"){
             FollowScreen()
         }
         composable ("searchscreen"){
             SearchScreen(modifier)
+        }
+        composable("detail_news/{newsId}") { backStackEntry ->
+            val newsId = backStackEntry.arguments?.getString("newsId")
+            if (newsId != null) {
+                DetailNewsPage(newsId,modifier,navHostController, sharePreferences)
+            }
+        }
+        composable("complaint") {
+                ComplaintPage(navHostController, sharePreferences)
         }
         composable("account_detail/{accountId}") { backStackEntry ->
             val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
@@ -182,10 +200,22 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 Text("Không tìm thấy tài khoản.")
             }
         }
+<<<<<<< HEAD
         composable("detail_news/{newsId}") { backStackEntry ->
             val newsId = backStackEntry.arguments?.getString("newsId")
             if (newsId != null) {
                 DetailNewsPage(newsId,modifier,navHostController, sharedPreferences)
+=======
+        composable("manager_complaint"){
+            ManagementComplaintScreen(navHostController,sharePreferences)
+        }
+        composable("complaint_detail/{complaintId}"){ backStackEntry ->
+            val complaintId = backStackEntry.arguments?.getString("complaintId")
+            if (complaintId != null) {
+                ManagementComplaintDetailScreen(modifier,navHostController,sharePreferences,complaintId)
+            } else {
+                Text("Không tìm thấy khiếu nại.")
+>>>>>>> 8722b6b3f52743fe4b18cd40ece20b93f5302e4c
             }
         }
 
