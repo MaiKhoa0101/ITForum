@@ -26,5 +26,6 @@ data class PostListResponse(
 )
 data class PostWithVote(
     val post: PostResponse,
-    val vote: GetVoteResponse?
+    val vote: GetVoteResponse?,
+    var isBookMark: Boolean = false
 )

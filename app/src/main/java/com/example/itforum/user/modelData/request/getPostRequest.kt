@@ -5,5 +5,6 @@ data class GetPostRequest(
     val title: String? = null,
     val tags: List<String>? = null,
     val page: Int? = null,
-    val limit: Int? = null
+    val limit: Int? = null,
+    val postsId: List<String>? = null,
 )

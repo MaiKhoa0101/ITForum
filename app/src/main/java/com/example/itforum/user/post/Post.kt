@@ -1,5 +1,6 @@
 package com.example.itforum.user.post
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.animation.core.Animatable
@@ -57,8 +58,10 @@ import java.time.Instant
 import java.time.Duration
 import com.example.itforum.user.modelData.response.GetVoteResponse
 import com.example.itforum.user.modelData.response.News
+import com.example.itforum.user.modelData.response.PostWithVote
 import com.example.itforum.user.modelData.response.VoteResponse
 import com.example.itforum.user.news.viewmodel.NewsViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -69,6 +72,42 @@ fun PostListScreen(
     navHostController: NavHostController,
     getPostRequest: GetPostRequest
 ) {
+    fun handleUpVote(viewModel: PostViewModel, postWithVote: PostWithVote, index: Int, scope: CoroutineScope) {
+        scope.launch {
+            val voteResponse = viewModel.votePost(
+                postId = postWithVote.post.id,
+                type = "upvote",
+                index = index
+            )
+            voteResponse?.let { response ->
+                postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
+                postWithVote.vote?.data?.userVote = response.data?.userVote
+            }
+        }
+    }
+    fun handleDownVote(viewModel: PostViewModel, postWithVote: PostWithVote, index: Int, scope: CoroutineScope) {
+        scope.launch {
+            val voteResponse = viewModel.votePost(
+                postId = postWithVote.post.id,
+                type = "downvote",
+                index = index
+            )
+            voteResponse?.let { response ->
+                postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
+                postWithVote.vote?.data?.userVote = response.data?.userVote
+            }
+        }
+    }
+
+    fun handleBookmark(viewModel: PostViewModel, postWithVote: PostWithVote, userId: String?, scope: CoroutineScope) {
+        scope.launch {
+            val bookmarkResponse = viewModel.savePost(
+                postId = postWithVote.post.id,
+                userId = userId
+            )
+            postWithVote.isBookMark = !postWithVote.isBookMark
+        }
+    }
 
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(navHostController, sharedPreferences) }
@@ -80,19 +119,24 @@ fun PostListScreen(
     val isLoadingMore by viewModel.isLoadingMore.collectAsState()
     var showCommentDialog by remember { mutableStateOf(false) }
     var selectedPostId by remember { mutableStateOf<String?>(null) }
+    var userId = sharedPreferences.getString("userId", null)
 
     // Fetch posts when screen loads
-    LaunchedEffect(Unit) {
+    LaunchedEffect(getPostRequest) {
+        postsWithVotes = emptyList()
         viewModel.fetchPosts(getPostRequest)
+        Log.d("PostListScreen", "Fetching posts for request: $getPostRequest")
+
     }
     LaunchedEffect(postsFromVm) {
         postsWithVotes = postsFromVm
+        Log.d("load page when postfromvm",postsWithVotes.toString())
     }// keep local data async
 
     // Pull to refresh state
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
-        onRefresh = { viewModel.refreshPosts() }
+        onRefresh = { viewModel.refreshPosts(getPostRequest) }
     )
 
     Box(
@@ -154,43 +198,23 @@ fun PostListScreen(
                     PostCardWithVote(
                         post = postWithVote.post,
                         vote = postWithVote.vote,
+                        isBookMark = postWithVote.isBookMark,
                         onUpvoteClick = {
-                            scope.launch {
-                                val voteResponse = viewModel.votePost(
-                                    postId = postWithVote.post.id,
-                                    type = "upvote",
-                                    index = index
-                                )
-
-                                // Update local data with response
-                                voteResponse?.let { response ->
-                                    postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
-                                    postWithVote.vote?.data?.userVote = response.data?.userVote
-                                }
-                            }
+                            handleUpVote(viewModel, postWithVote, index, scope)
                         },
                         onDownvoteClick = {
-                            scope.launch {
-                                val voteResponse = viewModel.votePost(
-                                    postId = postWithVote.post.id,
-                                    type = "downvote",
-                                    index = index
-                                )
-
-                                // Update local data with response
-                                voteResponse?.let { response ->
-                                    postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
-                                    postWithVote.vote?.data?.userVote = response.data?.userVote
-                                }
-                            }
+                            handleDownVote(viewModel, postWithVote, index, scope)
                         },
                         onCommentClick = {
                             selectedPostId = postWithVote.post.id
                             showCommentDialog = true
                         },
-                        onBookmarkClick = { },
-                        onShareClick = { },
+                        onBookmarkClick = {
+                            handleBookmark(viewModel, postWithVote, userId, scope)
+                        },
+                        onShareClick = { }
                     )
+
 
                     // Separator between posts
                     Divider(
@@ -433,6 +457,10 @@ fun AdvancedMarqueeTextList(
         }
     }
 }
+
+
+
+
 
 
 

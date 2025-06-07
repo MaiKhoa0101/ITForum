@@ -68,6 +68,7 @@ dependencies {
     //
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
     implementation("androidx.compose.runtime:runtime-livedata:1.6.5")
+    implementation(libs.firebase.messaging.ktx)
     //roomdb
     val room_version = "2.7.1"
 
@@ -165,4 +166,9 @@ dependencies {
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-messaging")
+
+
 }

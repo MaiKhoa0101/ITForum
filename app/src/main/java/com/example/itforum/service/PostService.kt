@@ -6,12 +6,15 @@ import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.modelData.request.PostComment
 import com.example.itforum.user.modelData.request.PostReply
 import com.example.itforum.user.modelData.request.VoteRequest
+import com.example.itforum.user.modelData.response.BookMarkResponse
 import com.example.itforum.user.modelData.response.CommentResponse
 import com.example.itforum.user.modelData.response.CreatePostResponse
+import com.example.itforum.user.modelData.response.GetBookMarkResponse
 import com.example.itforum.user.modelData.response.GetVoteResponse
 import com.example.itforum.user.modelData.response.PostCommentResponse
 import com.example.itforum.user.modelData.response.PostListResponse
 import com.example.itforum.user.modelData.response.PostReplyResponse
+import com.example.itforum.user.modelData.response.PostResponse
 import com.example.itforum.user.modelData.response.ReplyResponse
 
 import com.example.itforum.user.modelData.response.VoteResponse
@@ -21,6 +24,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 
 import retrofit2.http.POST
 import retrofit2.http.Part
@@ -66,6 +70,12 @@ interface PostService {
         @Part imageUrls: List<MultipartBody.Part?>
     ): Response<CreatePostResponse>
 
-    @POST("comments/reply")
+    @POST("posts/reply")
     suspend fun postReply(@Body postReply : PostReply): Response<PostReplyResponse>
+    @PATCH("posts/hide/{id}")
+    suspend fun hidePost(@Path("id") postId: String): Response<Unit>
+    @POST("posts/bookmarks/{postId}/{userId}")
+    suspend fun savedPost(@Path("postId")postId: String,@Path("userId")userId: String) : Response<BookMarkResponse>
+    @GET("posts/bookmarks/{userId}")
+    suspend fun getSavedPost(@Path("userId")userId: String): Response<GetBookMarkResponse>
 }

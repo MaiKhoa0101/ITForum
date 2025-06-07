@@ -1,5 +1,6 @@
 package com.example.itforum.admin.adminReport.ReportAccount.view
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,12 +15,18 @@ import com.example.itforum.user.post.icontext
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Visibility
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportViewModelFactory
+import com.example.itforum.admin.components.convertToTableRows
+import com.example.itforum.repository.ReportRepository
+import com.example.itforum.retrofit.RetrofitInstance
 
 @Composable
-fun ReportedAccountScreen(
-    viewModel: ReportedUserViewModel,
-    navController: NavHostController
-) {
+fun ReportedAccountScreen(navController: NavHostController,sharedPreferences: SharedPreferences) {
+    val viewModel: ReportedUserViewModel = viewModel(factory = ReportViewModelFactory(
+        ReportRepository(
+        RetrofitInstance.reportAccountService)
+    ))
     val users by viewModel.users.collectAsState()
     val error by viewModel.error.collectAsState()
 
@@ -48,17 +55,14 @@ fun ReportedAccountScreen(
 
         TableData(
             headers = listOf("ID", "Tên", "Email", "Số báo cáo"),
-            rows = convertReportedUsersToRows(filteredUsers),
+            rows = convertToTableRows(filteredUsers),
             menuOptions = menuOptions,
+            sharedPreferences = sharedPreferences,
             onClickOption = { accountId ->
+                println("🟡 reportId được chọn: $accountId")
                 navController.navigate("account_detail/$accountId")
             }
         )
     }
 }
 
-fun convertReportedUsersToRows(users: List<ReportedUser>): List<List<String>> {
-    return users.map {
-        listOf(it._id, it.username, it.email, it.reportCount.toString())
-    }
-}

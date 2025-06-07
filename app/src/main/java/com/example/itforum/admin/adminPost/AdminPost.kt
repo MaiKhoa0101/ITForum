@@ -16,9 +16,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 
 @Composable
-fun PostManagementScreen(posts: List<Post>) {
+fun PostManagementScreen( modifier: Modifier ,navHostController: NavHostController,posts: List<Post>) {
     var searchText by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("Tất cả") }
     var expandedFilter by remember { mutableStateOf(false) }
@@ -27,7 +28,7 @@ fun PostManagementScreen(posts: List<Post>) {
 
     val filterOptions = listOf("Tất cả", "Đang hoạt động", "Đã ẩn", "Tố cáo")
 
-    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    Column(modifier = modifier.fillMaxSize().background(Color.White)) {
         Box(modifier = Modifier.fillMaxWidth().height(70.dp).background(Color(0xFF00AEFF)), contentAlignment = Alignment.CenterStart) {
             Text(
                 text = "Quản lí bài viết",
@@ -147,9 +148,3 @@ fun samplePosts(): List<Post> = listOf(
     Post(2, "Đạt mot mat", "30/4/2025", "Đã ẩn"),
     Post(3, "Khoa đẹp gái", "30/4/2025", "Tố cáo")
 )
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewPostManagementScreen() {
-    PostManagementScreen(posts = samplePosts())
-}
