@@ -35,7 +35,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
-import com.example.itforum.admin.AdminRoot.AdminRoot
 import com.example.itforum.user.login.LoginScreen
 import kotlinx.coroutines.launch
 //import com.example.itforum.admin.
@@ -44,6 +43,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.itforum.admin.modeldata.SidebarItem
+import com.example.itforum.admin.modeldata.sidebarItems
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 
@@ -74,7 +75,8 @@ fun Root(sharedPreferences:SharedPreferences) {
     val showFootBars = currentRoute in listOf("home", "searchscreen", "notification", "personal")
     //thay doi ơ day
     val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
         try {
             val token = FirebaseMessaging.getInstance().token.await()
@@ -89,16 +91,12 @@ fun Root(sharedPreferences:SharedPreferences) {
             drawerState = drawerState,
             drawerContent = {
                 DrawerContent(
-                    onCloseDrawer = {
-                        coroutineScope.launch { drawerState.close() }
-                    },
-                    onSelectChatAI = {
-                        coroutineScope.launch { drawerState.close() }
-                        navHostController.navigate("chat")
-                    },
-                    onSelectNote = {
-                        coroutineScope.launch { drawerState.close() }
-                        navHostController.navigate("note")
+                    sidebarItem = sidebarItems,
+                    navHostController = navHostController,
+                    closedrawer = {
+                        scope.launch {
+                            drawerState.close()
+                        }
                     }
                 )
             },
@@ -111,10 +109,11 @@ fun Root(sharedPreferences:SharedPreferences) {
                         TopBarRoot(
                             navHostController,
                             onMenuClick = {
-                                coroutineScope.launch {
+                                scope.launch {
                                     drawerState.open()
                                 }
-                            })
+                            }
+                        )
                     }
                 },
                 bottomBar = {

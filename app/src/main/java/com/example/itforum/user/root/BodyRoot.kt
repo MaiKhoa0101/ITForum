@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.itforum.admin.AdminRoot.AdminRoot
+import com.example.itforum.admin.AdminScreen
 import com.example.itforum.user.home.HomePage
 import com.example.itforum.user.home.bookmark.BookMarkScreen
 import com.example.itforum.user.home.follow.FollowScreen
@@ -40,9 +40,12 @@ import com.example.itforum.utilities.note.NotesApp
 
 
 import com.example.itforum.admin.adminAccount.AccountDetailScreen
+import com.example.itforum.admin.adminAccount.AccountManagementScreen
+import com.example.itforum.admin.adminController.ControllerManagerScreen
 import com.example.itforum.admin.adminReport.ReportPost.model.request.ReportedPost
 import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailScreen
 import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
+import com.example.itforum.admin.postManagement.PostManagementScreen
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.ContentPost
 import com.example.itforum.user.post.PostCommentScreen
@@ -155,10 +158,6 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
             ) // Màn hình đăng ký mới thêm
         }
 
-        composable ("admin_root"){
-            AdminRoot(navHostController,sharePreferences, sharePreferences.getString("access_token", "") ?: "")
-        }
-
         composable("otp") {
             OtpVerificationScreen(
                 onBackClick = { navHostController.popBackStack() },
@@ -198,5 +197,28 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
                 DetailNewsPage(newsId,modifier,navHostController, sharePreferences)
             }
         }
+
+        composable ("admin_root"){
+            AdminScreen(navHostController,sharePreferences)
+        }
+        composable("Controller"){
+            ControllerManagerScreen(navHostController,modifier)
+        }
+        composable("UserManager") {
+            AccountManagementScreen(navHostController = navHostController,users = emptyList(), navController = navHostController)
+        }
+        composable("ReportManager") {
+            PostManagementScreen(navHostController = navHostController,posts = emptyList())
+        }
+        composable("PostManager") {
+            PostManagementScreen(navHostController = navHostController,posts = emptyList())
+        }
+        composable("NewsManager") {
+
+        }
+        composable("NotificationManager") {
+
+        }
+
     }
 }
