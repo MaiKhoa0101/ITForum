@@ -50,15 +50,12 @@ import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.time.LocalDate
 
 @Composable
-<<<<<<< HEAD
-fun AccountManagementScreen(modifier: Modifier,navHostController: NavHostController,users: List<UserAccountManagerAdmin>, navController: NavHostController) {
-=======
 fun AccountManagementScreen(
+    modifier: Modifier,
+    navHostController: NavHostController,
     users: List<UserAccountManagerAdmin>,
-    navController: NavHostController,
     sharedPreferences: SharedPreferences
 ) {
->>>>>>> 8722b6b3f52743fe4b18cd40ece20b93f5302e4c
     var searchText by remember { mutableStateOf("") }
     val dateDialogStateStart = rememberMaterialDialogState()
     val dateDialogStateEnd = rememberMaterialDialogState()
@@ -202,7 +199,7 @@ fun AccountManagementScreen(
                 menuOptions,
                 sharedPreferences = sharedPreferences,
                 onClickOption = { accountId ->
-                    navController.navigate("account_detail/$accountId")
+                    navHostController.navigate("account_detail/$accountId")
                 }
             )
         }

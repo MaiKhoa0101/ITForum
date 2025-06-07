@@ -66,20 +66,12 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ITForumTheme {
-
-//                Root(sharedPreferences)
+                Root(sharedPreferences)
 //                CrashLogScreen()
             }
         }
     }
-
-
 }
-
-                Root(sharedPreferences)
-            }
-        }
-    }}    
 
 
 
