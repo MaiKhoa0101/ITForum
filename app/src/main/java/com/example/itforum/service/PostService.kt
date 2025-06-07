@@ -6,12 +6,15 @@ import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.modelData.request.PostComment
 import com.example.itforum.user.modelData.request.PostReply
 import com.example.itforum.user.modelData.request.VoteRequest
+import com.example.itforum.user.modelData.response.BookMarkResponse
 import com.example.itforum.user.modelData.response.CommentResponse
 import com.example.itforum.user.modelData.response.CreatePostResponse
+import com.example.itforum.user.modelData.response.GetBookMarkResponse
 import com.example.itforum.user.modelData.response.GetVoteResponse
 import com.example.itforum.user.modelData.response.PostCommentResponse
 import com.example.itforum.user.modelData.response.PostListResponse
 import com.example.itforum.user.modelData.response.PostReplyResponse
+import com.example.itforum.user.modelData.response.PostResponse
 import com.example.itforum.user.modelData.response.ReplyResponse
 
 import com.example.itforum.user.modelData.response.VoteResponse
@@ -68,4 +71,8 @@ interface PostService {
 
     @POST("comments/reply")
     suspend fun postReply(@Body postReply : PostReply): Response<PostReplyResponse>
+    @POST("posts/bookmarks/{postId}/{userId}")
+    suspend fun savedPost(@Path("postId")postId: String,@Path("userId")userId: String) : Response<BookMarkResponse>
+    @GET("posts/bookmarks/{userId}")
+    suspend fun getSavedPost(@Path("userId")userId: String): Response<GetBookMarkResponse>
 }
