@@ -39,6 +39,12 @@ import com.example.itforum.admin.adminAccount.AccountDetailScreen
 import com.example.itforum.admin.adminAccount.AccountManagementScreen
 import com.example.itforum.admin.adminController.ControllerManagerScreen
 import com.example.itforum.admin.postManagement.PostManagementScreen
+import com.example.itforum.admin.adminComplaint.ManagementComplaintDetailScreen
+import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
+import com.example.itforum.admin.adminReport.ReportPost.model.request.ReportedPost
+import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailScreen
+import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
+import com.example.itforum.user.complaint.ComplaintPage
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.profile.OtherUserProfileScreen
@@ -166,13 +172,22 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             MyFeedScreen(modifier)
         }
         composable("bookmark"){
-            BookMarkScreen()
+            BookMarkScreen(navHostController,sharedPreferences)
         }
         composable("follow"){
             FollowScreen()
         }
         composable ("searchscreen"){
             SearchScreen(modifier)
+        }
+        composable("detail_news/{newsId}") { backStackEntry ->
+            val newsId = backStackEntry.arguments?.getString("newsId")
+            if (newsId != null) {
+                DetailNewsPage(newsId,modifier,navHostController, sharedPreferences)
+            }
+        }
+        composable("complaint") {
+                ComplaintPage(navHostController, sharedPreferences)
         }
         composable("account_detail/{accountId}") { backStackEntry ->
             val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
@@ -185,7 +200,18 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         composable("detail_news/{newsId}") { backStackEntry ->
             val newsId = backStackEntry.arguments?.getString("newsId")
             if (newsId != null) {
-                DetailNewsPage(newsId,modifier,navHostController, sharedPreferences)
+                DetailNewsPage(newsId, modifier, navHostController, sharedPreferences)
+            }
+        }
+        composable("manager_complaint"){
+            ManagementComplaintScreen(navHostController,sharedPreferences)
+        }
+        composable("complaint_detail/{complaintId}"){ backStackEntry ->
+            val complaintId = backStackEntry.arguments?.getString("complaintId")
+            if (complaintId != null) {
+                ManagementComplaintDetailScreen(modifier,navHostController,sharedPreferences,complaintId)
+            } else {
+                Text("Không tìm thấy khiếu nại.")
             }
         }
 

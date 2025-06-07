@@ -96,7 +96,14 @@ fun TopBarRoot(
                         )
                         ,
                     selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
+                    onClick = {
+                        selectedTabIndex = index
+                        when (index) {
+                            0 -> navHostController.navigate("home")
+                            3 -> navHostController.navigate("bookmark")
+                        }
+
+                              },
                     text = {
                         Text(
                             text = title,

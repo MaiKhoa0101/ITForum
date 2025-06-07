@@ -113,7 +113,7 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                         modifier = Modifier.padding(innerPadding),
                         navHostController = navHostController,
                         users = emptyList(),
-                        navController = navHostController
+                        sharedPreferences
                     )
                 }
                 composable("ReportManager") {

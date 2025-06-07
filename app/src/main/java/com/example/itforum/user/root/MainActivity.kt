@@ -45,10 +45,16 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.itforum.admin.modeldata.SidebarItem
+
+import com.example.itforum.admin.adminCrashlytic.CrashLogScreen
+
+
+
 import com.example.itforum.admin.modeldata.sidebarItems
 import com.example.itforum.admin.modeldata.sidebarUserItems
 import com.google.firebase.messaging.FirebaseMessaging
+import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
+import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
 import kotlinx.coroutines.tasks.await
 
 
@@ -61,9 +67,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             ITForumTheme {
                 Root(sharedPreferences)
+//                CrashLogScreen()
             }
         }
-    }}
+    }
+}
+
 
 
 
@@ -73,8 +82,8 @@ fun Root(sharedPreferences:SharedPreferences) {
     val navHostController = rememberNavController()
     val navBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val showTopBars = currentRoute in listOf("home")
-    val showFootBars = currentRoute in listOf("home", "searchscreen", "notification", "personal")
+    val showTopBars = currentRoute in listOf("home","bookmark")
+    val showFootBars = currentRoute in listOf("home", "searchscreen", "notification", "personal","bookmark")
     //thay doi ơ day
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()

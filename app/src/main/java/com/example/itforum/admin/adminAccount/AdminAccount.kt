@@ -1,6 +1,7 @@
 package com.example.itforum.admin.adminAccount
 
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.border
@@ -49,7 +50,12 @@ import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.time.LocalDate
 
 @Composable
-fun AccountManagementScreen(modifier: Modifier,navHostController: NavHostController,users: List<UserAccountManagerAdmin>, navController: NavHostController) {
+fun AccountManagementScreen(
+    modifier: Modifier,
+    navHostController: NavHostController,
+    users: List<UserAccountManagerAdmin>,
+    sharedPreferences: SharedPreferences
+) {
     var searchText by remember { mutableStateOf("") }
     val dateDialogStateStart = rememberMaterialDialogState()
     val dateDialogStateEnd = rememberMaterialDialogState()
@@ -191,8 +197,9 @@ fun AccountManagementScreen(modifier: Modifier,navHostController: NavHostControl
                 headers,
                 rows = convertToTableRows(filteredUsers),
                 menuOptions,
+                sharedPreferences = sharedPreferences,
                 onClickOption = { accountId ->
-                    navController.navigate("account_detail/$accountId")
+                    navHostController.navigate("account_detail/$accountId")
                 }
             )
         }

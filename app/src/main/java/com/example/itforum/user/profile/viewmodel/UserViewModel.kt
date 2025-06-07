@@ -66,6 +66,40 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel(){
         }
     }
 
+    fun getUser(id: String) {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try {
+                val response = RetrofitInstance.userService.getUser(id)
+                Log.d("ID", userId!!)
+                Log.d("UserViewModel", "Response: $response")
+                Log.d("UserViewModel", "ResponseBody: ${response.body()?.userProfileResponse}")
+
+                if (response.isSuccessful) {
+                    _uiState.value = UiState.FetchSuccess(
+                        response.body()?.message ?: "Lấy thành công"
+                    )
+                    _user.value  = response.body()?.userProfileResponse
+                    delay(500)
+                    _uiState.value = UiState.Idle
+                    println("UI state value is idle")
+                }
+                else {
+                    showError("Response get không hợp lệ")
+                    _uiState.value = UiState.FetchFail(response.message())                }
+            }
+            catch (e: IOException) {
+                _uiState.value = UiState.FetchFail("Lỗi kết nối mạng: ${e.localizedMessage}")
+                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+            }
+            catch (e: Exception) {
+                _uiState.value = UiState.FetchFail(e.message ?: "Lỗi hệ thống, vui lòng thử lại")
+                showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+            }
+
+        }
+    }
+
     fun ModifierUser(userUpdateRequest: UserUpdateRequest, context: Context) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
