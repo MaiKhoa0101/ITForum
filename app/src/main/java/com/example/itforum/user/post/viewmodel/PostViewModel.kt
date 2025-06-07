@@ -14,6 +14,8 @@ import com.example.itforum.user.effect.model.UiStatePost
 import com.example.itforum.user.modelData.request.CreatePostRequest
 import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.modelData.request.VoteRequest
+import com.example.itforum.user.modelData.response.BookMarkResponse
+import com.example.itforum.user.modelData.response.GetBookMarkResponse
 import com.example.itforum.user.modelData.response.GetVoteResponse
 import com.example.itforum.user.modelData.response.PostResponse
 import com.example.itforum.user.modelData.response.PostWithVote
@@ -96,6 +98,11 @@ class PostViewModel(
 
         viewModelScope.launch {
             try {
+                // fetch bookmarked post IDs
+                val bookmarkResponse = getSavePost(userId)
+                val bookmarkedIds = bookmarkResponse?.postsId?.toSet() ?: emptySet()
+                Log.d("bookmarkId",bookmarkedIds.toString())
+                // fetch post
                 val response = RetrofitInstance.postService.getPost(getPostRequest)
                 if (response.isSuccessful && response.body() != null) {
                     val newPosts = response.body()?.posts ?: emptyList()
@@ -104,7 +111,9 @@ class PostViewModel(
                         async {
                             PostWithVote(
                                 post = post,
-                                vote = getVoteDataByPostId(post.id, userId)
+                                vote = getVoteDataByPostId(post.id, userId),
+                                isBookMark = bookmarkedIds.contains(post.id)
+
                             )
                         }
                     }.awaitAll()
@@ -279,9 +288,56 @@ class PostViewModel(
             null
         }
     }
+    suspend fun savePost(postId: String?, userId: String?): BookMarkResponse? {
+        return try {
+            if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) {
+                Log.e("savePost", "postId or userId is null/empty")
+                return null
+            }
 
-    fun refreshPosts() {
-        fetchPosts(GetPostRequest(page = 1), isRefresh = true)
+            val res = RetrofitInstance.postService.savedPost(postId, userId)
+
+
+            if (res.isSuccessful) {
+                val response = res.body()
+                Log.d("savePost", response.toString())
+                response
+            } else {
+                Log.e("savePost", "Failed with code: ${res.code()}, message: ${res.message()}")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("savePost", "Error: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun getSavePost(userId: String?): GetBookMarkResponse? {
+        return try {
+            if (userId.isNullOrEmpty()) {
+                Log.e("getSavePost", "userId is null or empty")
+                return null
+            }
+
+            val res = RetrofitInstance.postService.getSavedPost(userId)
+
+            if (res.isSuccessful) {
+                val response = res.body()
+                Log.d("getSavePost", response.toString())
+                response
+            } else {
+                Log.e("getSavePost", "Failed with code: ${res.code()}, message: ${res.message()}")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("getSavePost", "Exception: ${e.message}")
+            null
+        }
+    }
+
+
+    fun refreshPosts(getPostRequest: GetPostRequest) {
+        fetchPosts(getPostRequest, isRefresh = true)
     }
 
 

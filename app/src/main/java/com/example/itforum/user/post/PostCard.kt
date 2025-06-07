@@ -1,5 +1,6 @@
 package com.example.itforum.user.post
 
+import android.R.bool
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,20 +36,21 @@ import com.example.itforum.user.modelData.response.PostResponse
 
 @Composable
 fun PostCardWithVote(
-
     post: PostResponse,
     vote: GetVoteResponse?,
+    isBookMark: Boolean,
     onUpvoteClick: () -> Unit = {},
     onDownvoteClick: () -> Unit = {},
     onCommentClick: () -> Unit = {},
     onBookmarkClick: () -> Unit = {},
     onShareClick: () -> Unit = {},
-
-    ) {
+)
+ {
     var isChange by remember { mutableStateOf(false) }
     var upvotes by remember { mutableStateOf(vote?.data?.upVoteData?.total?: 0) }
     var isVote by remember { mutableStateOf(vote?.data?.userVote) }
-    Log.d("isChange", isChange.toString())
+    var isSavedPost by remember { mutableStateOf(isBookMark) }
+    Log.d("bookmark", isSavedPost.toString())
 
 
 
@@ -190,12 +192,20 @@ fun PostCardWithVote(
                             tint = Color.Unspecified
                         )
                     }
-                    IconButton(onClick = onBookmarkClick) {
+                    IconButton(onClick = {onBookmarkClick()
+                        //neu save post r doi icon qua chua save va nguoc lai
+                        if(isSavedPost){
+                            isSavedPost = false
+                        }else{
+                            isSavedPost = true
+                        }}
+                    )
+                    {
                         Icon(
                             painter = painterResource(id = R.drawable.bookmark),
                             contentDescription = "Bookmark",
                             modifier = Modifier.size(30.dp),
-                            tint = Color.Unspecified
+                            tint = if (isSavedPost) Color.Green else Color.Unspecified
                         )
                     }
                     IconButton(onClick = onShareClick) {
