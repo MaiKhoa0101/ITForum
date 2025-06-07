@@ -49,7 +49,12 @@ val sidebarItems = listOf(
         nameField = "Quản lí thông báo trong hệ thống",
         iconField = Icons.Default.Message,
         navigationField = "NotificationManager"
-    )
+    ),
+    SidebarItem(
+        nameField = "Quản lý crash hệ thống",
+        iconField = Icons.Default.Message,
+        navigationField = "Crashlytics"
+)
 )
 
 // Sidebar item list
