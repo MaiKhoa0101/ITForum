@@ -51,7 +51,7 @@ import androidx.navigation.NavHostController
 @Composable
 fun ControllerManagerScreen(navHostController:NavHostController,modifier: Modifier) {
     LazyColumn (
-        modifier = Modifier.background(Color(0xFFF7F8FA))
+        modifier = modifier.background(MaterialTheme.colorScheme.background)
     ){
         item {
             Spacer(modifier = Modifier.height(8.dp))

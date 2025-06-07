@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 
 @Composable
-fun PostManagementScreen(navHostController: NavHostController,posts: List<Post>) {
+fun PostManagementScreen( modifier: Modifier ,navHostController: NavHostController,posts: List<Post>) {
     var searchText by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("Tất cả") }
     var expandedFilter by remember { mutableStateOf(false) }
@@ -28,7 +28,7 @@ fun PostManagementScreen(navHostController: NavHostController,posts: List<Post>)
 
     val filterOptions = listOf("Tất cả", "Đang hoạt động", "Đã ẩn", "Tố cáo")
 
-    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    Column(modifier = modifier.fillMaxSize().background(Color.White)) {
         Box(modifier = Modifier.fillMaxWidth().height(70.dp).background(Color(0xFF00AEFF)), contentAlignment = Alignment.CenterStart) {
             Text(
                 text = "Quản lí bài viết",

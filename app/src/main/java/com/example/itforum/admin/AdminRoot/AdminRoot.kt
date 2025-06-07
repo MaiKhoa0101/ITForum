@@ -1,4 +1,4 @@
-package com.example.itforum.admin
+package com.example.itforum.admin.AdminRoot
 
 import android.content.SharedPreferences
 import androidx.compose.foundation.Image
@@ -29,32 +29,37 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.itforum.admin.adminAccount.AccountManagementScreen
 import com.example.itforum.admin.adminController.ControllerManagerScreen
 import com.example.itforum.admin.modeldata.sidebarItems
+import com.example.itforum.admin.postManagement.PostManagementScreen
+import com.example.itforum.user.login.LoginScreen
 import com.example.itforum.utilities.DrawerContent
 import kotlinx.coroutines.launch
 import kotlin.collections.contains
 
 @Composable
-fun AdminScreen(navHostController: NavHostController, sharedPreferences: SharedPreferences) {
+fun AdminScreen(sharedPreferences: SharedPreferences) {
+    val navHostController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val showTopBars = currentRoute in listOf(
-        "admin_root",
         "Controller",
         "UserManager",
         "PostManager",
         "ReportManager",
         "NewsManager",
-        "NotificationManager")
+        "NotificationManager"
+    )
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -66,8 +71,10 @@ fun AdminScreen(navHostController: NavHostController, sharedPreferences: SharedP
                     sidebarItem = sidebarItems,
                     navHostController = navHostController,
                     closedrawer = {
-                        scope.launch {
-                            drawerState.close()
+                        if (showTopBars) {
+                            scope.launch {
+                                drawerState.close()
+                            }
                         }
                     }
                 )
@@ -87,7 +94,49 @@ fun AdminScreen(navHostController: NavHostController, sharedPreferences: SharedP
                 }
             },
         ){ innerPadding ->
-            ControllerManagerScreen(navHostController,modifier = Modifier.padding(innerPadding))
+            NavHost(navHostController, startDestination = "Controller") {
+                composable("login") {
+                    LoginScreen(
+                        navHostController = navHostController,
+                        sharedPreferences = sharedPreferences,
+                        onRegisterClick = { navHostController.navigate("register") },
+                        onForgotPasswordClick = { navHostController.navigate("forgot_password") },
+                    )
+                }
+                composable("Controller") {
+                    ControllerManagerScreen(
+                        navHostController,
+                        modifier = Modifier.padding(innerPadding))
+                }
+                composable("UserManager") {
+                    AccountManagementScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        navHostController = navHostController,
+                        users = emptyList(),
+                        navController = navHostController
+                    )
+                }
+                composable("ReportManager") {
+                    PostManagementScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        navHostController = navHostController,
+                        posts = emptyList()
+                    )
+                }
+                composable("PostManager") {
+                    PostManagementScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        navHostController = navHostController,
+                        posts = emptyList()
+                    )
+                }
+                composable("NewsManager") {
+
+                }
+                composable("NotificationManager") {
+
+                }
+            }
         }
     }
 }

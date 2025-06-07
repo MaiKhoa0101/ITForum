@@ -11,7 +11,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 
 import androidx.compose.material3.Scaffold
@@ -45,6 +47,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.itforum.admin.modeldata.SidebarItem
 import com.example.itforum.admin.modeldata.sidebarItems
+import com.example.itforum.admin.modeldata.sidebarUserItems
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 
@@ -58,7 +61,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             ITForumTheme {
                 Root(sharedPreferences)
-
             }
         }
     }}
@@ -74,7 +76,7 @@ fun Root(sharedPreferences:SharedPreferences) {
     val showTopBars = currentRoute in listOf("home")
     val showFootBars = currentRoute in listOf("home", "searchscreen", "notification", "personal")
     //thay doi ơ day
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -90,17 +92,22 @@ fun Root(sharedPreferences:SharedPreferences) {
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
-                DrawerContent(
-                    sidebarItem = sidebarItems,
-                    navHostController = navHostController,
-                    closedrawer = {
-                        scope.launch {
-                            drawerState.close()
+                ModalDrawerSheet(
+                    modifier = Modifier.width(300.dp)
+                ) {
+                    DrawerContent(
+                        sidebarItem = sidebarUserItems,
+                        navHostController = navHostController,
+                        closedrawer = {
+                            if (showTopBars) {
+                                scope.launch {
+                                    drawerState.close()
+                                }
+                            }
                         }
-                    }
-                )
-            },
-            scrimColor = Color.Transparent
+                    )
+                }
+            }
         ) {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),

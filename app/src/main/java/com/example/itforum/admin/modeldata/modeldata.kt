@@ -2,9 +2,11 @@ package com.example.itforum.admin.modeldata
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Interests
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.filled.Newspaper
+import androidx.compose.material.icons.filled.NoteAlt
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -47,6 +49,19 @@ val sidebarItems = listOf(
         nameField = "Quản lí thông báo trong hệ thống",
         iconField = Icons.Default.Message,
         navigationField = "NotificationManager"
-    ),
-
     )
+)
+
+// Sidebar item list
+val sidebarUserItems = listOf(
+    SidebarItem(
+        nameField = "Chat AI",
+        iconField = Icons.Default.Lightbulb,
+        navigationField = "chat"
+    ),
+    SidebarItem(
+        nameField = "Ghi chú",
+        iconField = Icons.Default.NoteAlt,
+        navigationField = "note"
+    )
+)
