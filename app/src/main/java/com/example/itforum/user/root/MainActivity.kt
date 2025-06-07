@@ -43,6 +43,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.itforum.admin.adminCrashlytic.CrashLogScreen
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,11 +54,14 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ITForumTheme {
-                Root(sharedPreferences)
-
+//                Root(sharedPreferences)
+//                CrashLogScreen()
             }
         }
-    }}
+    }
+
+
+}
 
 
 

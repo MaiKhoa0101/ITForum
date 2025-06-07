@@ -6,15 +6,22 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.auth0.android.jwt.JWT
+import com.example.itforum.admin.adminCrashlytic.CrashLogger
+import com.example.itforum.admin.adminCrashlytic.UserSession
+
+
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.request.LoginUser
+
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okio.IOException
+
+
 
 
 class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewModel() {
@@ -32,6 +39,7 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                 Log.d("LoginViewModel", "Response: $response")
                 if (response.isSuccessful) {
                     val token = response.body()?.accessToken
+                    saveUserEmail(emailOrPhone)
                     if (!token.isNullOrEmpty()) {
                         handleToken(token)
                         _uiState.value = UiState.Success(
@@ -58,20 +66,58 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
 
 
     // Xử lý token sau khi login thành công
+//    private fun handleToken(token: String) {
+//        saveToken(token)
+//        try {
+//            val jwt = JWT(token)
+//
+//            val id = jwt.getClaim("userId").asString()
+//            val role = jwt.getClaim("role").asString()
+//
+//            saveUserId(id)
+//            saveUserRole(role)
+//            // TODO: Xử lý role nếu cần
+//        } catch (e: Exception) {
+//            showError("Invalid token format")
+//        }
+//    }
     private fun handleToken(token: String) {
         saveToken(token)
         try {
             val jwt = JWT(token)
-
             val id = jwt.getClaim("userId").asString()
             val role = jwt.getClaim("role").asString()
+            val email = jwt.getClaim("email").asString()
+            UserSession.load(email ?: "", id ?: "")
+
+
+            saveUserEmail(email)
             saveUserId(id)
             saveUserRole(role)
-            // TODO: Xử lý role nếu cần
+//
+//            viewModelScope.launch {
+//                CrashLogger.logCrash(
+//                    error = Exception("💥 Crash sau khi login"),
+//                    userId = id ?: "",
+//                    email = email ?: ""
+//                )
+//            }
+
+
+
         } catch (e: Exception) {
             showError("Invalid token format")
         }
+
     }
+
+
+    private fun saveUserEmail(email: String?) {
+        sharedPreferences.edit()
+            .putString("email", email)
+            .apply()
+    }
+
 
     private fun saveToken(token: String) {
         sharedPreferences.edit()

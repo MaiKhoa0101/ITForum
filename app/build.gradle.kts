@@ -6,24 +6,18 @@ import java.util.Properties
 
 
 plugins {
-//    alias(libs.plugins.android.application)
-//    alias(libs.plugins.kotlin.android)
-//    alias(libs.plugins.kotlin.compose)
-//    kotlin("plugin.serialization")
+
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
     // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
+    //crashlytic
+    id("com.google.firebase.crashlytics")
 
 }
-//val localProperties = Properties().apply {
-//    load(FileInputStream(rootProject.file("local.properties")))
-//}
-//
-//val openAiKey = localProperties["OPENAI_API_KEY"]
-//    ?: throw GradleException("OPENAI_API_KEY not found in local.properties")
+
 android {
     namespace = "com.example.itforum"
     compileSdk = 35
@@ -52,6 +46,7 @@ android {
                 "proguard-rules.pro"
             )
         }
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -66,6 +61,10 @@ android {
 }
 
 dependencies {
+    //firebase crashlytic
+    implementation("com.google.firebase:firebase-crashlytics:18.6.1")
+    implementation("com.google.firebase:firebase-firestore-ktx:24.10.3")
+
     //
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
     implementation("androidx.compose.runtime:runtime-livedata:1.6.5")
@@ -109,9 +108,10 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.10.1")
 
-    implementation("androidx.compose.material3:material3:1.1.2")
+//    implementation("androidx.compose.material3:material3:1.1.2")
 
     implementation("org.json:json:20240303")
+    implementation("androidx.compose.material3:material3:1.2.1")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
