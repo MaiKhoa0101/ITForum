@@ -1,5 +1,8 @@
 import org.gradle.kotlin.dsl.implementation
 
+import java.io.FileInputStream
+import java.util.Properties
+
 
 
 plugins {
@@ -11,9 +14,16 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
+    // Add the Google services Gradle plugin
+    id("com.google.gms.google-services")
 
 }
-
+//val localProperties = Properties().apply {
+//    load(FileInputStream(rootProject.file("local.properties")))
+//}
+//
+//val openAiKey = localProperties["OPENAI_API_KEY"]
+//    ?: throw GradleException("OPENAI_API_KEY not found in local.properties")
 android {
     namespace = "com.example.itforum"
     compileSdk = 35
@@ -25,8 +35,14 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        //key openAI
+//        buildConfigField("String", "OPENAI_API_KEY", "\"$openAiKey\"")
+
+
     }
+    android.sourceSets["main"].java.srcDirs("src/main/java", "src/main/kotlin")
 
     buildTypes {
         release {
@@ -53,6 +69,7 @@ dependencies {
     //
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
     implementation("androidx.compose.runtime:runtime-livedata:1.6.5")
+    implementation(libs.firebase.messaging.ktx)
     //roomdb
     val room_version = "2.7.1"
 
@@ -146,4 +163,12 @@ dependencies {
 
     // Jetpack Compose integration
     implementation("androidx.navigation:navigation-compose:$nav_version")
+
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-messaging")
+
+
 }

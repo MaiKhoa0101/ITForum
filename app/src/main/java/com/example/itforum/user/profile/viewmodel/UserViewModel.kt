@@ -8,19 +8,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.effect.model.UiState
-import com.example.itforum.user.model.request.UserUpdateRequest
-import com.example.itforum.user.model.response.UserProfileResponse
+import com.example.itforum.user.modelData.request.UserUpdateRequest
+import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
 import java.io.File
 
@@ -39,6 +37,40 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel(){
             _uiState.value = UiState.Loading
             try {
                 val response = RetrofitInstance.userService.getUser(userId)
+                Log.d("ID", userId!!)
+                Log.d("UserViewModel", "Response: $response")
+                Log.d("UserViewModel", "ResponseBody: ${response.body()?.userProfileResponse}")
+
+                if (response.isSuccessful) {
+                    _uiState.value = UiState.FetchSuccess(
+                        response.body()?.message ?: "Lấy thành công"
+                    )
+                    _user.value  = response.body()?.userProfileResponse
+                    delay(500)
+                    _uiState.value = UiState.Idle
+                    println("UI state value is idle")
+                }
+                else {
+                    showError("Response get không hợp lệ")
+                    _uiState.value = UiState.FetchFail(response.message())                }
+            }
+            catch (e: IOException) {
+                _uiState.value = UiState.FetchFail("Lỗi kết nối mạng: ${e.localizedMessage}")
+                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+            }
+            catch (e: Exception) {
+                _uiState.value = UiState.FetchFail(e.message ?: "Lỗi hệ thống, vui lòng thử lại")
+                showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+            }
+
+        }
+    }
+
+    fun getUser(id: String) {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try {
+                val response = RetrofitInstance.userService.getUser(id)
                 Log.d("ID", userId!!)
                 Log.d("UserViewModel", "Response: $response")
                 Log.d("UserViewModel", "ResponseBody: ${response.body()?.userProfileResponse}")
@@ -95,8 +127,8 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel(){
                 val introduce = userUpdateRequest.introduce?.let {
                     MultipartBody.Part.createFormData("introduce", it)
                 }
-                val skills = userUpdateRequest.skills?.let {
-                    MultipartBody.Part.createFormData("skills", Gson().toJson(it))
+                val skill = userUpdateRequest.skill?.let {
+                    MultipartBody.Part.createFormData("skill", Gson().toJson(it))
                 }
                 val certificate = userUpdateRequest.certificate?.let {
                     MultipartBody.Part.createFormData("certificate", Gson().toJson(it))
@@ -109,7 +141,7 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel(){
                     email = email,
                     username = username,
                     introduce = introduce,
-                    skills = skills,
+                    skill = skill,
                     certificate = certificate,
                     avatar = avatar
                 )

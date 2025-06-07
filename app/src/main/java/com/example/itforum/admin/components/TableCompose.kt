@@ -1,5 +1,6 @@
 package com.example.itforum.admin.components
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.border
@@ -24,6 +25,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,8 +40,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.itforum.user.post.IconWithText
 import com.example.itforum.user.post.icontext
+import com.example.itforum.user.profile.viewmodel.UserViewModel
 
 interface TableRowConvertible {
     fun toTableRow(): List<String>
@@ -49,12 +56,17 @@ fun TableData(
     headers: List<String>,
     rows: List<List<String>>,
     menuOptions: List<icontext>,
+    sharedPreferences: SharedPreferences,
     onClickOption: (String) -> Unit) {
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val maxTableHeight = screenHeight * 0.6f
     var expandedIndex by remember { mutableStateOf(-1) }
     var rowState: Int? = null
+    var rowUser: Int? = null
+    var userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
+        initializer { UserViewModel(sharedPreferences) }
+    })
     Box(modifier = Modifier
         .fillMaxWidth()
         .border(1.dp, Color.Gray)
@@ -74,13 +86,13 @@ fun TableData(
                                 .padding(4.dp)
                                 .widthIn(min = 50.dp, max = 100.dp),textAlign = TextAlign.Center)
                             if(header == "Trạng thái") rowState = i
+                            if(header == "Người dùng") rowUser = i
                         }
                     }
                 }
             }
             itemsIndexed(rows) { index, row ->
                 val backgroundColor = if (index % 2 == 0) Color.White else Color(0xFFD9D9D9)
-
                 Row(modifier = Modifier
                     .horizontalScroll(horizontalScrollState)
                     .background(backgroundColor), verticalAlignment = Alignment.CenterVertically) {
@@ -88,36 +100,42 @@ fun TableData(
                         Box(modifier = Modifier
                             .width(120.dp)
                             .background(backgroundColor)) {
-                            if(rowState == null) {
-                                Text(
-                                    text = row[i],
-                                    color = Color.Black,
-                                    modifier = Modifier
-                                        .padding(8.dp)
-                                        .widthIn(min = 50.dp, max = 100.dp),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                            else{
-                                var color: Color = Color.Black
+                            var color: Color = Color.Black
+                            var text = row[i]
+                            if(i == rowState) {
                                 when(row[i]){
-                                    "Chưa xử lý" -> color = Color(0xFFFA8C25)
-                                    "Đã xử lý" -> color = Color(0xFF00BB00)
-                                    "Từ chối" -> color = Color(0xFFFF0004)
+                                    "pending" -> {
+                                        color = Color(0xFFFA8C25)
+                                        text = "Chưa xử lý"
+                                    }
+                                    "approved" -> {
+                                        color = Color(0xFF00BB00)
+                                        text = "Đã xử lý"
+                                    }
+                                    "rejected" -> {
+                                        color = Color(0xFFFF0004)
+                                        text = "Từ chối"
+                                    }
                                 }
-                                Text(
-                                    text = row[i],
-                                    color = color,
-                                    modifier = Modifier
-                                        .padding(4.dp)
-                                        .widthIn(min = 50.dp, max = 100.dp),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    textAlign = TextAlign.Center
-                                )
                             }
+                            else if (i == rowUser){
+                                LaunchedEffect(Unit) {
+                                    userViewModel.getUser(row[i])
+                                }
+                                val user by userViewModel.user.collectAsState()
+                                text = user?.name ?: "Đang tải..."
+                            }
+
+                            Text(
+                                text = text,
+                                color = color,
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .widthIn(min = 50.dp, max = 100.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center
+                            )
                         }
                     }
                     Box(modifier = Modifier

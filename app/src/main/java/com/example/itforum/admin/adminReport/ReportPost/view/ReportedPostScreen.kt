@@ -1,5 +1,6 @@
 package com.example.itforum.admin.adminReport.ReportPost.view
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
@@ -18,12 +19,14 @@ import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostVi
 import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostViewModelFactory
 import com.example.itforum.admin.components.AdminScreenLayout
 import com.example.itforum.admin.components.TableData
+import com.example.itforum.admin.components.convertToTableRows
 import com.example.itforum.repository.ReportPostRepository
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.post.icontext
 
 @Composable
-fun ReportedPostScreen(navController: NavHostController) {
+fun ReportedPostScreen(navController: NavHostController,
+                       sharedPreferences: SharedPreferences) {
     val viewModel: ReportedPostViewModel = viewModel(
         factory = ReportedPostViewModelFactory(
             ReportPostRepository(RetrofitInstance.reportPostService)
@@ -62,27 +65,14 @@ fun ReportedPostScreen(navController: NavHostController) {
 
         TableData(
             headers = listOf("ID", "Post ID", "Tiêu đề", "Lý do", "Ngày tạo"),
-            rows = convertReportedPostsToRows(filteredPosts),
             menuOptions = menuOptions,
+            rows = convertToTableRows(filteredPosts),
+            sharedPreferences = sharedPreferences,
             onClickOption = { reportId ->
                 println("🟢 reportId được chọn: $reportId")
                 navController.navigate("post_detail/$reportId")
             }
-        )
 
-    }
-}
-
-fun convertReportedPostsToRows(posts: List<ReportedPostList>): List<List<String>> {
-    return posts.map {
-        listOf(
-            it._id,
-            it.reportedPostId,
-            it.reportedPostTitle,
-            it.reason,
-            it.createdAt
         )
     }
 }
-
-

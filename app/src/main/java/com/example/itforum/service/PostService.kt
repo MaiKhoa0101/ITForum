@@ -1,25 +1,33 @@
 package com.example.itforum.service;
-import com.example.itforum.user.model.request.CreatePostRequest
-import com.example.itforum.user.model.request.GetPostRequest
-import com.example.itforum.user.model.request.PostComment
-import com.example.itforum.user.model.request.PostReply
-import com.example.itforum.user.model.request.VoteRequest
-import com.example.itforum.user.model.response.CommentResponse
-import com.example.itforum.user.model.response.CreatePostResponse
-import com.example.itforum.user.model.response.GetVoteResponse
-import com.example.itforum.user.model.response.PostCommentResponse
-import com.example.itforum.user.model.response.PostListResponse
-import com.example.itforum.user.model.response.PostReplyResponse
-import com.example.itforum.user.model.response.ReplyResponse
+import android.net.Uri
 
-import com.example.itforum.user.model.response.VoteResponse
+import com.example.itforum.user.modelData.request.CreatePostRequest
+import com.example.itforum.user.modelData.request.GetPostRequest
+import com.example.itforum.user.modelData.request.PostComment
+import com.example.itforum.user.modelData.request.PostReply
+import com.example.itforum.user.modelData.request.VoteRequest
+import com.example.itforum.user.modelData.response.BookMarkResponse
+import com.example.itforum.user.modelData.response.CommentResponse
+import com.example.itforum.user.modelData.response.CreatePostResponse
+import com.example.itforum.user.modelData.response.GetBookMarkResponse
+import com.example.itforum.user.modelData.response.GetVoteResponse
+import com.example.itforum.user.modelData.response.PostCommentResponse
+import com.example.itforum.user.modelData.response.PostListResponse
+import com.example.itforum.user.modelData.response.PostReplyResponse
+import com.example.itforum.user.modelData.response.PostResponse
+import com.example.itforum.user.modelData.response.ReplyResponse
+
+import com.example.itforum.user.modelData.response.VoteResponse
+import okhttp3.MultipartBody
 
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 
 import retrofit2.http.POST
+import retrofit2.http.Part
 
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -48,14 +56,26 @@ interface PostService {
         @Query("limit") limit: Int
     ): Response<ReplyResponse>
 
-    @POST("posts/create")
+    @POST("comments")
     suspend fun postComment(@Body postComment: PostComment): Response<PostCommentResponse>
 
+    @Multipart
     @POST("posts/create")
-    suspend fun createPost(@Body createPostRequest: CreatePostRequest): Response<CreatePostResponse>
+    suspend fun createPost(
+        @Part userId: MultipartBody.Part?,
+        @Part title: MultipartBody.Part?,
+        @Part content: MultipartBody.Part?,
+        @Part tags: MultipartBody.Part?,
+        @Part isPublished: MultipartBody.Part?,
+        @Part imageUrls: List<MultipartBody.Part?>
+    ): Response<CreatePostResponse>
 
     @POST("posts/reply")
     suspend fun postReply(@Body postReply : PostReply): Response<PostReplyResponse>
     @PATCH("posts/hide/{id}")
     suspend fun hidePost(@Path("id") postId: String): Response<Unit>
+    @POST("posts/bookmarks/{postId}/{userId}")
+    suspend fun savedPost(@Path("postId")postId: String,@Path("userId")userId: String) : Response<BookMarkResponse>
+    @GET("posts/bookmarks/{userId}")
+    suspend fun getSavedPost(@Path("userId")userId: String): Response<GetBookMarkResponse>
 }

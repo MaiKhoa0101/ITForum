@@ -1,23 +1,13 @@
 package com.example.itforum.service
 
-import com.example.itforum.user.model.request.CreatePostRequest
-import com.example.itforum.user.model.request.GetPostRequest
-import com.example.itforum.user.model.request.LoginUser
-import com.example.itforum.user.model.request.RegisterUser
-import com.example.itforum.user.model.request.UserUpdateRequest
-import com.example.itforum.user.model.request.VoteRequest
-import com.example.itforum.user.model.response.CreatePostResponse
-import com.example.itforum.user.model.response.GetVoteResponse
-import com.example.itforum.user.model.response.LoginResponse
-import com.example.itforum.user.model.response.PostListResponse
-import com.example.itforum.user.model.response.RegisterResponse
-import com.example.itforum.user.model.response.UserProfileResponse
-import com.example.itforum.user.model.response.UserResponse
-import com.example.itforum.user.model.response.VoteResponse
-import com.example.itforum.user.model.response.fetchUserState
-import com.example.itforum.user.model.response.userUpdateResponse
+import com.example.itforum.user.modelData.request.LoginUser
+import com.example.itforum.user.modelData.request.RegisterUser
+import com.example.itforum.user.modelData.response.LoginResponse
+import com.example.itforum.user.modelData.response.RegisterResponse
+import com.example.itforum.user.modelData.response.UserResponse
+import com.example.itforum.user.modelData.response.fetchUserState
+import com.example.itforum.user.modelData.response.userUpdateResponse
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -44,7 +34,7 @@ interface UserService {
         @Part email: MultipartBody.Part?,
         @Part username: MultipartBody.Part?,
         @Part introduce: MultipartBody.Part?,
-        @Part skills: MultipartBody.Part?,
+        @Part skill: MultipartBody.Part?,
         @Part certificate: MultipartBody.Part?,
         @Part avatar: MultipartBody.Part?
     ): Response<userUpdateResponse>

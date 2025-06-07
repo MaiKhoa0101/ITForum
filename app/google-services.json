@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "984462885199",
+    "project_id": "itforum-e2eea",
+    "storage_bucket": "itforum-e2eea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:984462885199:android:8675b88cef84a27e04853a",
+        "android_client_info": {
+          "package_name": "com.example.itforum"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmWaI4KJ_HMI1s3CEJoWrRjlC1fCYjFGY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

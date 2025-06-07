@@ -1,9 +1,7 @@
 package com.example.itforum.user.effect.model
 
-import com.example.itforum.user.model.response.Comment
-import com.example.itforum.user.model.response.CommentResponse
-import com.example.itforum.user.model.response.Reply
-import com.example.itforum.user.model.response.ReplyResponse
+import com.example.itforum.user.modelData.response.Comment
+import com.example.itforum.user.modelData.response.Reply
 
 sealed class UiStateComment {
     data class SuccessFetchComment(val comments: List<Comment>) : UiStateComment()

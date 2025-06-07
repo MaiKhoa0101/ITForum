@@ -44,7 +44,7 @@ fun DetailItem(
 
         if (divider) {
             Divider(
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.secondaryContainer,
                 thickness = 1.dp,
                 modifier = Modifier.padding(top = 4.dp)
             )

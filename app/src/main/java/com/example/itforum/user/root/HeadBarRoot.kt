@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -23,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -32,7 +35,6 @@ import com.example.itforum.R
 @Composable
 fun TopBarRoot(
     navHostController : NavHostController,
-    onToggleTheme: () -> Unit,
     onMenuClick: () -> Unit
 ) {
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -41,9 +43,8 @@ fun TopBarRoot(
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.primaryContainer)
-            .fillMaxWidth()
-            .height(130.dp),
-        verticalArrangement = Arrangement.Center
+            .fillMaxWidth() ,
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -73,47 +74,40 @@ fun TopBarRoot(
                 color = MaterialTheme.colorScheme.onPrimary
             )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.tool),
-                    contentDescription = "Toggle Theme",
-                    modifier = Modifier
-                        .size(30.dp)
-                        .clickable {navHostController.navigate("myfeed")}
-                )
-//                Spacer(modifier = Modifier.width(16.dp))
-//                Icon(
-//                    painter = painterResource(R.drawable.searchicon),
-//                    contentDescription = "Search",
-//                    modifier = Modifier
-//                        .size(25.dp)
-//                        .clickable {
-//                            // TODO: Implement search
-//                        }
-//                )
-            }
-        }
 
+        }
+        Spacer(modifier = Modifier.height(8.dp))
         // Tab Bar
         TabRow(
             selectedTabIndex = selectedTabIndex,
             containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(horizontal = 8.dp),
+            indicator = {}
         ) {
             roles.forEachIndexed { index, title ->
                 Tab(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                        .background(
+                            if (selectedTabIndex == index)
+                                MaterialTheme.colorScheme.background
+                            else
+                                MaterialTheme.colorScheme.primaryContainer
+                        )
+                        ,
                     selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
+                    onClick = {
+                        selectedTabIndex = index
+                        when (index) {
+                            0 -> navHostController.navigate("home")
+                            3 -> navHostController.navigate("bookmark")
+                        }
+
+                              },
                     text = {
                         Text(
                             text = title,
-                            color = if (selectedTabIndex == index)
-                                MaterialTheme.colorScheme.onSurface
-                            else
-                                MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 )

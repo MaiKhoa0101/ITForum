@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -68,14 +70,14 @@ fun NotificationPage(modifier: Modifier, navHostController: NavHostController){
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF00AEFF))
+            .background(MaterialTheme.colorScheme.primaryContainer)
     ) {
         Spacer(modifier = Modifier.height(30.dp))
         Text(
             text = "Thông báo",
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 13.dp, vertical = 10.dp)
                 .fillMaxWidth(),
             textAlign = TextAlign.Center
@@ -84,20 +86,21 @@ fun NotificationPage(modifier: Modifier, navHostController: NavHostController){
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .background(Color(0xFFEEEEEE))
+                .background( MaterialTheme.colorScheme.background)
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(7.dp)
             ) {
                 item {
                     Text(
                         text = "Mới",
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
-                        modifier = Modifier.padding(start = 15.dp, top = 15.dp)
+                        modifier = Modifier.padding(start = 15.dp, top = 15.dp),
+                        color = MaterialTheme.colorScheme.onBackground
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
                 items(ListNotiNew) { notify ->
@@ -109,8 +112,10 @@ fun NotificationPage(modifier: Modifier, navHostController: NavHostController){
                         text = "Trước đó",
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
-                        modifier = Modifier.padding(start = 15.dp, top = 10.dp)
+                        modifier = Modifier.padding(start = 15.dp, top = 10.dp),
+                        color = MaterialTheme.colorScheme.onBackground
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
                 items(ListNotiOld) { notify ->
@@ -129,11 +134,13 @@ fun NotifyChild(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .clickable { navHostController.navigate("detail_notify") },
     ) {
+        Divider(thickness = 2.dp)
         Row(
             modifier = Modifier
+                .background( MaterialTheme.colorScheme.tertiaryContainer)
                 .padding(vertical = 15.dp, horizontal = 12.dp)
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -168,12 +175,13 @@ fun NotifyChild(
                     Icon(
                         imageVector = Icons.Default.Schedule,
                         contentDescription = "",
-                        modifier = Modifier.size(12.dp)
+                        modifier = Modifier.size(12.dp),
+                        tint =  MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         text = notify.time,
                         fontSize = 12.sp,
-                        color = Color(0x80000000)
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
             }

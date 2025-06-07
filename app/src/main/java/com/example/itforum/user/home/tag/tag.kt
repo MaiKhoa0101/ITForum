@@ -1,5 +1,6 @@
 package com.example.itforum.user.home.tag
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -83,7 +84,8 @@ fun AllTagsWidget(
             Text(
                 text = key.toString(),
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             groupedTags[key]?.forEach { tag ->

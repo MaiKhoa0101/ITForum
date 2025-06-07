@@ -1,7 +1,9 @@
 package com.example.itforum.user.post.viewmodel
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,14 +11,16 @@ import androidx.navigation.NavHostController
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.effect.model.UiStatePost
-import com.example.itforum.user.model.request.CreatePostRequest
-import com.example.itforum.user.model.request.GetPostRequest
-import com.example.itforum.user.model.request.RegisterUser
-import com.example.itforum.user.model.request.VoteRequest
-import com.example.itforum.user.model.response.GetVoteResponse
-import com.example.itforum.user.model.response.PostResponse
-import com.example.itforum.user.model.response.PostWithVote
-import com.example.itforum.user.model.response.VoteResponse
+import com.example.itforum.user.modelData.request.CreatePostRequest
+import com.example.itforum.user.modelData.request.GetPostRequest
+import com.example.itforum.user.modelData.request.VoteRequest
+import com.example.itforum.user.modelData.response.BookMarkResponse
+import com.example.itforum.user.modelData.response.GetBookMarkResponse
+import com.example.itforum.user.modelData.response.GetVoteResponse
+import com.example.itforum.user.modelData.response.PostResponse
+import com.example.itforum.user.modelData.response.PostWithVote
+import com.example.itforum.user.modelData.response.UserProfileResponse
+import com.example.itforum.user.modelData.response.VoteResponse
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -24,7 +28,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
 import java.io.IOException
+import com.google.gson.Gson
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.http.Part
+import java.io.File
+
 
 class PostViewModel(
     navHostController: NavHostController,
@@ -52,6 +63,9 @@ class PostViewModel(
         userId = sharedPreferences.getString("userId", null)
     }
 
+    private val _postsWithVotes = MutableStateFlow<List<PostWithVote>>(emptyList())
+    val postsWithVotes: StateFlow<List<PostWithVote>> = _postsWithVotes
+
 
     private suspend fun getVoteDataByPostId(postId: String?, userId: String?): GetVoteResponse? {
         if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) return null
@@ -68,7 +82,6 @@ class PostViewModel(
     @SuppressLint("SuspiciousIndentation")
     fun fetchPosts(getPostRequest: GetPostRequest, isRefresh: Boolean = false, isLoadMore: Boolean = false) {
         if (isRefresh) {
-
             allPostsWithVotes.clear()
             _isRefreshing.value = true
             currentPage = 1
@@ -77,9 +90,7 @@ class PostViewModel(
             if (!canLoadMore || _isLoadingMore.value) return
             _isLoadingMore.value = true
         } else {
-
             allPostsWithVotes.clear()
-            _uiState.value = UiStatePost.Loading
             currentPage = 1
             canLoadMore = true
             Log.d("load state", canLoadMore.toString())
@@ -87,6 +98,11 @@ class PostViewModel(
 
         viewModelScope.launch {
             try {
+                // fetch bookmarked post IDs
+                val bookmarkResponse = getSavePost(userId)
+                val bookmarkedIds = bookmarkResponse?.postsId?.toSet() ?: emptySet()
+                Log.d("bookmarkId",bookmarkedIds.toString())
+                // fetch post
                 val response = RetrofitInstance.postService.getPost(getPostRequest)
                 if (response.isSuccessful && response.body() != null) {
                     val newPosts = response.body()?.posts ?: emptyList()
@@ -95,7 +111,9 @@ class PostViewModel(
                         async {
                             PostWithVote(
                                 post = post,
-                                vote = getVoteDataByPostId(post.id, userId)
+                                vote = getVoteDataByPostId(post.id, userId),
+                                isBookMark = bookmarkedIds.contains(post.id)
+
                             )
                         }
                     }.awaitAll()
@@ -106,25 +124,21 @@ class PostViewModel(
                     }
 
                     if (isRefresh || !isLoadMore) {
-                        // Fresh load or refresh: both lists cleared above
-
                         allPostsWithVotes.addAll(postsWithVotes)
                         if (newPosts.isNotEmpty()) currentPage = 2
                     } else if (isLoadMore) {
-                        // Load more: append new data
-
                         allPostsWithVotes.addAll(postsWithVotes)
                         if (newPosts.isNotEmpty()) currentPage++
                     }
 
-                    // Always update the UI with all accumulated posts
-                    _uiState.value = UiStatePost.SuccessWithVotes(allPostsWithVotes)
+                    // Always update posts flow
+                    _postsWithVotes.value = allPostsWithVotes
                 } else {
                     if (isLoadMore) {
                         canLoadMore = false
                         logError("Load more failed: ${response.message()}")
                     } else {
-                        _uiState.value = UiStatePost.Error("Lỗi: ${response.message()}")
+                        // Optionally emit error to another error flow/UI state
                         logError("Get post failed: ${response.message()}")
                     }
                 }
@@ -133,7 +147,7 @@ class PostViewModel(
                     canLoadMore = false
                     logError("Load more - Server unreachable: ${e.message}")
                 } else {
-                    _uiState.value = UiStatePost.Error("Không thể kết nối server.")
+                    // Optionally emit error to another error flow/UI state
                     logError("Server unreachable: ${e.message}")
                 }
             } catch (e: Exception) {
@@ -141,7 +155,7 @@ class PostViewModel(
                     canLoadMore = false
                     logError("Load more exception: ${e.localizedMessage}")
                 } else {
-                    _uiState.value = UiStatePost.Error("Lỗi không xác định: ${e.message}")
+                    // Optionally emit error to another error flow/UI state
                     logError("Exception: ${e.localizedMessage}")
                 }
             } finally {
@@ -154,63 +168,185 @@ class PostViewModel(
             }
         }
     }
-    fun createPost(createPostRequest: CreatePostRequest) {
+
+    fun createPost(createPostRequest: CreatePostRequest, context: Context) {
         viewModelScope.launch {
+            _uiStateCreate.value = UiState.Loading
             try {
-                val response = RetrofitInstance.postService.createPost(createPostRequest)
-                if (response.isSuccessful) {
-                    _uiStateCreate.value = UiState.Success(
-                        response.body()?.message ?: "Đăng bài thành công"
+                Log.d("UserViewModel", "Request: $createPostRequest")
+
+                val imageUrls = createPostRequest.imageUrls?.mapNotNull { uri ->
+                    prepareFilePart(context, uri, "imageUrls")
+                }
+
+                // Chỉ tạo MultipartBody.Part cho các trường không null
+                val userId = createPostRequest.userId?.let {
+                    MultipartBody.Part.createFormData("userId", it)
+                }
+                val title = createPostRequest.title?.let {
+                    MultipartBody.Part.createFormData("title", it)
+                }
+                val content = createPostRequest.content?.let {
+                    MultipartBody.Part.createFormData("content", it)
+                }
+                val isPublished = createPostRequest.isPublished?.let {
+                    MultipartBody.Part.createFormData("isPublished", it)
+                }
+                val tags = createPostRequest.tags?.let {
+                    MultipartBody.Part.createFormData("tags", Gson().toJson(it))
+                }
+
+                val response = imageUrls?.let {
+                    RetrofitInstance.postService.createPost(
+                        userId = userId,
+                        title = title,
+                        content = content,
+                        tags = tags,
+                        isPublished = isPublished,
+                        imageUrls = it
                     )
-                    delay(2000)
-                    _uiStateCreate.value = UiState.Idle
-                } else {
-                    showError("Đăng ký thất bại: ${response.message()}")
-                    _uiStateCreate.value = UiState.Error(response.message())
+                }
+
+
+                if (response != null) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body()
+                        Log.d("PostViewModel", "Success Response: ${responseBody?.message}")
+                        _uiStateCreate.value = UiState.Success(
+                            responseBody?.message ?: "Đăng bài thành công"
+                        )
+                        delay(500) // Cho Compose thời gian phản ứng trước khi đổi trạng thái
+                        _uiStateCreate.value = UiState.Idle
+                    } else {
+                        // Get error details from response body
+                        val errorBody = response.errorBody()?.string()
+                        Log.e("PostViewModel", "Error Response Body: $errorBody")
+
+                        val errorMessage = when (response.code()) {
+                            400 -> "Dữ liệu không hợp lệ: $errorBody"
+                            404 -> "Không tìm thấy người dùng"
+                            500 -> "Lỗi server: $errorBody"
+                            else -> "Lỗi không xác định (${response.code()}): $errorBody"
+                        }
+
+                        showError(errorMessage)
+                        _uiStateCreate.value = UiState.Error(errorMessage)
+                    }
                 }
             } catch (e: IOException) {
-                _uiStateCreate.value = UiState.Error("Lỗi phản hồi từ server")
-                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+                val errorMsg = "Lỗi kết nối mạng: ${e.localizedMessage}"
+                Log.e("PostViewModel", errorMsg, e)
+                _uiStateCreate.value = UiState.Error(errorMsg)
+                showError("Không thể kết nối máy chú, vui lòng kiểm tra mạng.")
             } catch (e: Exception) {
-                _uiStateCreate.value = UiState.Error("Lỗi không xác định: ${e.message}")
-                showError("Lỗi không xác định: ${e.localizedMessage ?: "Không rõ"}")
+                val errorMsg = "Lỗi hệ thống: ${e.message ?: e.localizedMessage}"
+                Log.e("PostViewModel", errorMsg, e)
+                _uiStateCreate.value = UiState.Error(errorMsg)
+                showError("Lỗi bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
             }
         }
     }
+    private fun prepareFilePart(
+        context: Context,
+        fileUri: Uri,
+        partName: String
+    ): MultipartBody.Part? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(fileUri)
+            val tempFile = File.createTempFile("upload_", ".jpg", context.cacheDir)
+            tempFile.outputStream().use { outputStream ->
+                inputStream?.copyTo(outputStream)
+            }
 
-
-    private fun showError(message: String) {
-        // TODO: Hiển thị lỗi lên UI, ví dụ Toast, Snackbar, hoặc cập nhật LiveData
-        Log.e("Register", message)
+            val requestFile = tempFile.asRequestBody("image/*".toMediaTypeOrNull())
+            MultipartBody.Part.createFormData(partName, tempFile.name, requestFile)
+        } catch (e: Exception) {
+            Log.e("PostViewModel", "Error preparing file part", e)
+            null
+        }
     }
+
     fun loadMorePosts() {
         if (canLoadMore && !_isLoadingMore.value) {
             fetchPosts(GetPostRequest(page = currentPage), isLoadMore = true)
         }
     }
-    fun votePost(postId: String?, type: String) {
-        if (postId.isNullOrEmpty() || userId.isNullOrEmpty() || type.isEmpty()) return
-        viewModelScope.launch {
-            try {
-                val voteRequest = VoteRequest(userId = userId, type = type)
-                val response = RetrofitInstance.postService.votePost(postId, voteRequest)
-                if (response.isSuccessful) {
-                   //
-                }
-                // No return needed
-            } catch (e: Exception) {
-                // Handle error (optional: log or update error state)
+    suspend fun votePost(postId: String?, type: String, index: Int): VoteResponse? {
+        if (postId.isNullOrEmpty() || userId.isNullOrEmpty() || type.isEmpty()) return null
+        Log.d("Index of post", index.toString())
+
+        return try {
+            val voteRequest = VoteRequest(userId = userId, type = type)
+            val response = RetrofitInstance.postService.votePost(postId, voteRequest)
+            if (response.isSuccessful) {
+                response.body() // Return the VoteResponse
+            } else {
+                null
             }
+        } catch (e: Exception) {
+            Log.e("VotePost", "Error voting: ${e.message}")
+            null
+        }
+    }
+    suspend fun savePost(postId: String?, userId: String?): BookMarkResponse? {
+        return try {
+            if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) {
+                Log.e("savePost", "postId or userId is null/empty")
+                return null
+            }
+
+            val res = RetrofitInstance.postService.savedPost(postId, userId)
+
+
+            if (res.isSuccessful) {
+                val response = res.body()
+                Log.d("savePost", response.toString())
+                response
+            } else {
+                Log.e("savePost", "Failed with code: ${res.code()}, message: ${res.message()}")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("savePost", "Error: ${e.message}")
+            null
         }
     }
 
-    fun refreshPosts() {
-        fetchPosts(GetPostRequest(page = 1), isRefresh = true)
+    suspend fun getSavePost(userId: String?): GetBookMarkResponse? {
+        return try {
+            if (userId.isNullOrEmpty()) {
+                Log.e("getSavePost", "userId is null or empty")
+                return null
+            }
+
+            val res = RetrofitInstance.postService.getSavedPost(userId)
+
+            if (res.isSuccessful) {
+                val response = res.body()
+                Log.d("getSavePost", response.toString())
+                response
+            } else {
+                Log.e("getSavePost", "Failed with code: ${res.code()}, message: ${res.message()}")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("getSavePost", "Exception: ${e.message}")
+            null
+        }
+    }
+
+
+    fun refreshPosts(getPostRequest: GetPostRequest) {
+        fetchPosts(getPostRequest, isRefresh = true)
     }
 
 
     fun getStoredUserId(): String? {
         return sharedPreferences.getString("userId", null)
+    }
+
+    private fun showError(message: String) {
+        Log.e("Register", message)
     }
 
     private fun logError(msg: String) {

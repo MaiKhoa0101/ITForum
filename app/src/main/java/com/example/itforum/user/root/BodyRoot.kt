@@ -2,13 +2,16 @@ package com.example.itforum.user.root
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.itforum.admin.AdminRoot.AdminRoot
 import com.example.itforum.user.home.HomePage
 import com.example.itforum.user.home.bookmark.BookMarkScreen
 import com.example.itforum.user.home.follow.FollowScreen
@@ -37,19 +40,23 @@ import com.example.itforum.utilities.note.NotesApp
 
 
 import com.example.itforum.admin.adminAccount.AccountDetailScreen
+import com.example.itforum.admin.adminComplaint.ManagementComplaintDetailScreen
+import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
 import com.example.itforum.admin.adminReport.ReportPost.model.request.ReportedPost
 import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailScreen
 import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
+import com.example.itforum.user.complaint.ComplaintPage
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.ContentPost
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.profile.OtherUserProfileScreen
 import com.example.itforum.user.profile.UserProfileScreen
+import com.example.itforum.user.setting.Setting
 import com.example.itforum.user.utilities.chat.ChatAIApp
 import com.example.itforum.user.utilities.chat.ChatAIApp
 
 @Composable
-fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier){
+fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier, onToggleTheme: () -> Unit, darkTheme: Boolean = false){
     NavHost(navHostController, startDestination = "login") {
         composable ("home") {
             HomePage(navHostController,modifier,sharePreferences)
@@ -87,13 +94,13 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
             ToolPage(modifier)
         }
         composable ("personal") {
-            UserProfileScreen(sharePreferences, navHostController,modifier)
+            UserProfileScreen(sharePreferences, navHostController)
         }
         composable ("otherprofile") {
             OtherUserProfileScreen(sharePreferences, navHostController,modifier)
         }
         composable ("editprofile") {
-            EditProfile(sharePreferences,navHostController)
+            EditProfile(modifier,sharePreferences,navHostController)
         }
         composable("create_post") {
             CreatePostPage(modifier, navHostController, sharePreferences)
@@ -109,11 +116,14 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
         }
         composable("login") {
             LoginScreen(
-                navHostController= navHostController,
+                navHostController = navHostController,
                 sharedPreferences = sharePreferences,
                 onRegisterClick = { navHostController.navigate("register") },
-                onForgotPasswordClick = { navHostController.navigate("forgot_password") }
+                onForgotPasswordClick = { navHostController.navigate("forgot_password") },
             )
+        }
+        composable ("settings"){
+            Setting(navHostController, onToggleTheme = onToggleTheme, darkTheme = darkTheme)
         }
         composable("forgot_password") {
             ForgotPasswordScreen(
@@ -148,6 +158,10 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
             ) // Màn hình đăng ký mới thêm
         }
 
+        composable ("admin_root"){
+            AdminRoot(navHostController,sharePreferences, sharePreferences.getString("access_token", "") ?: "")
+        }
+
         composable("otp") {
             OtpVerificationScreen(
                 onBackClick = { navHostController.popBackStack() },
@@ -165,13 +179,22 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
             MyFeedScreen(modifier)
         }
         composable("bookmark"){
-            BookMarkScreen()
+            BookMarkScreen(navHostController,sharePreferences)
         }
         composable("follow"){
             FollowScreen()
         }
         composable ("searchscreen"){
             SearchScreen(modifier)
+        }
+        composable("detail_news/{newsId}") { backStackEntry ->
+            val newsId = backStackEntry.arguments?.getString("newsId")
+            if (newsId != null) {
+                DetailNewsPage(newsId,modifier,navHostController, sharePreferences)
+            }
+        }
+        composable("complaint") {
+                ComplaintPage(navHostController, sharePreferences)
         }
         composable("account_detail/{accountId}") { backStackEntry ->
             val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
@@ -181,10 +204,15 @@ fun BodyRoot(sharePreferences: SharedPreferences, navHostController: NavHostCont
                 Text("Không tìm thấy tài khoản.")
             }
         }
-        composable("detail_news/{newsId}") { backStackEntry ->
-            val newsId = backStackEntry.arguments?.getString("newsId")
-            if (newsId != null) {
-                DetailNewsPage(newsId,modifier,navHostController, sharePreferences)
+        composable("manager_complaint"){
+            ManagementComplaintScreen(navHostController,sharePreferences)
+        }
+        composable("complaint_detail/{complaintId}"){ backStackEntry ->
+            val complaintId = backStackEntry.arguments?.getString("complaintId")
+            if (complaintId != null) {
+                ManagementComplaintDetailScreen(modifier,navHostController,sharePreferences,complaintId)
+            } else {
+                Text("Không tìm thấy khiếu nại.")
             }
         }
     }
