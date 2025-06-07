@@ -14,12 +14,17 @@ import com.example.itforum.user.post.icontext
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Visibility
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportViewModelFactory
+import com.example.itforum.repository.ReportRepository
+import com.example.itforum.retrofit.RetrofitInstance
 
 @Composable
-fun ReportedAccountScreen(
-    viewModel: ReportedUserViewModel,
-    navController: NavHostController
-) {
+fun ReportedAccountScreen(navController: NavHostController) {
+    val viewModel: ReportedUserViewModel = viewModel(factory = ReportViewModelFactory(
+        ReportRepository(
+        RetrofitInstance.reportAccountService)
+    ))
     val users by viewModel.users.collectAsState()
     val error by viewModel.error.collectAsState()
 
@@ -51,6 +56,7 @@ fun ReportedAccountScreen(
             rows = convertReportedUsersToRows(filteredUsers),
             menuOptions = menuOptions,
             onClickOption = { accountId ->
+                println("🟡 reportId được chọn: $accountId")
                 navController.navigate("account_detail/$accountId")
             }
         )

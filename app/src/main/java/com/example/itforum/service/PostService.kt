@@ -17,6 +17,7 @@ import com.example.itforum.user.model.response.VoteResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 
 import retrofit2.http.POST
 
@@ -55,4 +56,6 @@ interface PostService {
 
     @POST("posts/reply")
     suspend fun postReply(@Body postReply : PostReply): Response<PostReplyResponse>
+    @PATCH("posts/hide/{id}")
+    suspend fun hidePost(@Path("id") postId: String): Response<Unit>
 }

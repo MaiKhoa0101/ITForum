@@ -50,19 +50,77 @@ import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostVi
 import com.example.itforum.repository.ReportPostRepository
 import com.example.itforum.repository.ReportRepository
 import com.example.itforum.retrofit.RetrofitInstance
+import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
+import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        //tạo báo cáo tài khoản
+//        setContent {
+//            ITForumTheme {
+//                CreateReportAccountScreen(
+//                    reporterUserId = "683c1cd553363395202e2a2a",
+//                    reportedUserId = "683deb84c5b3e91c2901b8ba",
+//                    onBack = { /*  */ }
+//                )
+//            }
+//        }
+        //tạo báo cáo bài viết
+//        setContent {
+//            ITForumTheme {
+//
+//                val reporterUserId = "683c1cd553363395202e2a2a"
+//                val reportedPostId = "683e2a53a077f04ab64dbe40"
+//
+//                CreateReportPostScreen(
+//                    reporterUserId = reporterUserId,
+//                    reportedPostId = reportedPostId,
+//                    onBack = {}
+//                )
+//            }
+//        }
+        //xem báo cáo tài khoản
+//        setContent {
+//            ITForumTheme {
+//                val navController = rememberNavController()
+//
+//
+//                NavHost(navController = navController, startDestination = "reported_accounts") {
+//                    composable("reported_accounts") {
+//                        ReportedAccountScreen(navController = navController)
+//                    }
+//
+//                    composable("account_detail/{reportId}") { backStackEntry ->
+//                        val reportId = backStackEntry.arguments?.getString("reportId") ?: return@composable
+//                        ReportedAccountDetailScreen(reportId = reportId, onBack = { navController.popBackStack() })
+//                    }
+//                }
+        //xem báo cáo bài viết
+//                setContent {
+//            ITForumTheme {
+//                val navController = rememberNavController()
+//
+//
+//                NavHost(navController = navController, startDestination = "reported_posts") {
+//                    composable("reported_posts") {
+//                        ReportedPostScreen(navController = navController)
+//                    }
+//
+//                    composable("post_detail/{reportId}") { backStackEntry ->
+//                        val reportId = backStackEntry.arguments?.getString("reportId") ?: return@composable
+//                        ReportedPostDetailScreen(reportId = reportId, onBack = { navController.popBackStack() })
+//                    }
+//                }
 
 
-        setContent {
-            val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-            Root(sharedPreferences)
+            }
         }
-    }}    
+
+
+
 
 
 
