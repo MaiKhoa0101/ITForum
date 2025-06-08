@@ -45,7 +45,7 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                         _uiState.value = UiState.Success(
                             response.body()?.message ?: "Đăng nhập thành công"
                         )
-                        delay(2000)
+
                         _uiState.value = UiState.Idle
                     } else {
                         showError("Token không hợp lệ")
