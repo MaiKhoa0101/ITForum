@@ -41,46 +41,36 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                     val token = response.body()?.accessToken
                     saveUserEmail(emailOrPhone)
                     if (!token.isNullOrEmpty()) {
+                        println("Dang nhap thanh cong voi token ko null va response "+response.body())
                         handleToken(token)
                         _uiState.value = UiState.Success(
                             response.body()?.message ?: "Đăng nhập thành công"
                         )
+                        delay(500) // Cho phép UI xử lý trạng thái Success
 
-                        _uiState.value = UiState.Idle
                     } else {
                         showError("Token không hợp lệ")
                         _uiState.value = UiState.Error(response.message())
+                        delay(500) // Cho phép UI xử lý trạng thái Success
                     }
                 } else {
-                    showError(response.message())
+                    _uiState.value = UiState.Error(response.message())
                 }
             } catch (e: IOException) {
                 _uiState.value = UiState.Error("Lỗi kết nối mạng: ${e.localizedMessage}")
                 showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+                delay(500) // Cho phép UI xử lý trạng thái Success
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Lỗi hệ thống, vui lòng thử lại")
                 showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+                delay(500) // Cho phép UI xử lý trạng thái Success
             }
+            _uiState.value = UiState.Idle
+
         }
     }
 
 
-    // Xử lý token sau khi login thành công
-//    private fun handleToken(token: String) {
-//        saveToken(token)
-//        try {
-//            val jwt = JWT(token)
-//
-//            val id = jwt.getClaim("userId").asString()
-//            val role = jwt.getClaim("role").asString()
-//
-//            saveUserId(id)
-//            saveUserRole(role)
-//            // TODO: Xử lý role nếu cần
-//        } catch (e: Exception) {
-//            showError("Invalid token format")
-//        }
-//    }
     private fun handleToken(token: String) {
         saveToken(token)
         try {
@@ -94,19 +84,10 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
             saveUserEmail(email)
             saveUserId(id)
             saveUserRole(role)
-//
-//            viewModelScope.launch {
-//                CrashLogger.logCrash(
-//                    error = Exception("💥 Crash sau khi login"),
-//                    userId = id ?: "",
-//                    email = email ?: ""
-//                )
-//            }
-
 
 
         } catch (e: Exception) {
-            showError("Invalid token format")
+            showError("Invalid token format "+e)
         }
 
     }

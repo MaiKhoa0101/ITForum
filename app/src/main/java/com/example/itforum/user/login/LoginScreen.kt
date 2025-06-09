@@ -49,16 +49,12 @@ fun LoginScreen(
     var canSubmit by remember {mutableStateOf(false)}
 
     val uiState by loginViewModel.uiState.collectAsState()
-//    LaunchedEffect(uiState) {
-//        if (uiState is UiState.Success) {
-//            println("uiState là success")
-//            navHostController.navigate("home")
-//        }
-//    }
     LaunchedEffect(uiState) {
+        println("uiState da bi thay doi: "+uiState)
         if (uiState is UiState.Success) {
             val role = sharedPreferences.getString("role", null)
             if (role != null) {
+                println("Role la: "+role)
                 val destination = if (role == "admin") "admin_root" else "home"
                 navHostController.navigate(destination)
             } else {
@@ -99,7 +95,7 @@ fun LoginScreen(
                 isPhoneOrEmailValid = phoneNumberOrEmail.all { it.isDigit() } || phoneNumberOrEmail.contains("@")
                 isPasswordValid = password.length >= 6
                 canSubmit= isPasswordValid&&isPhoneOrEmailValid
-                println("Đã nhấn đăng ký với cansubmit: $canSubmit")
+                println("Đã nhấn đăng nhập với cansubmit: $canSubmit")
                 if (canSubmit) {
                     loginViewModel.userLogin(phoneNumberOrEmail, password)
                 }
