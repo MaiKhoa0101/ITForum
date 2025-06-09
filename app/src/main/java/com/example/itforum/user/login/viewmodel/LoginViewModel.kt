@@ -55,6 +55,7 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                     }
                 } else {
                     _uiState.value = UiState.Error(response.message())
+                    delay(500) // Cho phép UI xử lý trạng thái Success
                 }
             } catch (e: IOException) {
                 _uiState.value = UiState.Error("Lỗi kết nối mạng: ${e.localizedMessage}")
