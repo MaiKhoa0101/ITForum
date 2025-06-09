@@ -28,19 +28,22 @@ class RegisterViewModel(private var sharedPreferences: SharedPreferences)  : Vie
                     _uiState.value = UiState.Success(
                         response.body()?.message ?: "Đăng ký thành công"
                     )
-                    delay(2000)
-                    _uiState.value = UiState.Idle
+                    delay(500)
                 } else {
                     showError("Đăng ký thất bại: ${response.message()}")
                     _uiState.value = UiState.Error(response.message())
+                    delay(500)
                 }
             } catch (e: IOException) {
                 _uiState.value = UiState.Error("Lỗi phản hồi từ server")
                 showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+                delay(500)
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Lỗi không xác định: ${e.message}")
                 showError("Lỗi không xác định: ${e.localizedMessage ?: "Không rõ"}")
+                delay(500)
             }
+            _uiState.value = UiState.Idle
         }
     }
 

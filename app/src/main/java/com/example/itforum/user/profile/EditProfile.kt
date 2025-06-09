@@ -483,6 +483,13 @@ fun EditProfile(
             println("uiState là success")
             navHostController.popBackStack()
         }
+        if (uiState is UiState.Error) {
+            println("uiState là error")
+
+        }
+        if (uiState is UiState.Loading) {
+
+        }
     }
 
     LaunchedEffect(Unit) {
