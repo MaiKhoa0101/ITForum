@@ -36,7 +36,7 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                 val loginUser = LoginUser(emailOrPhone, password)
                 val response = RetrofitInstance.userService.login(loginUser)
 
-                Log.d("LoginViewModel", "Response: $response")
+                Log.d("LoginViewModel", "Response: $response")  
                 if (response.isSuccessful) {
                     val token = response.body()?.accessToken
                     saveUserEmail(emailOrPhone)
