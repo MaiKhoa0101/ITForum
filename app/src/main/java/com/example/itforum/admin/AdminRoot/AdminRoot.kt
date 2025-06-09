@@ -44,7 +44,7 @@ import com.example.itforum.user.login.LoginScreen
 import com.example.itforum.utilities.DrawerContent
 import kotlinx.coroutines.launch
 import kotlin.collections.contains
-
+import com.example.itforum.admin.adminCrashlytic.CrashLogScreen
 @Composable
 fun AdminScreen(sharedPreferences: SharedPreferences) {
     val navHostController = rememberNavController()
@@ -58,7 +58,8 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
         "PostManager",
         "ReportManager",
         "NewsManager",
-        "NotificationManager"
+        "NotificationManager",
+        "Crashlytics"
     )
 
     ModalNavigationDrawer(
@@ -136,6 +137,10 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                 composable("NotificationManager") {
 
                 }
+                composable("Crashlytics") {
+                    CrashLogScreen(navHostController = navHostController)
+                }
+
             }
         }
     }

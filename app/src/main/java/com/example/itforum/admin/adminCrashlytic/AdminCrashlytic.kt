@@ -25,47 +25,57 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.navigation.NavHostController
 
-@OptIn(ExperimentalMaterial3Api::class)
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun CrashTopBar(
+//    modifier: Modifier = Modifier,
+//    navHostController: NavHostController
+//) {
+//    CenterAlignedTopAppBar(
+//        modifier = modifier,
+//        title = {
+//            Text(
+//                text = "Crash Logs",
+//                style = MaterialTheme.typography.titleLarge
+//            )
+//        },
+//        navigationIcon = {
+//            IconButton(onClick = {
+//                navHostController.popBackStack()
+//            }) {
+//                Icon(
+//                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                    contentDescription = "Quay lại"
+//                )
+//            }
+//        },
+//        colors = TopAppBarDefaults.topAppBarColors(
+//            containerColor = MaterialTheme.colorScheme.primaryContainer
+//        )
+//    )
+//}
+
+
+
+
 @Composable
-fun CrashTopBar(onBack: () -> Unit = {}) {
-    CenterAlignedTopAppBar(
-        title = {
-            Text(
-                text = "Crash Logs",
-                style = MaterialTheme.typography.titleLarge
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Quay lại"
-                )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    )
-}
-
-
-
-
-@Composable
-fun CrashLogScreen(viewModel: CrashLogViewModel = viewModel()) {
+fun CrashLogScreen(
+    navHostController: NavHostController,
+    viewModel: CrashLogViewModel = viewModel()
+) {
     val logs by viewModel.logs.collectAsState()
 
     Scaffold(
-        topBar = { CrashTopBar() }
+
     ) { innerPadding ->
         if (logs.isEmpty()) {
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 50.dp)
             ) {
                 Text("⚠ Không có log nào.")
             }
@@ -73,12 +83,13 @@ fun CrashLogScreen(viewModel: CrashLogViewModel = viewModel()) {
             LazyColumn(
                 contentPadding = innerPadding,
                 modifier = Modifier.fillMaxSize()
+                    .padding(16.dp),
             ) {
                 items(logs) { log ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 50.dp),
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -93,6 +104,7 @@ fun CrashLogScreen(viewModel: CrashLogViewModel = viewModel()) {
         }
     }
 }
+
 
 
 
