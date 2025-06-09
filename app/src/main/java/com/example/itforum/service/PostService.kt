@@ -67,7 +67,8 @@ interface PostService {
         @Part content: MultipartBody.Part?,
         @Part tags: MultipartBody.Part?,
         @Part isPublished: MultipartBody.Part?,
-        @Part imageUrls: List<MultipartBody.Part?>
+        @Part imageUrls: List<MultipartBody.Part?>,
+        @Part videoUrls: List<MultipartBody.Part?>
     ): Response<CreatePostResponse>
 
     @POST("posts/reply")

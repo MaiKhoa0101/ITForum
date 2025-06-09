@@ -2,6 +2,7 @@ package com.example.itforum.user.complaint
 
 import android.content.SharedPreferences
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -85,14 +86,18 @@ fun ComplaintPage(
         val userInfo by userViewModel.user.collectAsState()
         val uiState by complaintViewModel.uiStateCreate.collectAsState()
         var showSuccessDialog by remember { mutableStateOf(false) }
+        var enable by remember { mutableStateOf<Boolean>(true) }
 
         LaunchedEffect(uiState) {
             println("UI State duoc thay doi")
             if (uiState is UiState.Success) {
                 println("uiState là success")
                 showSuccessDialog = true
+            }else if(uiState is UiState.Loading){
+                enable = false
             }
         }
+
         LaunchedEffect(Unit) {
             userViewModel.getUser()
         }
@@ -109,7 +114,7 @@ fun ComplaintPage(
         LazyColumn (
             modifier = Modifier.fillMaxSize()
         ) {
-            stickyHeader { TopPost("Góp ý", "Gửi",navHostController) {
+            stickyHeader { TopPost("Góp ý", "Gửi",navHostController, enable, uiState) {
                 complaintViewModel.createComplaint(
                     ComplaintRequest(
                         userId = userInfo?.id ?: "",
@@ -119,7 +124,9 @@ fun ComplaintPage(
                     ),
                     context
                 )
-            } }
+                Log.d("Img", imageUrl.toString())
+            }
+            }
             item {
                 Column(
                     modifier = Modifier

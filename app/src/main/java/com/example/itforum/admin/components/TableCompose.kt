@@ -57,7 +57,8 @@ fun TableData(
     rows: List<List<String>>,
     menuOptions: List<icontext>,
     sharedPreferences: SharedPreferences,
-    onClickOption: (String) -> Unit) {
+    onClickOption: (String) -> Unit = {}
+) {
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val maxTableHeight = screenHeight * 0.6f
@@ -160,7 +161,7 @@ fun TableData(
                                         onClick = {
                                             expandedIndex = -1
                                             val accountId = row[0]
-                                            onClickOption(accountId)
+                                            item.onClick(accountId)
                                         }
                                     )
                                 }

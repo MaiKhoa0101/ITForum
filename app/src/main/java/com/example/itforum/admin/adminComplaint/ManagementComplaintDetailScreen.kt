@@ -36,7 +36,6 @@ import com.example.itforum.user.profile.viewmodel.UserViewModel
 
 @Composable
 fun ManagementComplaintDetailScreen(
-    modifier: Modifier,
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences,
     complaintId: String

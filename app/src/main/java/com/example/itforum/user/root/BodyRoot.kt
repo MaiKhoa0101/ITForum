@@ -183,7 +183,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         composable("detail_news/{newsId}") { backStackEntry ->
             val newsId = backStackEntry.arguments?.getString("newsId")
             if (newsId != null) {
-                DetailNewsPage(newsId,modifier,navHostController, sharedPreferences)
+                DetailNewsPage(newsId, navHostController, sharedPreferences)
             }
         }
         composable("complaint") {
@@ -197,24 +197,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 Text("Không tìm thấy tài khoản.")
             }
         }
-        composable("detail_news/{newsId}") { backStackEntry ->
-            val newsId = backStackEntry.arguments?.getString("newsId")
-            if (newsId != null) {
-                DetailNewsPage(newsId, modifier, navHostController, sharedPreferences)
-            }
-        }
-        composable("manager_complaint"){
-            ManagementComplaintScreen(navHostController,sharedPreferences)
-        }
-        composable("complaint_detail/{complaintId}"){ backStackEntry ->
-            val complaintId = backStackEntry.arguments?.getString("complaintId")
-            if (complaintId != null) {
-                ManagementComplaintDetailScreen(modifier,navHostController,sharedPreferences,complaintId)
-            } else {
-                Text("Không tìm thấy khiếu nại.")
-            }
-        }
-
         composable ("admin_root"){
             AdminScreen(sharedPreferences)
         }
