@@ -55,6 +55,7 @@ import com.example.itforum.admin.modeldata.sidebarUserItems
 import com.google.firebase.messaging.FirebaseMessaging
 import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
 import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
+import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.tasks.await
 
 
@@ -62,6 +63,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+//        val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        // Khởi tạo Firebase Analytics
+        val firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+
+        // Gửi sự kiện screen_view
+        val screenBundle = Bundle().apply {
+            putString(FirebaseAnalytics.Param.SCREEN_NAME, "RootScreen")
+            putString(FirebaseAnalytics.Param.SCREEN_CLASS, "MainActivity")
+        }
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, screenBundle)
+
+
         val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
         setContent {

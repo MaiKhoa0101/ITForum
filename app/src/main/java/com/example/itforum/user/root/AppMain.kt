@@ -21,8 +21,7 @@ class App : Application() {
 
         // Cho phép Crashlytics thu thập lỗi
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
-//        FirebaseCrashlytics.getInstance().setUserId(userId)
-//        FirebaseCrashlytics.getInstance().setCustomKey("email", email)
+
         FirebaseCrashlytics.getInstance().setUserId(UserSession.userId)
         FirebaseCrashlytics.getInstance().setCustomKey("email", UserSession.email)
 
