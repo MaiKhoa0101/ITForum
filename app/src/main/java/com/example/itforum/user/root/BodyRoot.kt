@@ -507,9 +507,9 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                     delay(1200)
                 }
 
-                DetailNewsPage(newsId, modifier, navHostController, sharedPreferences)
+//                DetailNewsPage(newsId, modifier, navHostController, sharedPreferences)
 
-//                 DetailNewsPage(newsId, navHostController, sharedPreferences)
+                 DetailNewsPage(newsId, navHostController, sharedPreferences)
 
             }
         }
@@ -563,7 +563,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         composable("complaint_detail/{complaintId}"){ backStackEntry ->
             val complaintId = backStackEntry.arguments?.getString("complaintId")
             if (complaintId != null) {
-                ManagementComplaintDetailScreen(modifier,navHostController,sharedPreferences,complaintId)
+                ManagementComplaintDetailScreen(navHostController,sharedPreferences,complaintId)
             } else {
                 Text("Không tìm thấy khiếu nại.")
             }
