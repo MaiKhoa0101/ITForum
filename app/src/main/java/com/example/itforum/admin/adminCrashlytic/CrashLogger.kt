@@ -3,6 +3,7 @@ package com.example.itforum.admin.adminCrashlytic
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 //
 //data class CrashLog(
@@ -18,10 +19,10 @@ data class CrashLog(
     val timestamp: Long = System.currentTimeMillis()
 )
 
-    object CrashLogger {
+object CrashLogger {
 
-        // Overload: gọi có truyền email + userId (chính xác nhất)
-        suspend fun logCrash(error: Throwable, userId: String, email: String) {
+    suspend fun logCrash(error: Throwable, userId: String, email: String) {
+        try {
             val crashlytics = FirebaseCrashlytics.getInstance()
             crashlytics.setUserId(userId)
             crashlytics.setCustomKey("email", email)
@@ -29,16 +30,18 @@ data class CrashLog(
             crashlytics.recordException(error)
 
             val crashLog = CrashLog(email, userId, error.stackTraceToString())
+
+            // ✅ await để tránh NetworkOnMainThreadException
             FirebaseFirestore.getInstance()
                 .collection("crash_logs")
                 .document("latest_crash_$userId")
                 .set(crashLog)
-
-            kotlinx.coroutines.delay(3000)
-            throw RuntimeException("Crash for testing")
+                .await() // ✅ Đây là phần bạn thiếu!
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
     }
+}
 
 
 

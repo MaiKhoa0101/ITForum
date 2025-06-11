@@ -4,8 +4,10 @@ import android.content.SharedPreferences
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,6 +57,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -82,13 +86,20 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
-import com.example.itforum.user.Analytics.logScreenView
+
+import com.example.itforum.user.effect.UiStateMessage
+
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.request.CreatePostRequest
 import com.example.itforum.user.post.viewmodel.PostViewModel
@@ -97,6 +108,7 @@ import com.example.itforum.user.profile.viewmodel.UserViewModel
 data class icontext(
     val icon: ImageVector = Icons.Default.Visibility,
     val text: String = "",
+    val onClick: (String) -> Unit = {}
 )
 
 @Composable
@@ -115,13 +127,15 @@ fun CreatePostPage(
     })
 
     val userInfo by userViewModel.user.collectAsState()
-    val uiState by postViewModel.uiStateCreate.collectAsState()
-
-    LaunchedEffect(uiState) {
+    val uiStateCreate by postViewModel.uiStateCreate.collectAsState()
+    var enable by remember { mutableStateOf<Boolean>(true) }
+    LaunchedEffect(uiStateCreate) {
         println("UI State duoc thay doi")
-        if (uiState is UiState.Success) {
+        if (uiStateCreate is UiState.Success) {
             println("uiState là success")
             navHostController.navigate("home")
+        }else if(uiStateCreate is UiState.Loading){
+            enable = false
         }
     }
     LaunchedEffect(Unit) {
@@ -129,6 +143,8 @@ fun CreatePostPage(
     }
 
     var imageUrls by remember  { mutableStateOf<List<Uri>?>(emptyList()) }
+    var videoUrls by remember  { mutableStateOf<List<Uri>?>(emptyList()) }
+    var applicationUrls by remember  { mutableStateOf<List<Uri>?>(emptyList()) }
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var tags by remember { mutableStateOf(listOf<String?>(null)) }
@@ -142,10 +158,11 @@ fun CreatePostPage(
         ) {
 
             stickyHeader {
-                TopPost("Bài viết mới", "Đăng",navHostController) {
+                TopPost("Bài viết mới", "Đăng", navHostController, enable, uiStateCreate) {
                     postViewModel.createPost(
                         CreatePostRequest(
                             imageUrls = imageUrls,
+                            videoUrls = videoUrls,
                             userId = userInfo?.id ?: "",
                             title = title,
                             content = content,
@@ -169,7 +186,11 @@ fun CreatePostPage(
                         content = input
                     }
                     AddTagPost(){tags = it}
-                    AddMedia(){imageUrls = it}
+                    AddMedia(
+                        onImageChange = { imageUrls = it },
+                        onVideoChange = { videoUrls = it },
+                        onApplicationChange = { applicationUrls = it }
+                    )
                     CustomPost()
                 }
             }
@@ -182,7 +203,9 @@ fun TopPost(
     title: String,
     nameButton: String,
     navHostController: NavHostController,
-    onClickPush: () -> Unit = {}
+    enable: Boolean = true,
+    uiState: UiState = UiState.Idle,
+    onClickPush: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -222,7 +245,8 @@ fun TopPost(
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = Color.White,
                     contentColor = MaterialTheme.colorScheme.primaryContainer
-                )
+                ),
+                enabled = enable
             ) {
                 Text(
                     text = nameButton,
@@ -231,6 +255,7 @@ fun TopPost(
                     modifier = Modifier.padding(3.dp),
                 )
             }
+            UiStateMessage(uiState = uiState, canSubmit = true)
         }
     }
 }
@@ -305,7 +330,7 @@ fun WritePost(onChange: (String) -> Unit) {
             )
         )
         Text(
-            "${textPost.length}/10000 kí tự",
+            "${textPost.length}/1000 kí tự",
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
@@ -463,30 +488,56 @@ fun TagChild(
 
 @Composable
 fun AddMedia(
-    onChange: (List<Uri>) -> Unit
+    onImageChange: (List<Uri>) -> Unit = {},
+    onVideoChange: (List<Uri>) -> Unit = {},
+    onApplicationChange: (List<Uri>) -> Unit = {}
 ) {
     val context = LocalContext.current
+    val MAX_TOTAL_SIZE = 100 * 1024 * 1024L // 100MB
     var imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
-    var videoUri by remember { mutableStateOf<List<Uri>>(emptyList()) }
-    var applicationUri by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var videoUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var applicationUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var mediaUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var mediaTypes by remember { mutableStateOf<List<String>>(emptyList()) }
-
+    var totalUsedMB = remember(mediaUris) {
+        mediaUris.sumOf {
+            context.contentResolver.openAssetFileDescriptor(it, "r")?.length ?: 0L
+        } / (1024 * 1024.0)
+    }
+    LaunchedEffect(imageUris, videoUris, applicationUris) {
+        mediaUris = imageUris + videoUris + applicationUris
+    }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenMultipleDocuments()
     ) { uris: List<Uri> ->
         uris.forEach{uri ->
+            val size = context.contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: 0L
+            totalUsedMB += size/ (1024 * 1024.0)
+            if (totalUsedMB > (MAX_TOTAL_SIZE/ (1024 * 1024.0))) {
+                Toast.makeText(context, "Vượt quá dung lượng cho phép (100MB)", Toast.LENGTH_SHORT).show()
+                return@forEach
+            }
+
             val type =context.contentResolver.getType(uri) ?:""
             when{
                 type.startsWith("image") -> {
                     imageUris = imageUris + uri
-                    onChange(imageUris)
+
                 }
-                type.startsWith("video") -> videoUri = videoUri + uri
-                type.startsWith("application") -> applicationUri = applicationUri + uri
+                type.startsWith("video") -> {
+                    videoUris = videoUris + uri
+                }
+                type.startsWith("application") -> {
+                    applicationUris = applicationUris + uri
+                }
             }
         }
-        mediaUris = mediaUris + uris  // Nối list cũ với list mới
+
+        onImageChange(imageUris)
+        onVideoChange(videoUris)
+        onApplicationChange(applicationUris)
+
+        mediaUris = imageUris + videoUris + applicationUris  // Nối list cũ với list mới
         mediaTypes = mediaUris.map { uri ->
             context.contentResolver.getType(uri) ?: "unknown"
         }
@@ -500,7 +551,17 @@ fun AddMedia(
             .TopBorder()
             .BottomBorder()
     ) {
-        if(imageUris.isEmpty() && videoUri.isEmpty() && applicationUri.isEmpty()){
+
+        Text(
+            text = "Đã sử dụng: %.2f/100 MB".format(totalUsedMB),
+            color = MaterialTheme.colorScheme.onBackground,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .padding(end = 10.dp)
+                .align(Alignment.End)
+        )
+        if(imageUris.isEmpty() && videoUris.isEmpty() && applicationUris.isEmpty()){
             IconButton(
                 onClick = {
                     launcher.launch(arrayOf("*/*"))  //Chọn tệp bất kì
@@ -533,24 +594,30 @@ fun AddMedia(
             Box(modifier = Modifier.fillMaxWidth()) {
                 if (imageUris.isNotEmpty()){
                     imageUris.forEachIndexed(){index, uri ->
-                        ImgOrVdMedia("image",index, uri, imageUris, removeUri = {newList-> imageUris = newList})
+                        ImgOrVdMedia("image",index, uri, imageUris, removeUri = {newList->
+                            imageUris = newList
+                            onImageChange(imageUris)
+                        })
                     }
                 }
             }
             Box(modifier = Modifier.fillMaxWidth()) {
-                if (videoUri.isNotEmpty()) {
-                    videoUri.forEachIndexed() { index, uri ->
-                        ImgOrVdMedia("video", index, uri, videoUri, removeUri = {newList-> videoUri = newList})
+                if (videoUris.isNotEmpty()) {
+                    videoUris.forEachIndexed() { index, uri ->
+                        ImgOrVdMedia("video", index, uri, videoUris, removeUri = {newList->
+                            videoUris = newList
+                            onVideoChange(videoUris)
+                        })
                     }
                 }
             }
-            if (applicationUri.isNotEmpty()){
+            if (applicationUris.isNotEmpty()){
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     maxItemsInEachRow = 3,
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ){
-                    applicationUri.forEach{ uri ->
+                    applicationUris.forEach{ uri ->
                         val name = context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                             if (cursor.moveToFirst()) {
                                 val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
@@ -558,7 +625,10 @@ fun AddMedia(
                             } else "kocoten"
                         }
                         if (name != null) {
-                            TagFile(name, applicationUri, Icons.Default.AttachFile, uri, removeTag = {newList -> applicationUri = newList as List<Uri>})
+                            TagFile(name, applicationUris, Icons.Default.AttachFile, uri, removeTag = {newList ->
+                                applicationUris = newList as List<Uri>
+                                onApplicationChange(applicationUris)
+                            })
                         }
                     }
                 }
@@ -598,34 +668,38 @@ fun AddMedia(
 fun ImgOrVdMedia(type: String, index: Int = 0, uri: Uri, ListUri: List<Uri>, removeUri: (List<Uri>) -> Unit) {
     val pxValue = with(LocalDensity.current) { (70.dp * (ListUri.size-1-index)).roundToPx() }
     Box(
-        modifier = Modifier.offset { IntOffset(pxValue, 0) }
+        modifier = Modifier
+            .offset { IntOffset(pxValue, 0) }
+            .border(2.dp, MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         if (type == "video") {
-            val context = LocalContext.current
-            val bitmap = remember(uri) {
-                val retriever = MediaMetadataRetriever()
-                try {
-                    retriever.setDataSource(context, uri)
-                    retriever.frameAtTime
-                } catch (e: Exception) {
-                    null
-                } finally {
-                    retriever.release()
-                }
-            }
-            bitmap?.let {
-                var painter = remember(it) {
-                    BitmapPainter(it.asImageBitmap())
-                }
-                Image(
-                    painter = painter,
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .padding(3.dp)
-                        .size(150.dp)
-                )
-            }
+//            val context = LocalContext.current
+//            val bitmap = remember(uri) {
+//                val retriever = MediaMetadataRetriever()
+//                try {
+//                    retriever.setDataSource(context, uri)
+//                    retriever.frameAtTime
+//                } catch (e: Exception) {
+//                    null
+//                } finally {
+//                    retriever.release()
+//                }
+//            }
+//            bitmap?.let {
+//                var painter = remember(it) {
+//                    BitmapPainter(it.asImageBitmap())
+//                }
+//                Image(
+//                    painter = painter,
+//                    contentDescription = "",
+//                    contentScale = ContentScale.Crop,
+//                    modifier = Modifier
+//                        .padding(3.dp)
+//                        .size(150.dp)
+//                )
+//            }
+            VideoPlayer(uri)
         }else {
             Image(
                 painter = rememberAsyncImagePainter(uri),
@@ -797,6 +871,52 @@ fun TagFile(
                         removeTag(newList)
                     }
                 }
+        )
+    }
+}
+
+
+//VideoPlayer(uri = Uri.parse("https://www.example.com/video.mp4"))
+@OptIn(UnstableApi::class)
+@Composable
+fun VideoPlayer(
+    uri: Uri,
+    modifier: Modifier = Modifier.padding(3.dp)
+        .size(150.dp)
+        .aspectRatio(16 / 9f)
+        .background(Color.Black)
+) {
+    val context = LocalContext.current
+
+    val exoPlayer = remember(uri) {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(uri))
+            prepare()
+            playWhenReady = false // KHÔNG tự động phát
+        }
+    }
+
+    DisposableEffect(exoPlayer) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+    Box(
+        modifier = modifier
+    ) {
+        AndroidView(
+            factory = {
+                PlayerView(context).apply {
+                    player = exoPlayer
+                    useController = true
+                    controllerShowTimeoutMs = 2000 // tự ẩn sau 2s
+                    showController() // hiện lần đầu (tuỳ chọn)
+                    controllerAutoShow = false // ⛔ KHÔNG tự hiện controller khi chưa phát
+                }
+            },
+//            modifier = Modifier
+////                .size(150.dp)
+//                .aspectRatio(16 / 9f)
         )
     }
 }

@@ -45,7 +45,6 @@ import com.example.itforum.user.post.AvatarNameDetail
 @Composable
 fun DetailNewsPage(
     newsId: String,
-    modifier: Modifier,
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences
 ) {

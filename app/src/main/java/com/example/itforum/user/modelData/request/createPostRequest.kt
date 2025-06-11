@@ -8,5 +8,6 @@ data class CreatePostRequest(
     val content: String?,
     val tags: List<String?>,
     val isPublished: String?,
-    val imageUrls: List<Uri>? = emptyList()
+    val imageUrls: List<Uri>? = emptyList(),
+    val videoUrls: List<Uri>? = emptyList()
 )

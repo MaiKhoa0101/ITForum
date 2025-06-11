@@ -27,12 +27,14 @@ fun ManagementComplaintScreen (
     }
     val complaints by complaintViewModel.listComplaint.collectAsState()
     val menuOptions = listOf(
-        icontext(Icons.Default.Edit,"Xem chi tiết"),
-        icontext(Icons.Default.Build,"Xử lý")
+        icontext(Icons.Default.Edit,"Xem chi tiết",{ complaintId ->
+            navController.navigate("complaint_detail/$complaintId")
+        }),
+        icontext(Icons.Default.Build,"Xử lý",{})
     )
     complaints?.let {
         AdminScreenLayout(
-        title = "Quản lý báo cáo người dùng",
+        title = "Quản lý khiếu nại người dùng",
         itemCount = it.size
     ) { searchText, _, _ ->
         val filteredUsers = complaints!!.filter {
@@ -44,9 +46,6 @@ fun ManagementComplaintScreen (
             rows = convertToTableRows(filteredUsers),
             menuOptions = menuOptions,
             sharedPreferences = sharedPreferences,
-            onClickOption = { complaintId ->
-                navController.navigate("complaint_detail/$complaintId")
-            }
         )
     }
     }

@@ -28,7 +28,7 @@ class App : Application() {
 
         //  Bắt crash toàn cục và ghi log
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-            runBlocking {
+            CoroutineScope(Dispatchers.IO).launch {
                 CrashLogger.logCrash(
                     throwable,
                     userId = UserSession.userId,
@@ -36,6 +36,7 @@ class App : Application() {
                 )
             }
         }
+
 
     }
 }

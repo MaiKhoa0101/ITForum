@@ -153,6 +153,9 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2025.05.00"))
     implementation("io.coil-kt:coil-compose:2.6.0")
 
+    //Hiển thị video
+    implementation("androidx.media3:media3-exoplayer:1.7.1")
+    implementation("androidx.media3:media3-ui:1.7.1")
 
     implementation("androidx.compose.material:material:1.8.1")
     implementation("androidx.compose.material3:material3:1.3.2")
@@ -171,6 +174,5 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-messaging")
-
 
 }

@@ -501,12 +501,16 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             val context = LocalContext.current
 
             if (newsId != null) {
+
                 LaunchedEffect(newsId) {
                     logScreenView(context, "detail_news")
                     delay(1200)
                 }
 
                 DetailNewsPage(newsId, modifier, navHostController, sharedPreferences)
+
+//                 DetailNewsPage(newsId, navHostController, sharedPreferences)
+
             }
         }
 
@@ -546,6 +550,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             }
         }
 
+
 //        composable("detail_news/{newsId}") { backStackEntry ->
 //            val newsId = backStackEntry.arguments?.getString("newsId")
 //            if (newsId != null) {
@@ -563,6 +568,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 Text("Không tìm thấy khiếu nại.")
             }
         }
+
 
         composable ("admin_root"){
             AdminScreen(sharedPreferences)

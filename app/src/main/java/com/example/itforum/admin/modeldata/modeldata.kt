@@ -37,7 +37,7 @@ val sidebarItems = listOf(
     SidebarItem(
         nameField = "Quản lý khiếu nại",
         iconField = Icons.Default.Report,
-        navigationField = "ReportManager"
+        navigationField = "ComplaintManager"
     ),
     SidebarItem(
         nameField = "Quản lý tin tức",
