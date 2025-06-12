@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import com.example.itforum.user.complaint.SuccessDialog
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.effect.UiStateMessage
 import com.example.itforum.user.login.viewmodel.LoginViewModel
@@ -47,7 +48,9 @@ fun LoginScreen(
     var isPasswordValid by remember { mutableStateOf(true) }
 
     var canSubmit by remember {mutableStateOf(false)}
-
+    var showSuccessDialog by remember { mutableStateOf(false) }
+    var enable by remember { mutableStateOf<Boolean>(true) }
+    var error by remember { mutableStateOf<String>("") }
     val uiState by loginViewModel.uiState.collectAsState()
     LaunchedEffect(uiState) {
         println("uiState da bi thay doi: "+uiState)
@@ -60,11 +63,27 @@ fun LoginScreen(
             } else {
                 println("Không tìm thấy role trong SharedPreferences.")
             }
+        }else if(uiState is UiState.Loading){
+            enable = false
+        }else if(uiState is UiState.Idle){
+            enable = true
+        }else if(uiState is UiState.Error){
+            showSuccessDialog = true
+            error = (uiState as UiState.Error).message
         }
     }
-
-
-
+    // UI hiển thị
+    if (showSuccessDialog) {
+        SuccessDialog(
+            title = "Thông báo!!!",
+            color = Color.Red,
+            message = error,
+            nameButton = "Đóng",
+            onDismiss = {
+                showSuccessDialog = false
+            }
+        )
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -108,7 +127,8 @@ fun LoginScreen(
             shape = RoundedCornerShape(50),
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .height(50.dp)
+                .height(50.dp),
+            enabled = enable
         ) {
             Text("Đăng nhập", color = Color.White, fontSize = 24.sp)
         }

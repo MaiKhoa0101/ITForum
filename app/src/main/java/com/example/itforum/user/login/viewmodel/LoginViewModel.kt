@@ -50,7 +50,7 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
 
                     } else {
                         showError("Token không hợp lệ")
-                        _uiState.value = UiState.Error(response.message())
+                        _uiState.value = response.body()?.let { UiState.Error(it.message) }!!
                         delay(500) // Cho phép UI xử lý trạng thái Success
                     }
                 } else {
