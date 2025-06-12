@@ -61,6 +61,9 @@ android {
 }
 
 dependencies {
+    //login by google
+    implementation ("com.google.firebase:firebase-auth-ktx")
+    implementation ("com.google.android.gms:play-services-auth:21.0.0")
     //firebase analytics
     implementation ("com.google.firebase:firebase-analytics:21.6.1")
     //firebase crashlytic
