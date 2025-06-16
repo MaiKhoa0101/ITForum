@@ -82,7 +82,7 @@ fun Root(sharedPreferences:SharedPreferences) {
     val navHostController = rememberNavController()
     val navBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val showTopBars = currentRoute in listOf("home","bookmark")
+    val showTopBars = currentRoute in listOf("home","bookmark","follow")
     val showFootBars = currentRoute in listOf("home", "searchscreen", "notification", "personal","bookmark")
     //thay doi ơ day
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)

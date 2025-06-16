@@ -175,7 +175,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             BookMarkScreen(navHostController,sharedPreferences)
         }
         composable("follow"){
-            FollowScreen()
+            FollowScreen(navHostController,sharedPreferences)
         }
         composable ("searchscreen"){
             SearchScreen(modifier)
