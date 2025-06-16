@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
+import android.webkit.MimeTypeMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
@@ -185,6 +186,10 @@ class PostViewModel(
                     prepareFilePart(context, uri, "imageUrls")
                 }
 
+                val videoUrls = createPostRequest.videoUrls?.mapNotNull { uri ->
+                    prepareFilePart(context, uri, "videoUrls")
+                }
+
                 // Chỉ tạo MultipartBody.Part cho các trường không null
                 val userId = createPostRequest.userId?.let {
                     MultipartBody.Part.createFormData("userId", it)
@@ -202,16 +207,20 @@ class PostViewModel(
                     MultipartBody.Part.createFormData("tags", Gson().toJson(it))
                 }
 
-                val response = imageUrls?.let {
-                    RetrofitInstance.postService.createPost(
-                        userId = userId,
-                        title = title,
-                        content = content,
-                        tags = tags,
-                        isPublished = isPublished,
-                        imageUrls = it
-                    )
-                }
+                val response =
+                    videoUrls?.let {
+                        imageUrls?.let { it1 ->
+                            RetrofitInstance.postService.createPost(
+                                userId = userId,
+                                title = title,
+                                content = content,
+                                tags = tags,
+                                isPublished = isPublished,
+                                imageUrls = it1,
+                                videoUrls = it
+                            )
+                        }
+                    }
 
 
                 if (response != null) {
@@ -259,15 +268,18 @@ class PostViewModel(
     ): MultipartBody.Part? {
         return try {
             val inputStream = context.contentResolver.openInputStream(fileUri)
-            val tempFile = File.createTempFile("upload_", ".jpg", context.cacheDir)
+            val mimeType = context.contentResolver.getType(fileUri) ?: "application/octet-stream"
+            val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "tmp"
+            val tempFile = File.createTempFile("upload_", ".$extension", context.cacheDir)
+
             tempFile.outputStream().use { outputStream ->
                 inputStream?.copyTo(outputStream)
             }
 
-            val requestFile = tempFile.asRequestBody("image/*".toMediaTypeOrNull())
+            val requestFile = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
             MultipartBody.Part.createFormData(partName, tempFile.name, requestFile)
         } catch (e: Exception) {
-            Log.e("PostViewModel", "Error preparing file part", e)
+            Log.e("Upload", "Error preparing file part", e)
             null
         }
     }

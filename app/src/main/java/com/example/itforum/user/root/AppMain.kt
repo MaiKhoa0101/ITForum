@@ -21,15 +21,14 @@ class App : Application() {
 
         // Cho phép Crashlytics thu thập lỗi
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
-//        FirebaseCrashlytics.getInstance().setUserId(userId)
-//        FirebaseCrashlytics.getInstance().setCustomKey("email", email)
+
         FirebaseCrashlytics.getInstance().setUserId(UserSession.userId)
         FirebaseCrashlytics.getInstance().setCustomKey("email", UserSession.email)
 
 
         //  Bắt crash toàn cục và ghi log
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-            runBlocking {
+            CoroutineScope(Dispatchers.IO).launch {
                 CrashLogger.logCrash(
                     throwable,
                     userId = UserSession.userId,
@@ -37,6 +36,7 @@ class App : Application() {
                 )
             }
         }
+
 
     }
 }

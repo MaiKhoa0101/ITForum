@@ -70,6 +70,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.R
+import com.example.itforum.user.Analytics.logScreenView
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.request.UserUpdateRequest
 import com.example.itforum.user.modelData.response.Certificate
@@ -482,6 +483,13 @@ fun EditProfile(
         if (uiState is UiState.Success) {
             println("uiState là success")
             navHostController.popBackStack()
+        }
+        if (uiState is UiState.Error) {
+            println("uiState là error")
+
+        }
+        if (uiState is UiState.Loading) {
+
         }
     }
 

@@ -127,6 +127,7 @@ class ComplaintViewModel() : ViewModel() {
                         img = it
                     )
                 }
+                img?.let {Log.d("Img", img.toString())}
 
                 if (response != null) {
                     if (response.isSuccessful) {
