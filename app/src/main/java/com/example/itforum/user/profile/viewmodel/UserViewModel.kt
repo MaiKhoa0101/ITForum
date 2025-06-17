@@ -32,6 +32,7 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel(){
     private val _user = MutableStateFlow<UserProfileResponse?>(null)
     val user: StateFlow<UserProfileResponse?>get() = _user
 
+
     fun getUser() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading

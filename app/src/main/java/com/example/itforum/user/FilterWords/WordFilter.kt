@@ -1,4 +1,7 @@
 package com.example.itforum.user.FilterWords
+
+import android.content.Context
+
 //kiểm tra từ cấm
 object WordFilter {
     private val bannedWords = listOf(
@@ -17,12 +20,12 @@ object WordFilter {
         // Nhóm chơi chữ lách luật
         "lồn", "cặc", "vl", "ngu vãi", "óc lợn", "đĩ", "phò", "dâm", "râm", "rape", "gạ tình"
     )
-    fun containsBannedWordsAndLog(userId: String, input: String): Boolean {
+    fun containsBannedWordsAndLog( userId: String, input: String): Boolean {
         val hasBadWord = bannedWords.any { word ->
             Regex("\\b${Regex.escape(word)}\\b", RegexOption.IGNORE_CASE).containsMatchIn(input)
         }
         if (hasBadWord) {
-            ViolationLogger.log(userId, input)
+            ViolationLogger.log( userId, input)
         }
         return hasBadWord
     }
