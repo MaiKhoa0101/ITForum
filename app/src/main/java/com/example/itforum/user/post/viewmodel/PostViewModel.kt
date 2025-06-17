@@ -174,7 +174,7 @@ class PostViewModel(
         viewModelScope.launch {
             _uiStateCreate.value = UiState.Loading
             try {
-                Log.d("UserViewModel", "Request: $createPostRequest")
+                Log.d("PostViewModel", "Request: $createPostRequest")
 
                 val imageUrls = createPostRequest.imageUrls?.mapNotNull { uri ->
                     prepareFilePart(context, uri, "imageUrls")
@@ -197,22 +197,25 @@ class PostViewModel(
                 val isPublished = createPostRequest.isPublished?.let {
                     MultipartBody.Part.createFormData("isPublished", it)
                 }
-                val tags = createPostRequest.tags?.let {
+                val tags = createPostRequest.tags?.mapNotNull  {
                     MultipartBody.Part.createFormData("tags", Gson().toJson(it))
                 }
+                Log.d("tagsViewModel",tags.toString())
 
                 val response =
                     videoUrls?.let {
                         imageUrls?.let { it1 ->
-                            RetrofitInstance.postService.createPost(
-                                userId = userId,
-                                title = title,
-                                content = content,
-                                tags = tags,
-                                isPublished = isPublished,
-                                imageUrls = it1,
-                                videoUrls = it
-                            )
+                            tags?.let { it2 ->
+                                RetrofitInstance.postService.createPost(
+                                    userId = userId,
+                                    title = title,
+                                    content = content,
+                                    tags = it2,
+                                    isPublished = isPublished,
+                                    imageUrls = it1,
+                                    videoUrls = it
+                                )
+                            }
                         }
                     }
 

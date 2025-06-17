@@ -187,6 +187,96 @@ class ComplaintViewModel() : ViewModel() {
         }
     }
 
+    fun handleRejected(complaintId: String) {
+        viewModelScope.launch {
+            _uiStateCreate.value = UiState.Loading
+            try {
+                val response = RetrofitInstance.complaintService.handleRejected(complaintId)
+
+                if (response != null) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body()
+                        Log.d("ComplaintViewModel", "Success Response: ${responseBody?.message}")
+                        _uiStateCreate.value = UiState.Success(
+                            responseBody?.message ?: "Xử lý thành công"
+                        )
+                        delay(500) // Cho Compose thời gian phản ứng trước khi đổi trạng thái
+                        _uiStateCreate.value = UiState.Idle
+                    } else {
+                        // Get error details from response body
+                        val errorBody = response.errorBody()?.string()
+                        Log.e("ComplaintViewModel", "Error Response Body: $errorBody")
+
+                        val errorMessage = when (response.code()) {
+                            400 -> "Dữ liệu không hợp lệ: $errorBody"
+                            404 -> "Không tìm thấy người dùng"
+                            500 -> "Lỗi server: $errorBody"
+                            else -> "Lỗi không xác định (${response.code()}): $errorBody"
+                        }
+
+                        showError(errorMessage)
+                        _uiStateCreate.value = UiState.Error(errorMessage)
+                    }
+                }
+            } catch (e: IOException) {
+                val errorMsg = "Lỗi kết nối mạng: ${e.localizedMessage}"
+                Log.e("ComplaintViewModel", errorMsg, e)
+                _uiStateCreate.value = UiState.Error(errorMsg)
+                showError("Không thể kết nối máy chú, vui lòng kiểm tra mạng.")
+            } catch (e: Exception) {
+                val errorMsg = "Lỗi hệ thống: ${e.message ?: e.localizedMessage}"
+                Log.e("ComplaintViewModel", errorMsg, e)
+                _uiStateCreate.value = UiState.Error(errorMsg)
+                showError("Lỗi bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+            }
+        }
+    }
+
+    fun handleApproved(complaintId: String) {
+        viewModelScope.launch {
+            _uiStateCreate.value = UiState.Loading
+            try {
+                val response = RetrofitInstance.complaintService.handleApproved(complaintId)
+
+                if (response != null) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body()
+                        Log.d("ComplaintViewModel", "Success Response: ${responseBody?.message}")
+                        _uiStateCreate.value = UiState.Success(
+                            responseBody?.message ?: "Xử lý thành công"
+                        )
+                        delay(500) // Cho Compose thời gian phản ứng trước khi đổi trạng thái
+                        _uiStateCreate.value = UiState.Idle
+                    } else {
+                        // Get error details from response body
+                        val errorBody = response.errorBody()?.string()
+                        Log.e("ComplaintViewModel", "Error Response Body: $errorBody")
+
+                        val errorMessage = when (response.code()) {
+                            400 -> "Dữ liệu không hợp lệ: $errorBody"
+                            404 -> "Không tìm thấy người dùng"
+                            500 -> "Lỗi server: $errorBody"
+                            else -> "Lỗi không xác định (${response.code()}): $errorBody"
+                        }
+
+                        showError(errorMessage)
+                        _uiStateCreate.value = UiState.Error(errorMessage)
+                    }
+                }
+            } catch (e: IOException) {
+                val errorMsg = "Lỗi kết nối mạng: ${e.localizedMessage}"
+                Log.e("ComplaintViewModel", errorMsg, e)
+                _uiStateCreate.value = UiState.Error(errorMsg)
+                showError("Không thể kết nối máy chú, vui lòng kiểm tra mạng.")
+            } catch (e: Exception) {
+                val errorMsg = "Lỗi hệ thống: ${e.message ?: e.localizedMessage}"
+                Log.e("ComplaintViewModel", errorMsg, e)
+                _uiStateCreate.value = UiState.Error(errorMsg)
+                showError("Lỗi bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+            }
+        }
+    }
+
     private fun showError(message: String) {
         _uiState.value = UiState.Error(message)
         Log.e("ComplaintViewModel", message)

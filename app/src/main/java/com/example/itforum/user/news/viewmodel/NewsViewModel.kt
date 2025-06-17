@@ -7,8 +7,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.itforum.retrofit.RetrofitInstance
+import com.example.itforum.service.NewsDao
+import com.example.itforum.service.toEntity
+import com.example.itforum.service.toModel
 import com.example.itforum.user.effect.model.UiState
-import com.example.itforum.user.modelData.request.ComplaintRequest
 import com.example.itforum.user.modelData.request.NewsRequest
 import com.example.itforum.user.modelData.response.News
 import kotlinx.coroutines.delay
@@ -22,7 +24,10 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import java.io.File
 
-class NewsViewModel (private val sharedPreferences: SharedPreferences) : ViewModel() {
+class NewsViewModel (
+    private val newsDao: NewsDao,
+    private val sharedPreferences: SharedPreferences
+) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
@@ -42,13 +47,15 @@ class NewsViewModel (private val sharedPreferences: SharedPreferences) : ViewMod
                 val response = RetrofitInstance.newsService.getNews()
 
                 if (response.isSuccessful) {
+                    response.body()?.listNews?.let { newsList ->
+                        val entities = newsList.map { it.toEntity() }
+                        newsDao.clearAllNews()
+                        newsDao.insertAll(entities)
+                        _listNews.value = newsList
+                    }
                     _uiState.value = UiState.FetchSuccess(
                         response.body()?.message ?: "Lấy tin tức thành công"
                     )
-                    _listNews.value  = response.body()?.listNews
-                    delay(500)
-                    _uiState.value = UiState.Idle
-                    println("UI state value is idle")
                 }
                 else {
                     showError("Response get không hợp lệ")
@@ -61,6 +68,12 @@ class NewsViewModel (private val sharedPreferences: SharedPreferences) : ViewMod
             catch (e: Exception) {
                 _uiState.value = UiState.FetchFail(e.message ?: "Lỗi hệ thống, vui lòng thử lại")
                 showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+            } finally {
+                newsDao.getAllNews().collect { cachedNews ->
+                    _listNews.value = cachedNews.map { it.toModel() }
+                }
+                delay(500)
+                _uiState.value = UiState.Idle
             }
 
         }
@@ -73,11 +86,12 @@ class NewsViewModel (private val sharedPreferences: SharedPreferences) : ViewMod
                 val response = RetrofitInstance.newsService.getNewsById(id)
 
                 if (response.isSuccessful) {
+                    response.body()?.let { news ->
+                        val entity = news.toEntity()
+                        newsDao.insertNews(entity)
+                        _news.value  = news
+                    }
                     _uiState.value = UiState.FetchSuccess("Lấy tin tức thành công")
-                    _news.value  = response.body()
-                    delay(500)
-                    _uiState.value = UiState.Idle
-                    println("UI state value is idle")
                 }
                 else {
                     showError("Response get không hợp lệ")
@@ -90,6 +104,10 @@ class NewsViewModel (private val sharedPreferences: SharedPreferences) : ViewMod
             catch (e: Exception) {
                 _uiState.value = UiState.FetchFail(e.message ?: "Lỗi hệ thống, vui lòng thử lại")
                 showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+            } finally {
+                _news.value = newsDao.getNewsById(id)?.toModel()
+                delay(500)
+                _uiState.value = UiState.Idle
             }
 
         }
@@ -162,6 +180,35 @@ class NewsViewModel (private val sharedPreferences: SharedPreferences) : ViewMod
                 _uiStateCreate.value = UiState.Error(errorMsg)
                 showError("Lỗi bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
             }
+        }
+    }
+
+    fun DeleteNews(id: String) {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try {
+                val response = RetrofitInstance.newsService.deleteNews(id)
+
+                if (response.isSuccessful) {
+                    newsDao.deleteNews(id)
+                    _uiState.value = UiState.FetchSuccess("Xóa tin tức thành công")
+                }
+                else {
+                    showError("Response get không hợp lệ")
+                    _uiState.value = UiState.FetchFail(response.message())                }
+            }
+            catch (e: IOException) {
+                _uiState.value = UiState.FetchFail("Lỗi kết nối mạng: ${e.localizedMessage}")
+                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+            }
+            catch (e: Exception) {
+                _uiState.value = UiState.FetchFail(e.message ?: "Lỗi hệ thống, vui lòng thử lại")
+                showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+            } finally {
+                delay(500)
+                _uiState.value = UiState.Idle
+            }
+
         }
     }
     private fun prepareFilePart(

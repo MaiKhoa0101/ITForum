@@ -1,5 +1,8 @@
 package com.example.itforum.user.setting
 
+import android.annotation.SuppressLint
+import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.StarRate
@@ -35,7 +39,7 @@ import androidx.navigation.NavHostController
 import com.example.itforum.user.Analytics.logScreenView
 
 @Composable
-fun Setting(navHostController: NavHostController,onToggleTheme:()->Unit, darkTheme:Boolean){
+fun Setting(navHostController: NavHostController, sharedPreferences: SharedPreferences,onToggleTheme:()->Unit, darkTheme:Boolean){
 
     Column(
         modifier = Modifier
@@ -96,6 +100,14 @@ fun Setting(navHostController: NavHostController,onToggleTheme:()->Unit, darkThe
             iconVector = Icons.Default.QuestionMark,
             onPress = {
                 navHostController.navigate("complaint")
+            })
+        SectionSetting(
+            "Đăng xuất",
+            iconVector = Icons.Default.Logout,
+            onPress = {
+                val removeRole = sharedPreferences.edit().remove("role").apply()
+                val removeToken = sharedPreferences.edit().remove("access_token").apply()
+                navHostController.navigate("login")
             })
     }
 }

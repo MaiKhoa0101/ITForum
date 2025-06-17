@@ -2,6 +2,7 @@ package com.example.itforum.user.login.viewmodel
 
 
 import android.content.SharedPreferences
+import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,8 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okio.IOException
-
-
+import org.json.JSONObject
 
 
 class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewModel() {
@@ -92,7 +92,6 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
         }
 
     }
-
 
     private fun saveUserEmail(email: String?) {
         sharedPreferences.edit()

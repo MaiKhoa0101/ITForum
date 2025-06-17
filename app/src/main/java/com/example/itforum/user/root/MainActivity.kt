@@ -120,6 +120,7 @@ fun Root(sharedPreferences:SharedPreferences) {
                     DrawerContent(
                         sidebarItem = sidebarUserItems,
                         navHostController = navHostController,
+                        sharedPreferences = sharedPreferences,
                         closedrawer = {
                             if (showTopBars) {
                                 scope.launch {

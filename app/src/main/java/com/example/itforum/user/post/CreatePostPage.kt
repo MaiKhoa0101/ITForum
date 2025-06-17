@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -147,7 +148,7 @@ fun CreatePostPage(
     var applicationUrls by remember  { mutableStateOf<List<Uri>?>(emptyList()) }
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
-    var tags by remember { mutableStateOf(listOf<String?>(null)) }
+    var tags by remember { mutableStateOf<List<String?>?>(emptyList()) }
     var isPublished by remember { mutableStateOf("public") }
     Box(
         modifier = Modifier
@@ -159,6 +160,7 @@ fun CreatePostPage(
 
             stickyHeader {
                 TopPost("Bài viết mới", "Đăng", navHostController, enable, uiStateCreate) {
+                    Log.d("tags", tags.toString())
                     postViewModel.createPost(
                         CreatePostRequest(
                             imageUrls = imageUrls,
@@ -342,7 +344,7 @@ fun WritePost(onChange: (String) -> Unit) {
 
 @Composable
 fun AddTagPost(
-    onChange: (List<String?>) -> Unit
+    onChange: (List<String?>?) -> Unit
 ) {
     Column(
         modifier = Modifier

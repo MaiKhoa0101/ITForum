@@ -8,6 +8,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,10 +26,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import androidx.room.Room
 import com.example.itforum.admin.components.AdminScreenLayout
 import com.example.itforum.admin.components.TableData
 import com.example.itforum.admin.components.convertToTableRows
+import com.example.itforum.user.news.NewsDatabase
 import com.example.itforum.user.news.viewmodel.NewsViewModel
+import com.example.itforum.user.news.viewmodel.NewsViewModelFactory
 import com.example.itforum.user.post.icontext
 
 @Composable
@@ -35,9 +40,19 @@ fun ManagementNewsScreen (
     navController: NavHostController,
     sharedPreferences: SharedPreferences
 ) {
-    val newsViewModel: NewsViewModel = viewModel(factory = viewModelFactory {
-        initializer { NewsViewModel(sharedPreferences) }
-    })
+    val context = LocalContext.current
+
+    val db = Room.databaseBuilder(
+        context,
+        NewsDatabase::class.java,
+        "news-db"
+    ).build()
+
+    val newsDao = db.newsDao()
+    val newsViewModel: NewsViewModel = viewModel(
+        factory = NewsViewModelFactory(newsDao, sharedPreferences)
+    )
+
     LaunchedEffect(Unit) {
         newsViewModel.getNews()
     }
@@ -45,6 +60,9 @@ fun ManagementNewsScreen (
     val menuOptions = listOf(
         icontext(Icons.Default.Edit,"Xem chi tiết",{ newsId ->
             navController.navigate("detail_news/$newsId")
+        }),
+        icontext(Icons.Default.Delete,"Xóa",{ newsId ->
+            newsViewModel.DeleteNews(newsId)
         })
     )
     listNews?.let {
