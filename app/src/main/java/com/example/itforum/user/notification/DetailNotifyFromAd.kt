@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.itforum.user.Analytics.logScreenView
+
 import com.example.itforum.user.post.IconWithText
 import com.example.itforum.user.post.TopListLike
 
