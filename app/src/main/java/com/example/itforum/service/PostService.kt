@@ -65,7 +65,7 @@ interface PostService {
         @Part userId: MultipartBody.Part?,
         @Part title: MultipartBody.Part?,
         @Part content: MultipartBody.Part?,
-        @Part tags: MultipartBody.Part?,
+        @Part tags: List<MultipartBody.Part?>,
         @Part isPublished: MultipartBody.Part?,
         @Part imageUrls: List<MultipartBody.Part?>,
         @Part videoUrls: List<MultipartBody.Part?>

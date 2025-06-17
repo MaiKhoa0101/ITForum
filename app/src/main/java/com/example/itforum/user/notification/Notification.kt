@@ -21,10 +21,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,6 +69,8 @@ fun NotificationPage(modifier: Modifier, navHostController: NavHostController){
         Notify(Icons.Default.AccountCircle,"Thông báo hệ thống", "Cập nhật: Hệ thống sẽ bảo trì lúc 2AM", "Hôm qua"),
         Notify(Icons.Default.AccountCircle,"Nhu vừa nhắc đến bạn", "bài này đáng lẽ phải làm như này", "1 ngày"),
     )
+
+
     Column (
         modifier = Modifier
             .fillMaxSize()

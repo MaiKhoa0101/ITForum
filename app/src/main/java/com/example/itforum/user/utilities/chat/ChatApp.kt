@@ -42,6 +42,7 @@ fun ChatAIApp(
         }
     }
 
+
     NavHost(navController = navController, startDestination = "chat") {
         composable("chat") {
             val currentSessionId by viewModel.currentSessionId.collectAsState()

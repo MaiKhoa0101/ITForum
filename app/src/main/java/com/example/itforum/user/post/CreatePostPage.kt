@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -99,7 +100,9 @@ import coil.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.example.itforum.user.FilterWords.ToastHelper
 import com.example.itforum.user.FilterWords.WordFilter
+
 import com.example.itforum.user.effect.UiStateMessage
+
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.request.CreatePostRequest
 import com.example.itforum.user.post.viewmodel.PostViewModel
@@ -147,7 +150,7 @@ fun CreatePostPage(
     var applicationUrls by remember  { mutableStateOf<List<Uri>?>(emptyList()) }
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
-    var tags by remember { mutableStateOf(listOf<String?>(null)) }
+    var tags by remember { mutableStateOf<List<String?>?>(emptyList()) }
     var isPublished by remember { mutableStateOf("public") }
     Box(
         modifier = Modifier
@@ -168,6 +171,7 @@ fun CreatePostPage(
                             return@TopPost
                         }
                     }
+                    Log.d("tags", tags.toString())
                     postViewModel.createPost(
                         CreatePostRequest(
                             imageUrls = imageUrls,
@@ -181,7 +185,6 @@ fun CreatePostPage(
                         context
                     )
                 }
-
             }
             item {
 
@@ -352,7 +355,7 @@ fun WritePost(onChange: (String) -> Unit) {
 
 @Composable
 fun AddTagPost(
-    onChange: (List<String?>) -> Unit
+    onChange: (List<String?>?) -> Unit
 ) {
     Column(
         modifier = Modifier

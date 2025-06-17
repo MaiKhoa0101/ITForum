@@ -18,16 +18,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+
 
 @Composable
 fun ListLikePage(navHostController: NavHostController) {
@@ -57,6 +60,7 @@ fun ListLikePage(navHostController: NavHostController) {
         Icons.Default.AccountCircle to "MEO Meo",
         Icons.Default.AccountCircle to "Trịnh Tổng"
     )
+
     Column (
         modifier = Modifier
             .fillMaxSize()

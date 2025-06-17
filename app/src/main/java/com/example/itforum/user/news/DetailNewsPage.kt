@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,10 +36,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import androidx.room.Room
 import coil.compose.AsyncImage
 import com.example.itforum.R
 import com.example.itforum.ui.theme.ITForumTheme
 import com.example.itforum.user.news.viewmodel.NewsViewModel
+import com.example.itforum.user.news.viewmodel.NewsViewModelFactory
 import com.example.itforum.user.post.AvatarNameDetail
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,9 +51,17 @@ fun DetailNewsPage(
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences
 ) {
-    val newsViewModel: NewsViewModel = viewModel(factory = viewModelFactory {
-        initializer { NewsViewModel(sharedPreferences) }
-    })
+    val context = LocalContext.current
+    val db = Room.databaseBuilder(
+        context,
+        NewsDatabase::class.java,
+        "news-db"
+    ).build()
+
+    val newsDao = db.newsDao()
+    val newsViewModel: NewsViewModel = viewModel(
+        factory = NewsViewModelFactory(newsDao, sharedPreferences)
+    )
     LaunchedEffect(Unit) {
         newsViewModel.getByIdNews(newsId)
     }

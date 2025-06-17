@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,8 +30,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import androidx.navigation.NavController
+import androidx.room.Room
 import com.example.itforum.user.modelData.request.GetPostRequest
+import com.example.itforum.user.news.NewsDatabase
 import com.example.itforum.user.news.viewmodel.NewsViewModel
+import com.example.itforum.user.news.viewmodel.NewsViewModelFactory
 import com.example.itforum.user.post.AdvancedMarqueeTextList
 import com.example.itforum.user.post.PostListScreen
 
@@ -45,9 +49,19 @@ fun HomePage(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        val newsViewModel: NewsViewModel = viewModel(factory = viewModelFactory {
-            initializer { NewsViewModel(sharePreferences) }
-        })
+        val context = LocalContext.current
+        val db = Room.databaseBuilder(
+            context,
+            NewsDatabase::class.java,
+            "news-db"
+        )
+        .fallbackToDestructiveMigration()
+        .build()
+
+        val newsDao = db.newsDao()
+        val newsViewModel: NewsViewModel = viewModel(
+            factory = NewsViewModelFactory(newsDao, sharePreferences)
+        )
 
         LaunchedEffect(Unit) {
             newsViewModel.getNews()

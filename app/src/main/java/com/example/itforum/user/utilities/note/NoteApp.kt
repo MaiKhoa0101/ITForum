@@ -17,6 +17,7 @@ import java.util.*
 fun NotesApp(
     onBackToHome: () -> Unit,
 ) {
+
     val context = LocalContext.current.applicationContext as Application
     val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
     val userId = sharedPreferences.getString("userId", "") ?: ""

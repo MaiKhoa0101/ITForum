@@ -51,6 +51,8 @@ fun PostCardWithVote(
     var isVote by remember { mutableStateOf(vote?.data?.userVote) }
     var isSavedPost by remember { mutableStateOf(isBookMark) }
     Log.d("bookmark", isSavedPost.toString())
+     var showImageDetail by remember { mutableStateOf(false) }
+     var selectedImageIndex by remember { mutableStateOf(0) }
 
 
 
@@ -126,8 +128,23 @@ fun PostCardWithVote(
 
             // Post image
             if (!post.imageUrls.isNullOrEmpty()) {
-                ImageGrid(post.imageUrls)
+                ImageGrid(
+                    imageUrls = post.imageUrls,
+                    onImageClick = { _, index ->
+                        selectedImageIndex = index
+                        showImageDetail = true
+                    }
+                )
                 Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            // Image detail dialog
+            if (showImageDetail && !post.imageUrls.isNullOrEmpty()) {
+                ImageDetailDialog(
+                    imageUrls = post.imageUrls,
+                    initialIndex = selectedImageIndex,
+                    onDismiss = { showImageDetail = false }
+                )
             }
 
 

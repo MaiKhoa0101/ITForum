@@ -2,7 +2,10 @@
 <network-security-config xmlns:android="http://schemas.android.com/apk/res/android">
     <domain-config cleartextTrafficPermitted="true">
 <!--    <domain includeSubdomains="true">beitforum.onrender.com</domain>-->
-        
-        <domain includeSubdomains="true">192.168.0.112</domain>
+
+<!--        <domain includeSubdomains="true">192.168.0.112</domain>-->
+<!--    <domain includeSubdomains="true">beitforum.onrender.com</domain>-->
+        <domain includeSubdomains="true">beitforum-b0ng.onrender.com</domain>
+<!--        <domain includeSubdomains="true">192.168.1.170</domain>-->
     </domain-config>
 </network-security-config>

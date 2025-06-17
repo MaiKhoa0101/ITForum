@@ -13,7 +13,7 @@ data class UserModelResponse(
 
 
 data class LoginResponse(
-    val accessToken: String,
+    val accessToken: String?,
     val message: String
 )
 

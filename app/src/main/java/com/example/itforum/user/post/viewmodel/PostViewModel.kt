@@ -54,6 +54,8 @@ class PostViewModel(
 
     private val _isLoadingMore = MutableStateFlow(false)
     val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     private var currentPage = 1
     private var canLoadMore = true
@@ -94,6 +96,7 @@ class PostViewModel(
             allPostsWithVotes.clear()
             currentPage = 1
             canLoadMore = true
+            _isLoading.value = true
             Log.d("load state", canLoadMore.toString())
         }
 
@@ -166,6 +169,9 @@ class PostViewModel(
                 if (isLoadMore) {
                     _isLoadingMore.value = false
                 }
+                if (!isRefresh && !isLoadMore) {
+                    _isLoading.value = false
+                }
             }
         }
     }
@@ -174,7 +180,7 @@ class PostViewModel(
         viewModelScope.launch {
             _uiStateCreate.value = UiState.Loading
             try {
-                Log.d("UserViewModel", "Request: $createPostRequest")
+                Log.d("PostViewModel", "Request: $createPostRequest")
 
                 val imageUrls = createPostRequest.imageUrls?.mapNotNull { uri ->
                     prepareFilePart(context, uri, "imageUrls")
@@ -197,22 +203,25 @@ class PostViewModel(
                 val isPublished = createPostRequest.isPublished?.let {
                     MultipartBody.Part.createFormData("isPublished", it)
                 }
-                val tags = createPostRequest.tags?.let {
+                val tags = createPostRequest.tags?.mapNotNull  {
                     MultipartBody.Part.createFormData("tags", Gson().toJson(it))
                 }
+                Log.d("tagsViewModel",tags.toString())
 
                 val response =
                     videoUrls?.let {
                         imageUrls?.let { it1 ->
-                            RetrofitInstance.postService.createPost(
-                                userId = userId,
-                                title = title,
-                                content = content,
-                                tags = tags,
-                                isPublished = isPublished,
-                                imageUrls = it1,
-                                videoUrls = it
-                            )
+                            tags?.let { it2 ->
+                                RetrofitInstance.postService.createPost(
+                                    userId = userId,
+                                    title = title,
+                                    content = content,
+                                    tags = it2,
+                                    isPublished = isPublished,
+                                    imageUrls = it1,
+                                    videoUrls = it
+                                )
+                            }
                         }
                     }
 
@@ -278,10 +287,10 @@ class PostViewModel(
         }
     }
 
-
-    fun loadMorePosts() {
+    fun loadMorePosts(getPostRequest: GetPostRequest) {
         if (canLoadMore && !_isLoadingMore.value) {
-            fetchPosts(GetPostRequest(page = currentPage), isLoadMore = true)
+            val updatedRequest = getPostRequest.copy(page = currentPage)
+            fetchPosts(updatedRequest, isLoadMore = true)
         }
     }
     suspend fun votePost(postId: String?, type: String, index: Int): VoteResponse? {
@@ -350,6 +359,7 @@ class PostViewModel(
 
 
     fun refreshPosts(getPostRequest: GetPostRequest) {
+        Log.d("check data when refresh",getPostRequest.toString())
         fetchPosts(getPostRequest, isRefresh = true)
     }
 

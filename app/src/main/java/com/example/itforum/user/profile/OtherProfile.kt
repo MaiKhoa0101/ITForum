@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+
 import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.profile.viewmodel.UserViewModel
 
@@ -50,6 +52,7 @@ fun OtherUserProfileScreen(
     val tabs = listOf("Thông tin", "Bài viết")
     val user by viewModel.user.collectAsState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+
 
     LaunchedEffect(Unit) { viewModel.getUser() }
 

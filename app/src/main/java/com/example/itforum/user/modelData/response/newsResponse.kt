@@ -9,7 +9,7 @@ data class News(
     val adminId: String,
     val title: String,
     val content: String,
-    val img: String,
+    val img: String?,
     val createdAt: String
 ): TableRowConvertible {
     override fun toTableRow(): List<String> {

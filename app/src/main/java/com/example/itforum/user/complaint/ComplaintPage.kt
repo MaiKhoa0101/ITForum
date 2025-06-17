@@ -97,10 +97,6 @@ fun ComplaintPage(
                 enable = false
             }
         }
-
-        LaunchedEffect(Unit) {
-            userViewModel.getUser()
-        }
         // UI hiển thị
         if (showSuccessDialog) {
             SuccessDialog(
@@ -111,6 +107,10 @@ fun ComplaintPage(
                 }
             )
         }
+        LaunchedEffect(Unit) {
+            userViewModel.getUser()
+        }
+
         LazyColumn (
             modifier = Modifier.fillMaxSize()
         ) {
@@ -283,7 +283,9 @@ fun SuccessDialogExample() {
 @Composable
 fun SuccessDialog(
     title: String = "Thành công",
+    color: Color = Color(0xFF3EB641),
     message: String = "Thao tác của bạn đã được thực hiện thành công!",
+    nameButton: String = "Quay về trang chủ",
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -297,21 +299,26 @@ fun SuccessDialog(
                     painter = painterResource(id = R.drawable.icon_success),
                     contentDescription = "Success",
                     modifier = Modifier.size(30.dp),
-                    tint = Color.Transparent
+                    tint = Color.Unspecified
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
                     text = title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 30.sp,
-                    color = Color(0xFF3EB641)
+                    color = color
                 )
             }
                 },
-        text = { Text(message) },
+        text = {
+            Text(
+                text = message,
+                fontSize = 18.sp
+            )
+               },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Quay về trang chủ")
+                Text(nameButton)
             }
         },
         containerColor = Color.White

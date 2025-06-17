@@ -56,6 +56,7 @@ import com.example.itforum.user.FilterWords.ToastHelper
 import com.google.firebase.messaging.FirebaseMessaging
 import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
 import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
+import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.tasks.await
 
 
@@ -63,6 +64,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+//        val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        // Khởi tạo Firebase Analytics
+        val firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+
+        // Gửi sự kiện screen_view
+        val screenBundle = Bundle().apply {
+            putString(FirebaseAnalytics.Param.SCREEN_NAME, "RootScreen")
+            putString(FirebaseAnalytics.Param.SCREEN_CLASS, "MainActivity")
+        }
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, screenBundle)
+
+
         val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         ToastHelper.init(this)
         setContent {
@@ -83,7 +96,7 @@ fun Root(sharedPreferences:SharedPreferences) {
     val navHostController = rememberNavController()
     val navBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val showTopBars = currentRoute in listOf("home","bookmark")
+    val showTopBars = currentRoute in listOf("home","bookmark","follow")
     val showFootBars = currentRoute in listOf("home", "searchscreen", "notification", "personal","bookmark")
     //thay doi ơ day
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -108,6 +121,7 @@ fun Root(sharedPreferences:SharedPreferences) {
                     DrawerContent(
                         sidebarItem = sidebarUserItems,
                         navHostController = navHostController,
+                        sharedPreferences = sharedPreferences,
                         closedrawer = {
                             if (showTopBars) {
                                 scope.launch {

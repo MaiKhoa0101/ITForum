@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +57,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+
 import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.modelData.response.Certificate
 import com.example.itforum.user.modelData.response.Skill
@@ -77,9 +79,21 @@ fun UserProfileScreen(
     val user by viewModel.user.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
+//    LaunchedEffect(Unit) {
+//        viewModel.getUser()
+//    }
     LaunchedEffect(Unit) {
-        viewModel.getUser()
+        val loginType = sharedPreferences.getString("loginType", "") ?: ""
+
+        if (loginType == "google") {
+
+            viewModel.getUserFromFirestore()
+        } else {
+
+            viewModel.getUser()
+        }
     }
+
 
     Scaffold(
         modifier = Modifier
@@ -144,35 +158,31 @@ fun ProfileContent(
     tabs: List<String>,
     sharedPreferences: SharedPreferences
 ) {
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        item { UserHeader(user) }
+   Column(modifier = modifier.fillMaxSize()) {
+        UserHeader(user)
 
-        stickyHeader {
-            UserTabRow(
+
+       UserTabRow(
                 tabs = tabs,
                 selectedTabIndex = selectedTabIndex,
                 onTabSelected = onTabSelected
             )
-        }
 
-        when (selectedTabIndex) {
-            0 -> {
-                item {UserInfoDetail(user) }
-            }
-            1 -> {
-               item {
-                   PostListScreen(
-                       sharedPreferences,
-                       navController,
-                       GetPostRequest(
-                           page = 1,
-                           userId = sharedPreferences
-                               .getString("userId", null)
-                       )
-                   )
-               }
-            }
-        }
+       when (selectedTabIndex) {
+           0 -> {
+               UserInfoDetail(user)
+           }
+           1 -> {
+               PostListScreen(
+                   sharedPreferences,
+                   navController,
+                   GetPostRequest(
+                       page = 1,
+                       userId = sharedPreferences.getString("userId", null)
+                   ), reloadKey = selectedTabIndex
+               )
+           }
+       }
     }
 }
 
@@ -199,7 +209,7 @@ fun UserHeader(user: UserProfileResponse?) {
             Spacer(modifier = Modifier.width(50.dp))
             Column{
                 Text(user?.username?:"Người dùng", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Text(user?.email?:"maikhoa@gmail.com")
+                Text(user?.email?:"")
 
 
                 Text(

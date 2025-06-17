@@ -56,6 +56,7 @@ import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailS
 import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostScreen
 import com.example.itforum.admin.components.LocalDrawerOpener
 import com.example.itforum.user.news.DetailNewsPage
+import com.example.itforum.user.root.Root
 
 @Composable
 fun AdminScreen(sharedPreferences: SharedPreferences) {
@@ -88,6 +89,7 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                 DrawerContent(
                     sidebarItem = sidebarItems,
                     navHostController = navHostController,
+                    sharedPreferences = sharedPreferences,
                     closedrawer = {
                         if (showTopBars) {
                             scope.launch {
@@ -212,7 +214,12 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                             sharedPreferences
                         )
                     }
+                    composable("root"){
+                        Root(sharedPreferences)
+                    }
                 }
+
+
             }
         }
     }
