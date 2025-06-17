@@ -9,7 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.example.itforum.user.Analytics.logScreenView
+
 
 @Composable
 fun ToolPage(modifier: Modifier){

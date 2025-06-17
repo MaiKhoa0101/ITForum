@@ -57,7 +57,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.itforum.user.Analytics.logScreenView
+
 import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.modelData.response.Certificate
 import com.example.itforum.user.modelData.response.Skill
@@ -79,9 +79,21 @@ fun UserProfileScreen(
     val user by viewModel.user.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
+//    LaunchedEffect(Unit) {
+//        viewModel.getUser()
+//    }
     LaunchedEffect(Unit) {
-        viewModel.getUser()
+        val loginType = sharedPreferences.getString("loginType", "") ?: ""
+
+        if (loginType == "google") {
+
+            viewModel.getUserFromFirestore()
+        } else {
+
+            viewModel.getUser()
+        }
     }
+
 
     Scaffold(
         modifier = Modifier
@@ -201,7 +213,7 @@ fun UserHeader(user: UserProfileResponse?) {
             Spacer(modifier = Modifier.width(50.dp))
             Column{
                 Text(user?.username?:"Người dùng", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Text(user?.email?:"maikhoa@gmail.com")
+                Text(user?.email?:"")
 
 
                 Text(

@@ -1,5 +1,8 @@
 package com.example.itforum.user.login.loginGoogle
 
+import android.app.Activity
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -21,8 +24,10 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 
 @Composable
-fun GoogleSignInButton(onResult: (FirebaseUser?) -> Unit) {
+fun GoogleSignInButton(sharedPreferences: SharedPreferences,onResult: (FirebaseUser?) -> Unit) {
     val context = LocalContext.current
+    val activity = context as? Activity ?: return
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -30,23 +35,37 @@ fun GoogleSignInButton(onResult: (FirebaseUser?) -> Unit) {
         try {
             val account = task.getResult(ApiException::class.java)
             val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+
+            FirebaseAuth.getInstance().signOut()
+
             FirebaseAuth.getInstance().signInWithCredential(credential)
                 .addOnCompleteListener { authTask ->
                     if (authTask.isSuccessful) {
-                        onResult(authTask.result?.user)
+                        val firebaseUser = authTask.result?.user
+                        val email = firebaseUser?.email ?: "unknown@gmail.com" // ✅ lấy email Google
+
+                        // Lưu vào SharedPreferences (nếu bạn muốn)
+                        val prefs = activity.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
+                        prefs.edit().putString("email", email).apply()
+
+                        sharedPreferences.edit()
+                            .putString("loginType", "google")
+                            .apply()
+
+                        onResult(firebaseUser) // Gọi callback tiếp tục xử lý
                     } else {
                         onResult(null)
                     }
                 }
+
         } catch (e: ApiException) {
             onResult(null)
         }
     }
 
-
     Button(
         onClick = {
-            val client = getGoogleSignInClient(context)
+            val client = getGoogleSignInClient(activity)
             launcher.launch(client.signInIntent)
         },
         colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
@@ -59,4 +78,3 @@ fun GoogleSignInButton(onResult: (FirebaseUser?) -> Unit) {
         Text("Đăng nhập bằng Google", color = Color.Black)
     }
 }
-

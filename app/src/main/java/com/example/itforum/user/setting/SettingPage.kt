@@ -32,7 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.itforum.user.Analytics.logScreenView
+
 
 @Composable
 fun Setting(navHostController: NavHostController,onToggleTheme:()->Unit, darkTheme:Boolean){

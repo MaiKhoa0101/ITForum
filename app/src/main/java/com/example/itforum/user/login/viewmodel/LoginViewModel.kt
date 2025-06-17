@@ -13,6 +13,7 @@ import com.example.itforum.admin.adminCrashlytic.UserSession
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.request.LoginUser
+import com.google.firebase.auth.FirebaseAuth
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,13 +21,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okio.IOException
-
+import kotlinx.coroutines.tasks.await
 
 
 
 class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewModel() {
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+
 
     fun userLogin(emailOrPhone: String, password: String) {
         viewModelScope.launch {
@@ -35,9 +38,10 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
             try {
                 val loginUser = LoginUser(emailOrPhone, password)
                 val response = RetrofitInstance.userService.login(loginUser)
-
-                Log.d("LoginViewModel", "Response: $response")  
+                Log.d("LoginViewModel", "Response: $response")
+                Log.d("LoginViewModel", "Response: ${response.body()}")
                 if (response.isSuccessful) {
+
                     val token = response.body()?.accessToken
                     saveUserEmail(emailOrPhone)
                     if (!token.isNullOrEmpty()) {
@@ -70,6 +74,61 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
 
         }
     }
+    fun handleGoogleLogin(uid: String) {
+        viewModelScope.launch {
+            try {
+                val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                val userRef = db.collection("users").document(uid)
+
+                val document = userRef.get().await() // ✅ dùng await() để truy cập trong coroutine
+
+                if (document.exists()) {
+                    val email = document.getString("email") ?: "unknown@gmail.com"
+                    val role = document.getString("role") ?: "user"
+
+                    saveUserEmail(email)         // ✅ Ghi email lấy từ Firestore
+                    saveUserId(uid)
+                    saveUserRole(role)
+
+                    _uiState.value = UiState.Success("Đăng nhập Google thành công")
+                } else {
+                    _uiState.value = UiState.Error("Không tìm thấy user trong Firestore")
+                }
+
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error("Lỗi đọc Firestore: ${e.message}")
+            }
+        }
+    }
+//fun handleGoogleLogin(uid: String) {
+//    viewModelScope.launch {
+//        try {
+//            val firebaseUser = FirebaseAuth.getInstance().currentUser
+//            val idToken = firebaseUser?.getIdToken(true)?.await()?.token
+//
+//            if (idToken == null) {
+//                _uiState.value = UiState.Error("Không lấy được idToken từ Firebase")
+//                return@launch
+//            }
+//
+//            // 🔥 Gửi idToken về backend
+////            val response = RetrofitInstance.api.loginWithFirebase(mapOf("idToken" to idToken))
+//
+//            if (response.isSuccessful) {
+//                val backendUserId = response.body()?.userId
+//                saveUserId(backendUserId ?: "")
+//                _uiState.value = UiState.Success("Đăng nhập thành công")
+//            } else {
+//                _uiState.value = UiState.Error("Lỗi backend: ${response.message()}")
+//            }
+//
+//        } catch (e: Exception) {
+//            _uiState.value = UiState.Error("Lỗi đăng nhập Google: ${e.message}")
+//        }
+//    }
+//}
+
+
 
 
     private fun handleToken(token: String) {

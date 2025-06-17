@@ -3,6 +3,7 @@ package com.example.itforum.user.root
 import android.content.SharedPreferences
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -46,7 +47,9 @@ import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
 import com.example.itforum.admin.adminReport.ReportPost.model.request.ReportedPost
 import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailScreen
 import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
-import com.example.itforum.user.Analytics.logScreenView
+import com.example.itforum.user.Analytics.logScreenEnter
+import com.example.itforum.user.Analytics.logScreenExit
+
 import com.example.itforum.user.complaint.ComplaintPage
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.PostCommentScreen
@@ -59,14 +62,22 @@ import kotlinx.coroutines.delay
 @Composable
 fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier, onToggleTheme: () -> Unit, darkTheme: Boolean = false){
     NavHost(navHostController, startDestination = "login") {
-        composable ("home") {
+        composable("home") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "HomePage")
-                delay(1200)
+                logScreenEnter(context, "HomePage") // gửi screen_view
             }
-            HomePage(navHostController,modifier,sharedPreferences)
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "HomePage") // khi thoát màn hình
+                }
+            }
+
+            HomePage(navHostController, modifier, sharedPreferences)
         }
+
         // NavGraphBuilder
 //        composable("comment/{postId}") { backStackEntry ->
 //            val postId = backStackEntry.arguments?.getString("postId") ?: ""
@@ -76,22 +87,37 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             val postId = backStackEntry.arguments?.getString("postId") ?: ""
 
             val context = LocalContext.current
+
             LaunchedEffect(postId) {
-                logScreenView(context, "comment_post")
-                delay(1200)
+                logScreenEnter(context, "comment_post_$postId") // hoặc "comment_post"
+            }
+
+            DisposableEffect(postId) {
+                onDispose {
+                    logScreenExit(context, "comment_post_$postId") // hoặc "comment_post"
+                }
             }
 
             PostCommentScreen(navHostController, postId, sharedPreferences)
         }
 
-        composable ("notification") {
+
+        composable("notification") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "NotificationPage")
-                delay(1200)
+                logScreenEnter(context, "NotificationPage") // gửi sự kiện screen_view
             }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "NotificationPage") // khi rời màn hình
+                }
+            }
+
             NotificationPage(modifier, navHostController)
         }
+
 //        composable("chat") {
 //            ChatAIApp(onExitToHome = {
 //                navHostController.navigate("home") {
@@ -102,10 +128,17 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("chat") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "chat")
-                delay(1200)
+                logScreenEnter(context, "chat") // bắt đầu ghi nhận màn hình chat
             }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "chat") // kết thúc và ghi thời gian ở lại
+                }
+            }
+
             ChatAIApp(
                 onExitToHome = {
                     navHostController.navigate("home") {
@@ -115,6 +148,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 }
             )
         }
+
 
 //        composable("note") {
 //            NotesApp(
@@ -128,9 +162,15 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("note") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "note")
-                delay(1200)
+                logScreenEnter(context, "note")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "note")
+                }
             }
 
             NotesApp(
@@ -143,13 +183,21 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
+
 //        composable ("detail_notify") {
 //            DetailNotify(modifier, navHostController)
 //        }
         composable("detail_notify") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "detail_notify")
+                logScreenEnter(context, "detail_notify")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "detail_notify")
+                }
             }
 
             DetailNotify(modifier, navHostController)
@@ -160,44 +208,75 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("tool") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "tool")
+                logScreenEnter(context, "tool")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "tool")
+                }
             }
 
             ToolPage(modifier)
         }
+
 
 //        composable ("personal") {
 //            UserProfileScreen(sharedPreferences, navHostController)
 //        }
         composable("personal") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "personal")
+                logScreenEnter(context, "personal") // Gửi sự kiện screen_view
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "personal") // Gửi screen_exit kèm thời gian
+                }
             }
 
             UserProfileScreen(sharedPreferences, navHostController)
         }
+
 
 //        composable ("otherprofile") {
 //            OtherUserProfileScreen(sharedPreferences, navHostController,modifier)
 //        }
         composable("otherprofile") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "other_profile")
+                logScreenEnter(context, "other_profile") // Bắt đầu tracking khi vào màn
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "other_profile") // Ghi thời gian khi rời màn
+                }
             }
 
             OtherUserProfileScreen(sharedPreferences, navHostController, modifier)
         }
+
 
 //        composable ("editprofile") {
 //            EditProfile(modifier,sharedPreferences,navHostController)
 //        }
         composable("editprofile") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "edit_profile")
+                logScreenEnter(context, "edit_profile") // Ghi nhận khi vào màn hình
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "edit_profile") // Ghi nhận khi rời màn hình
+                }
             }
 
             EditProfile(modifier, sharedPreferences, navHostController)
@@ -205,46 +284,79 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 
         composable("create_post") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "CreatePostPage")
+                logScreenEnter(context, "CreatePostPage") // Gửi screen_view
             }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "CreatePostPage") // Gửi thời gian ở lại
+                }
+            }
+
             CreatePostPage(modifier, navHostController, sharedPreferences)
         }
+
 //        composable("detail_post"){
 //            DetailPostPage(navHostController)
 //        }
         composable("detail_post") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "detail_post")
+                logScreenEnter(context, "detail_post") // Khi vào màn hình
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "detail_post") // Khi thoát màn hình
+                }
             }
 
             DetailPostPage(navHostController)
         }
+
 
 //        composable("listlike") {
 //            ListLikePage(navHostController)
 //        }
         composable("listlike") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "list_like")
+                logScreenEnter(context, "list_like") // Khi người dùng vào màn hình
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "list_like") // Khi người dùng rời khỏi màn hình
+                }
             }
 
             ListLikePage(navHostController)
         }
+
 
 //        composable("intro") {
 //            IntroScreen(navHostController)
 //        }
         composable("intro") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "intro")
+                logScreenEnter(context, "intro") // Khi người dùng vào màn hình
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "intro") // Khi người dùng rời khỏi màn hình
+                }
             }
 
             IntroScreen(navHostController)
         }
+
 
 //        composable("login") {
 //            LoginScreen(
@@ -256,8 +368,15 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("login") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "login")
+                logScreenEnter(context, "login") // Ghi nhận khi vào màn hình
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "login") // Ghi nhận khi thoát màn hình
+                }
             }
 
             LoginScreen(
@@ -268,6 +387,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
+
 //        composable ("settings"){
 //            val context = LocalContext.current
 //            LaunchedEffect(Unit) {
@@ -277,11 +397,24 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("settings") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "Settings")
+                logScreenEnter(context, "Settings") // Gửi sự kiện screen_view
             }
-            Setting(navHostController, onToggleTheme = onToggleTheme, darkTheme = darkTheme)
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "Settings") // Tính thời gian ở lại và gửi screen_exit
+                }
+            }
+
+            Setting(
+                navHostController,
+                onToggleTheme = onToggleTheme,
+                darkTheme = darkTheme
+            )
         }
+
 
 //        composable("forgot_password") {
 //            ForgotPasswordScreen(
@@ -292,8 +425,15 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("forgot_password") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "forgot_password")
+                logScreenEnter(context, "forgot_password") // Gửi sự kiện screen_view
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "forgot_password") // Gửi thời gian ở lại
+                }
             }
 
             ForgotPasswordScreen(
@@ -304,14 +444,22 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         }
 
 
+
 //        composable("phone_otp") {
 //            EnterPhoneNumberScreen(onBackClick = { navHostController.popBackStack() },
 //                onContinueClick = {navHostController.navigate("enter_otp")})
 //        }
         composable("phone_otp") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "phone_otp")
+                logScreenEnter(context, "phone_otp") // Ghi nhận khi vào màn hình
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "phone_otp") // Ghi nhận khi thoát màn hình
+                }
             }
 
             EnterPhoneNumberScreen(
@@ -320,14 +468,22 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
+
 //        composable("email_otp") {
 //            EnterEmailScreen(onBackClick = { navHostController.popBackStack() },
 //                onContinueClick = {navHostController.navigate("enter_otp")})
 //        }
         composable("email_otp") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "email_otp")
+                logScreenEnter(context, "email_otp") // Gửi screen_view
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "email_otp") // Gửi screen_exit kèm thời gian ở lại
+                }
             }
 
             EnterEmailScreen(
@@ -336,6 +492,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
+
 //        composable("enter_otp"){
 //            EnterOtpScreen(onBackClick = { navHostController.popBackStack() },
 //                onSubmitClick = {navHostController.navigate("sumit_otp")})
@@ -343,8 +500,15 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("enter_otp") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "enter_otp")
+                logScreenEnter(context, "enter_otp") // Gửi screen_view
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "enter_otp") // Gửi thời gian ở lại (screen_exit)
+                }
             }
 
             EnterOtpScreen(
@@ -353,22 +517,29 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
+
 //        composable("sumit_otp"){
 //            ResetPasswordScreen(onBackClick= {navHostController.popBackStack()},)
 //            // thêm điều hướng cho nút
 //        }
         composable("sumit_otp") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "reset_password")
-                delay(1200)
+                logScreenEnter(context, "reset_password") // Gửi sự kiện screen_view
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "reset_password") // Gửi thời gian ở lại
+                }
             }
 
             ResetPasswordScreen(
                 onBackClick = { navHostController.popBackStack() }
             )
-            // thêm điều hướng cho nút nếu cần
         }
+
 
 
 //        composable("register") {
@@ -379,9 +550,15 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("register") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "register")
-                delay(1200)
+                logScreenEnter(context, "register") // Gửi screen_view
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "register") // Gửi thời gian ở lại (screen_exit)
+                }
             }
 
             RegisterScreen(
@@ -389,6 +566,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 sharedPreferences = sharedPreferences,
             )
         }
+
 
 
 //        composable("otp") {
@@ -401,15 +579,20 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("otp") {
             val context = LocalContext.current
-            LaunchedEffect(Unit) {
-                logScreenView(context, "otp_verification")
-                delay(1200)
 
+            LaunchedEffect(Unit) {
+                logScreenEnter(context, "otp_verification") // Gửi screen_view khi vào màn hình
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "otp_verification") // Gửi thời gian ở lại khi thoát màn
+                }
             }
 
             OtpVerificationScreen(
                 onBackClick = { navHostController.popBackStack() },
-                onSubmitClick = { navHostController.navigate("success") }, // Điều hướng sau khi xác thực thành công
+                onSubmitClick = { navHostController.navigate("success") },
                 onResendClick = { /* xử lý gửi lại */ },
                 onLoginClick = { navHostController.navigate("login") }
             )
@@ -422,9 +605,15 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("success") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "registration_success")
-                delay(1200)
+                logScreenEnter(context, "registration_success")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "registration_success")
+                }
             }
 
             RegistrationSuccessScreen(
@@ -432,14 +621,21 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
+
 //        composable("myfeed"){
 //            MyFeedScreen(modifier)
 //        }
         composable("myfeed") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "my_feed")
-                delay(1200)
+                logScreenEnter(context, "my_feed")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "my_feed")
+                }
             }
 
             MyFeedScreen(modifier)
@@ -450,9 +646,15 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("bookmark") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "bookmark")
-                delay(1200)
+                logScreenEnter(context, "bookmark")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "bookmark")
+                }
             }
 
             BookMarkScreen(navHostController, sharedPreferences)
@@ -463,26 +665,40 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("follow") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "follow")
-                delay(1200)
+                logScreenEnter(context, "follow") // Gửi screen_view
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "follow") // Gửi screen_exit kèm thời gian ở lại
+                }
             }
 
             FollowScreen()
         }
+
 
 //        composable ("searchscreen"){
 //            SearchScreen(modifier)
 //        }
         composable("searchscreen") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "search_screen")
-                delay(1200)
+                logScreenEnter(context, "search_screen") // Gửi screen_view
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "search_screen") // Gửi thời gian ở lại khi rời màn
+                }
             }
 
             SearchScreen(modifier)
         }
+
 
 //        composable("detail_news/{newsId}") { backStackEntry ->
 //            val newsId = backStackEntry.arguments?.getString("newsId")
@@ -501,16 +717,17 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             val context = LocalContext.current
 
             if (newsId != null) {
-
                 LaunchedEffect(newsId) {
-                    logScreenView(context, "detail_news")
-                    delay(1200)
+                    logScreenEnter(context, "detail_news_$newsId") // Ghi nhận screen_view
                 }
 
-//                DetailNewsPage(newsId, modifier, navHostController, sharedPreferences)
+                DisposableEffect(newsId) {
+                    onDispose {
+                        logScreenExit(context, "detail_news_$newsId") // Ghi nhận thời gian ở lại
+                    }
+                }
 
-                 DetailNewsPage(newsId, navHostController, sharedPreferences)
-
+                DetailNewsPage(newsId, navHostController, sharedPreferences)
             }
         }
 
@@ -520,12 +737,20 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        }
         composable("complaint") {
             val context = LocalContext.current
+
             LaunchedEffect(Unit) {
-                logScreenView(context, "complaint")
+                logScreenEnter(context, "complaint") // Gửi screen_view khi vào màn
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "complaint") // Gửi screen_exit kèm thời gian ở lại
+                }
             }
 
             ComplaintPage(navHostController, sharedPreferences)
         }
+
 
 //        composable("account_detail/{accountId}") { backStackEntry ->
 //            val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
@@ -541,7 +766,13 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 
             if (accountId != null) {
                 LaunchedEffect(accountId) {
-                    logScreenView(context, "account_detail")
+                    logScreenEnter(context, "account_detail_$accountId")
+                }
+
+                DisposableEffect(accountId) {
+                    onDispose {
+                        logScreenExit(context, "account_detail_$accountId")
+                    }
                 }
 
                 AccountDetailScreen(accountId)
@@ -549,6 +780,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 Text("Không tìm thấy tài khoản.")
             }
         }
+
 
 
 //        composable("detail_news/{newsId}") { backStackEntry ->

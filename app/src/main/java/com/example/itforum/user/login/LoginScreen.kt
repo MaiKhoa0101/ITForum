@@ -2,6 +2,7 @@ package com.example.itforum.user.login
 
 import android.content.SharedPreferences
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -32,9 +33,11 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.effect.UiStateMessage
+import com.example.itforum.user.login.loginGoogle.GoogleSignInButton
+import com.example.itforum.user.login.loginGoogle.saveUserToFirestore
 import com.example.itforum.user.login.viewmodel.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -57,59 +60,22 @@ fun LoginScreen(
     var isPhoneOrEmailValid by remember { mutableStateOf(true) }
     var isPasswordValid by remember { mutableStateOf(true) }
 
-    var canSubmit by remember {mutableStateOf(false)}
+    var canSubmit by remember { mutableStateOf(false) }
 
     val uiState by loginViewModel.uiState.collectAsState()
+
+    val context = LocalContext.current
+
     LaunchedEffect(uiState) {
-        println("uiState da bi thay doi: "+uiState)
+        println("uiState da bi thay doi: $uiState")
         if (uiState is UiState.Success) {
             val role = sharedPreferences.getString("role", null)
             if (role != null) {
-                println("Role la: "+role)
                 val destination = if (role == "admin") "admin_root" else "home"
                 navHostController.navigate(destination)
-            } else {
-                println("Không tìm thấy role trong SharedPreferences.")
             }
         }
     }
-    // xu lý đăng nhập google
-    val context = LocalContext.current
-    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestIdToken(context.getString(R.string.default_web_client_id))
-        .requestEmail()
-        .build()
-
-    val googleSignInClient = GoogleSignIn.getClient(context, gso)
-
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-
-            FirebaseAuth.getInstance().signInWithCredential(credential)
-                .addOnCompleteListener { authTask ->
-                    if (authTask.isSuccessful) {
-                        val user = authTask.result?.user
-                        // ✅ Lưu thông tin user
-                        sharedPreferences.edit()
-                            .putString("uid", user?.uid)
-                            .putString("email", user?.email)
-                            .putString("role", "user") // TODO: có thể xác định từ backend nếu cần
-                            .apply()
-
-                        // ✅ Điều hướng tới home
-                        navHostController.navigate("home")
-                    } else {
-                        Log.e("GoogleLogin", "Lỗi xác thực Google: ${authTask.exception}")
-                    }
-                }
-        } catch (e: ApiException) {
-            Log.e("GoogleLogin", "Google sign-in thất bại", e)
-        }
-    }
-
 
     Column(
         modifier = Modifier
@@ -118,7 +84,6 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         HeaderSection()
-
         Spacer(modifier = Modifier.height(24.dp))
 
         PhoneOrEmailInput(phoneNumberOrEmail, isPhoneOrEmailValid) {
@@ -132,22 +97,19 @@ fun LoginScreen(
         }
 
         ForgotPasswordText(onForgotPasswordClick)
-
         Spacer(modifier = Modifier.height(24.dp))
-
 
         Button(
             onClick = {
                 isPhoneOrEmailValid = phoneNumberOrEmail.all { it.isDigit() } || phoneNumberOrEmail.contains("@")
                 isPasswordValid = password.length >= 6
-                canSubmit= isPasswordValid&&isPhoneOrEmailValid
-                println("Đã nhấn đăng nhập với cansubmit: $canSubmit")
+                canSubmit = isPhoneOrEmailValid && isPasswordValid
+
                 if (canSubmit) {
                     loginViewModel.userLogin(phoneNumberOrEmail, password)
-                }
-                else{
-                    println("phone: "+isPhoneOrEmailValid+" "+phoneNumberOrEmail)
-                    println("password: "+isPasswordValid+" "+password)
+                } else {
+                    println("phone: $isPhoneOrEmailValid $phoneNumberOrEmail")
+                    println("password: $isPasswordValid $password")
                 }
             },
             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF6FA9FF)),
@@ -159,27 +121,32 @@ fun LoginScreen(
             Text("Đăng nhập", color = Color.White, fontSize = 24.sp)
         }
 
-
         Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                launcher.launch(googleSignInClient.signInIntent)
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
-            border = BorderStroke(1.dp, Color.Gray),
-            shape = RoundedCornerShape(50),
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(50.dp)
-        ) {
-            Text("Đăng nhập bằng Google", color = Color.Black, fontSize = 16.sp)
+
+        // ✅ Nút Google đã đóng gói xử lý bên trong
+        GoogleSignInButton(sharedPreferences) { user ->
+            if (user != null) {
+                loginViewModel.handleGoogleLogin(user.uid)
+
+                // Nếu muốn điều hướng sau khi login:
+                navHostController.navigate("home") {
+                    popUpTo("login") { inclusive = true }
+                }
+
+
+            } else {
+                Toast.makeText(context, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show()
+            }
         }
+
+
+
         Spacer(modifier = Modifier.height(16.dp))
         RegisterText(onRegisterClick)
-
         UiStateMessage(uiState, canSubmit)
     }
 }
+
 
 @Composable
 fun HeaderSection() {

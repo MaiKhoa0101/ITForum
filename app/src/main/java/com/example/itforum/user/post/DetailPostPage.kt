@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.R
-import com.example.itforum.user.Analytics.logScreenView
+
 
 @Composable
 fun DetailPostPage(
