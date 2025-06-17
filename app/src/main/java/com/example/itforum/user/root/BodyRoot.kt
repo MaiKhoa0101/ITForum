@@ -189,14 +189,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         composable("complaint") {
                 ComplaintPage(navHostController, sharedPreferences)
         }
-        composable("account_detail/{accountId}") { backStackEntry ->
-            val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
-            if (accountId != null) {
-                AccountDetailScreen(accountId)
-            } else {
-                Text("Không tìm thấy tài khoản.")
-            }
-        }
+
         composable ("admin_root"){
             AdminScreen(sharedPreferences)
         }

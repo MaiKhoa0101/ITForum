@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.itforum.admin.components.TableData
@@ -19,7 +20,8 @@ import com.example.itforum.user.post.icontext
 @Composable
 fun ManagementComplaintScreen (
     navController: NavHostController,
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+
 ) {
     var complaintViewModel: ComplaintViewModel = viewModel()
     LaunchedEffect(Unit) {
@@ -35,7 +37,9 @@ fun ManagementComplaintScreen (
     complaints?.let {
         AdminScreenLayout(
         title = "Quản lý khiếu nại người dùng",
-        itemCount = it.size
+        itemCount = it.size,
+
+
     ) { searchText, _, _ ->
         val filteredUsers = complaints!!.filter {
             it.userId.contains(searchText, ignoreCase = true) ||
@@ -45,7 +49,7 @@ fun ManagementComplaintScreen (
             headers = listOf("ID", "Người dùng", "Tiêu đề", "Lý do", "Thời gian", "Trạng thái", "Tùy chỉnh"),
             rows = convertToTableRows(filteredUsers),
             menuOptions = menuOptions,
-            sharedPreferences = sharedPreferences,
+            sharedPreferences = sharedPreferences
         )
     }
     }

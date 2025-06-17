@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.itforum.admin.AdminRoot.HeadBarAdmin
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
@@ -25,6 +26,7 @@ import java.time.LocalDate
 fun AdminScreenLayout(
     title: String,
     itemCount: Int,
+    onOpenDrawer: () -> Unit = {},
     addComposed: @Composable () -> Unit = {},
     content: @Composable (String, LocalDate?, LocalDate?) -> Unit
 ) {
@@ -35,27 +37,8 @@ fun AdminScreenLayout(
     var endDate by remember { mutableStateOf<LocalDate?>(null) }
     var showDateFilters by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth().background(Color.White)) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(69.dp)
-                .background(Color(0xFF00AEFF))
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize().padding(start = 25.dp, end = 25.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Icon(Icons.Default.Menu, contentDescription = "Menu")
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "xin chao user", color = Color.White)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(Icons.Default.AccountCircle, contentDescription = "User")
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(17.dp))
+    Column {
+        HeadBarAdmin()
         Column(modifier = Modifier.padding(horizontal = 25.dp)) {
             Text(text = title, fontSize = 20.sp, color = Color.Black)
             Spacer(modifier = Modifier.height(14.dp))

@@ -19,13 +19,13 @@ object RetrofitInstance {
 
 
 
-    private const val BASE_URL = "https://beitforum.onrender.com/"
-
+//    private const val BASE_URL = "https://beitforum.onrender.com/"
+    private const val BASE_URL = "http://192.168.1.2:4000"
 
     val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(60, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
     val retrofit = Retrofit.Builder()

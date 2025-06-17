@@ -9,6 +9,8 @@ import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.NoteAlt
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.filled.ReportGmailerrorred
+import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class SidebarItem(
@@ -54,7 +56,17 @@ val sidebarItems = listOf(
         nameField = "Quản lý crash hệ thống",
         iconField = Icons.Default.Message,
         navigationField = "Crashlytics"
-)
+),
+    SidebarItem(
+        nameField = "Quản lý báo cáo tài khoản",
+        iconField = Icons.Default.ReportProblem,
+        navigationField = "ReportAccount"
+    ),
+    SidebarItem(
+        nameField = "Quản lý báo cáo bài viết",
+        iconField = Icons.Default.ReportGmailerrorred,
+        navigationField = "ReportPost"
+    )
 )
 
 // Sidebar item list
