@@ -2,6 +2,7 @@ package com.example.itforum.user.login.viewmodel
 
 
 import android.content.SharedPreferences
+import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,7 +22,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okio.IOException
+
 import kotlinx.coroutines.tasks.await
+
+
+import org.json.JSONObject
 
 
 
@@ -54,7 +59,7 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
 
                     } else {
                         showError("Token không hợp lệ")
-                        _uiState.value = UiState.Error(response.message())
+                        _uiState.value = response.body()?.let { UiState.Error(it.message) }!!
                         delay(500) // Cho phép UI xử lý trạng thái Success
                     }
                 } else {
@@ -151,7 +156,6 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
         }
 
     }
-
 
     private fun saveUserEmail(email: String?) {
         sharedPreferences.edit()

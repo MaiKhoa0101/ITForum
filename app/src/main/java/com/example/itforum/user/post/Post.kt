@@ -70,7 +70,8 @@ import kotlinx.coroutines.launch
 fun PostListScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
-    getPostRequest: GetPostRequest
+    getPostRequest: GetPostRequest,
+    reloadKey: Any? = null
 ) {
     fun handleUpVote(viewModel: PostViewModel, postWithVote: PostWithVote, index: Int, scope: CoroutineScope) {
         scope.launch {
@@ -121,15 +122,18 @@ fun PostListScreen(
     var selectedPostId by remember { mutableStateOf<String?>(null) }
     var userId = sharedPreferences.getString("userId", null)
 
+    val isLoading by viewModel.isLoading.collectAsState()
     // Fetch posts when screen loads
-    LaunchedEffect(getPostRequest) {
+    LaunchedEffect(reloadKey,getPostRequest) {
         postsWithVotes = emptyList()
         viewModel.fetchPosts(getPostRequest)
-        Log.d("PostListScreen", "Fetching posts for request: $getPostRequest")
+        Log.d("PostListScreen", postsFromVm.toString())
 
     }
-    LaunchedEffect(postsFromVm) {
-        postsWithVotes = postsFromVm
+    LaunchedEffect(isLoading, postsFromVm) {
+        if (!isLoading && postsFromVm.isNotEmpty()) {
+            postsWithVotes = postsFromVm
+        }
         Log.d("load page when postfromvm",postsWithVotes.toString())
     }// keep local data async
 
@@ -144,6 +148,7 @@ fun PostListScreen(
             .fillMaxSize()
             .pullRefresh(pullRefreshState)
     ) {
+        Log.d("post refreshing loading",isRefreshing.toString()+" "+isLoadingMore.toString())
         if (postsWithVotes.isEmpty() && !isRefreshing && !isLoadingMore) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -226,7 +231,7 @@ fun PostListScreen(
                     // Load more when reaching near the end
                     if (index >= postsWithVotes.size - 3 && !isLoadingMore) {
                         LaunchedEffect(index) {
-                            viewModel.loadMorePosts()
+                            viewModel.loadMorePosts(getPostRequest)
                         }
                     }
                 }
@@ -296,83 +301,13 @@ fun PostListScreen(
     }
 }
 
-
-
-
-@Composable
-fun AdvancedMarqueeText(
-    news: News,
-    navHostController: NavHostController,
-    modifier: Modifier = Modifier,
-    textStyle: TextStyle = TextStyle.Default,
-    durationMillis: Int = 10000
-) {
-    var isPaused by remember { mutableStateOf(false) }
-    val animOffset = remember { Animatable(0f) }
-
-    var textWidth by remember { mutableStateOf(0f) }
-    var containerWidth by remember { mutableStateOf(0f) }
-
-    LaunchedEffect(isPaused) {
-        while (true) {
-            if (!isPaused) {
-                // Nếu đã chạy hết thì mới reset lại
-                if (animOffset.value <= -textWidth) {
-                    animOffset.snapTo(10f)
-                }
-                animOffset.animateTo(
-                    targetValue = -textWidth,
-                    animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing)
-                )
-            } else {
-                delay(100)
-            }
-        }
-    }
-
-    Box(
-        modifier = modifier
-            .clipToBounds()
-            .onGloballyPositioned {
-                containerWidth = it.size.width.toFloat()
-            }
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        isPaused = true
-                        tryAwaitRelease()
-                        isPaused = false
-                    }
-                )
-            },
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Text(
-            text = news.title,
-            style = textStyle,
-            maxLines = 1,
-            softWrap = false,
-            overflow = TextOverflow.Visible,
-            modifier = Modifier
-                .clickable {
-                    navHostController.navigate("detail_news/${news.id}")
-                }
-                .wrapContentWidth()
-                .offset { IntOffset(animOffset.value.toInt(), 0) }
-                .onGloballyPositioned {
-                    textWidth = it.size.width.toFloat()
-                }
-        )
-    }
-}
-
 @Composable
 fun AdvancedMarqueeTextList(
     items: List<News>,
     navHostController: NavHostController,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = TextStyle.Default,
-    durationMillis: Int = 10000,
+    durationMillis: Int = 3000,
     separator: String = "   •   "
 ) {
     var isPaused by remember { mutableStateOf(false) }
@@ -389,7 +324,7 @@ fun AdvancedMarqueeTextList(
                 }
                 animOffset.animateTo(
                     targetValue = -contentWidth,
-                    animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing)
+                    animationSpec = tween(durationMillis = durationMillis*items.size, easing = LinearEasing)
                 )
             } else {
                 delay(100)

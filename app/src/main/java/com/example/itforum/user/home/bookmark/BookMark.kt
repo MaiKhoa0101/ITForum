@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,7 +44,7 @@ fun BookMarkScreen(
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(navHostController, sharedPreferences) }
     })
-    val bookmarkedPostIds = remember { mutableStateListOf<String>() }
+    val bookmarkedPostIds = remember { mutableStateListOf<String>("") }
     val userId = sharedPreferences.getString("userId", null)
 
     var isLoading by remember { mutableStateOf(true) }
@@ -57,7 +58,7 @@ fun BookMarkScreen(
         isLoading = false
     }
 
-    Column {
+    Column(modifier = Modifier.fillMaxSize().padding(top = 40.dp, bottom = 120.dp)) {
         SearchField()
         Spacer(Modifier.height(40.dp))
 

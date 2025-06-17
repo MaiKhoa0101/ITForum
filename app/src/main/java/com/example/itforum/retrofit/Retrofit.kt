@@ -2,6 +2,7 @@ package com.example.itforum.retrofit
 
 
 import com.example.itforum.service.ComplaintService
+import com.example.itforum.service.FollowService
 import com.example.itforum.service.UserService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -17,13 +18,9 @@ import com.example.itforum.service.ReportAccountService
 //import com.example.itforum.service.AuthApi
 
 object RetrofitInstance {
-
-
-
-    private const val BASE_URL = "https://beitforum.onrender.com/"
-
-
-
+//    private const val BASE_URL = "http://192.168.1.171:4000"
+    private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
+//    private const val BASE_URL = "https://beitforum.onrender.com/"
     val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(60, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
@@ -43,6 +40,7 @@ object RetrofitInstance {
     val postService: PostService by lazy {retrofit.create(PostService::class.java) }
     val complaintService: ComplaintService by lazy {retrofit.create(ComplaintService::class.java) }
 
+
 //    val api: AuthApi by lazy {
 //        Retrofit.Builder()
 //            .baseUrl(BASE_URL)
@@ -50,4 +48,6 @@ object RetrofitInstance {
 //            .build()
 //            .create(AuthApi::class.java)
 //    }
+val followService: FollowService by lazy { retrofit.create(FollowService::class.java) }
+
 }

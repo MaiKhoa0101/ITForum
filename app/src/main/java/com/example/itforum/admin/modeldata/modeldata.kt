@@ -3,6 +3,7 @@ package com.example.itforum.admin.modeldata
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Interests
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.filled.Newspaper
@@ -54,7 +55,12 @@ val sidebarItems = listOf(
         nameField = "Quản lý crash hệ thống",
         iconField = Icons.Default.Message,
         navigationField = "Crashlytics"
-)
+    ),
+    SidebarItem(
+        nameField = "Đăng xuất",
+        iconField = Icons.Default.Logout,
+        navigationField = "root"
+    )
 )
 
 // Sidebar item list

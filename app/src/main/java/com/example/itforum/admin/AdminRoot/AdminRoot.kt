@@ -50,6 +50,7 @@ import com.example.itforum.admin.adminCrashlytic.CrashLogScreen
 import com.example.itforum.admin.adminNews.CreateNewsScreen
 import com.example.itforum.admin.adminNews.ManagementNewsScreen
 import com.example.itforum.user.news.DetailNewsPage
+import com.example.itforum.user.root.Root
 
 @Composable
 fun AdminScreen(sharedPreferences: SharedPreferences) {
@@ -77,6 +78,7 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                 DrawerContent(
                     sidebarItem = sidebarItems,
                     navHostController = navHostController,
+                    sharedPreferences = sharedPreferences,
                     closedrawer = {
                         if (showTopBars) {
                             scope.launch {
@@ -166,6 +168,10 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                         androidx.compose.material.Text("Không tìm thấy khiếu nại.")
                     }
                 }
+                composable("root"){
+                    Root(sharedPreferences)
+                }
+
             }
         }
     }

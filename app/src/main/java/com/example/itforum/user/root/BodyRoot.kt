@@ -1,10 +1,18 @@
 package com.example.itforum.user.root
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.SharedPreferences
+import android.util.Base64
+import android.util.Log
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -58,11 +66,58 @@ import com.example.itforum.user.profile.UserProfileScreen
 import com.example.itforum.user.setting.Setting
 import com.example.itforum.user.utilities.chat.ChatAIApp
 import kotlinx.coroutines.delay
+import org.json.JSONObject
 
+fun isTokenExpired(token: String): Boolean {
+    return try {
+        val parts = token.split(".")
+        if (parts.size != 3) return true
+
+        val payload = String(Base64.decode(parts[1], Base64.URL_SAFE))
+        val json = JSONObject(payload)
+        val exp = json.getLong("exp") // thời gian hết hạn (giây)
+        val now = System.currentTimeMillis() / 1000 // hiện tại (giây)
+        exp < now
+    } catch (e: Exception) {
+        true // lỗi -> coi như token không hợp lệ
+    }
+}
+@SuppressLint("CommitPrefEdits")
+@Composable
+fun SplashScreen(
+    navController: NavHostController,
+    sharedPreferences: SharedPreferences
+) {
+    LaunchedEffect(Unit) {
+        val token = sharedPreferences.getString("access_token", null)
+        val role = sharedPreferences.getString("role", null)
+        var destination = "login"
+        if (token != null && !isTokenExpired(token)) {
+            if (role != null) {
+                destination = if (role == "admin") "admin_root" else "home"
+                navController.navigate(destination) {
+                    popUpTo("splash") { inclusive = true }
+                }
+            }
+        } else {
+            val remove = sharedPreferences.edit().remove("access_token")
+        }
+        navController.navigate(destination) {
+            popUpTo("splash") { inclusive = true }
+        }
+    }
+
+    // Giao diện loading đơn giản
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
 @Composable
 fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier, onToggleTheme: () -> Unit, darkTheme: Boolean = false){
-    NavHost(navHostController, startDestination = "login") {
-        composable("home") {
+
+    NavHost(navHostController, startDestination = "splash") {
+        composable ("home") {
+
             val context = LocalContext.current
 
             LaunchedEffect(Unit) {
@@ -76,6 +131,10 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             }
 
             HomePage(navHostController, modifier, sharedPreferences)
+        }
+
+        composable("splash") {
+            SplashScreen(navHostController, sharedPreferences)
         }
 
         // NavGraphBuilder
@@ -402,17 +461,17 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 logScreenEnter(context, "Settings") // Gửi sự kiện screen_view
             }
 
+
             DisposableEffect(Unit) {
                 onDispose {
                     logScreenExit(context, "Settings") // Tính thời gian ở lại và gửi screen_exit
                 }
             }
 
-            Setting(
-                navHostController,
-                onToggleTheme = onToggleTheme,
-                darkTheme = darkTheme
-            )
+            
+
+            Setting(navHostController, sharedPreferences, onToggleTheme = onToggleTheme, darkTheme = darkTheme)
+
         }
 
 
@@ -659,10 +718,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 
             BookMarkScreen(navHostController, sharedPreferences)
         }
-
-//        composable("follow"){
-//            FollowScreen()
-//        }
         composable("follow") {
             val context = LocalContext.current
 
@@ -676,7 +731,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 }
             }
 
-            FollowScreen()
+            FollowScreen(navHostController,sharedPreferences)
         }
 
 
