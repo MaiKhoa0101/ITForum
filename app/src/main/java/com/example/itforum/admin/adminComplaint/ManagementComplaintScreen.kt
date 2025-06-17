@@ -3,17 +3,23 @@ package com.example.itforum.admin.adminComplaint
 import android.content.SharedPreferences
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.itforum.admin.components.TableData
 import com.example.itforum.admin.components.convertToTableRows
 import com.example.itforum.admin.adminComplaint.viewmodel.ComplaintViewModel
 import com.example.itforum.admin.components.AdminScreenLayout
+import com.example.itforum.user.complaint.SuccessDialog
+import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.post.icontext
 
 @Composable
@@ -25,14 +31,41 @@ fun ManagementComplaintScreen (
     LaunchedEffect(Unit) {
         complaintViewModel.getComplaint()
     }
+    val uiState by complaintViewModel.uiStateCreate.collectAsState()
+    var showSuccessDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState) {
+        println("UI State duoc thay doi")
+        if (uiState is UiState.Success) {
+            println("uiState là success")
+            showSuccessDialog = true
+        }
+    }
+    // UI hiển thị
+    if (showSuccessDialog) {
+        SuccessDialog(
+            message = "Xử lý thành công!",
+            onDismiss = {
+                showSuccessDialog = false
+                navController.navigate("ComplaintManager")
+            }
+        )
+    }
     val complaints by complaintViewModel.listComplaint.collectAsState()
     val menuOptions = listOf(
-        icontext(Icons.Default.Edit,"Xem chi tiết"),
-        icontext(Icons.Default.Build,"Xử lý")
+        icontext(Icons.Default.Edit,"Xem chi tiết",{ complaintId ->
+            navController.navigate("complaint_detail/$complaintId")
+        }),
+        icontext(Icons.Default.Build,"Chấp nhận",{complaintId ->
+            complaintViewModel.handleApproved(complaintId)
+        }),
+        icontext(Icons.Default.Close,"Từ chối",{complaintId ->
+            complaintViewModel.handleRejected(complaintId)
+        })
     )
     complaints?.let {
         AdminScreenLayout(
-        title = "Quản lý báo cáo người dùng",
+        title = "Quản lý khiếu nại người dùng",
         itemCount = it.size
     ) { searchText, _, _ ->
         val filteredUsers = complaints!!.filter {
@@ -44,9 +77,6 @@ fun ManagementComplaintScreen (
             rows = convertToTableRows(filteredUsers),
             menuOptions = menuOptions,
             sharedPreferences = sharedPreferences,
-            onClickOption = { complaintId ->
-                navController.navigate("complaint_detail/$complaintId")
-            }
         )
     }
     }

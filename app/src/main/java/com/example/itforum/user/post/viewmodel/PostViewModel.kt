@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
+import android.webkit.MimeTypeMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
@@ -53,6 +54,8 @@ class PostViewModel(
 
     private val _isLoadingMore = MutableStateFlow(false)
     val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     private var currentPage = 1
     private var canLoadMore = true
@@ -93,6 +96,7 @@ class PostViewModel(
             allPostsWithVotes.clear()
             currentPage = 1
             canLoadMore = true
+            _isLoading.value = true
             Log.d("load state", canLoadMore.toString())
         }
 
@@ -165,6 +169,9 @@ class PostViewModel(
                 if (isLoadMore) {
                     _isLoadingMore.value = false
                 }
+                if (!isRefresh && !isLoadMore) {
+                    _isLoading.value = false
+                }
             }
         }
     }
@@ -173,10 +180,14 @@ class PostViewModel(
         viewModelScope.launch {
             _uiStateCreate.value = UiState.Loading
             try {
-                Log.d("UserViewModel", "Request: $createPostRequest")
+                Log.d("PostViewModel", "Request: $createPostRequest")
 
                 val imageUrls = createPostRequest.imageUrls?.mapNotNull { uri ->
                     prepareFilePart(context, uri, "imageUrls")
+                }
+
+                val videoUrls = createPostRequest.videoUrls?.mapNotNull { uri ->
+                    prepareFilePart(context, uri, "videoUrls")
                 }
 
                 // Chỉ tạo MultipartBody.Part cho các trường không null
@@ -192,20 +203,27 @@ class PostViewModel(
                 val isPublished = createPostRequest.isPublished?.let {
                     MultipartBody.Part.createFormData("isPublished", it)
                 }
-                val tags = createPostRequest.tags?.let {
+                val tags = createPostRequest.tags?.mapNotNull  {
                     MultipartBody.Part.createFormData("tags", Gson().toJson(it))
                 }
+                Log.d("tagsViewModel",tags.toString())
 
-                val response = imageUrls?.let {
-                    RetrofitInstance.postService.createPost(
-                        userId = userId,
-                        title = title,
-                        content = content,
-                        tags = tags,
-                        isPublished = isPublished,
-                        imageUrls = it
-                    )
-                }
+                val response =
+                    videoUrls?.let {
+                        imageUrls?.let { it1 ->
+                            tags?.let { it2 ->
+                                RetrofitInstance.postService.createPost(
+                                    userId = userId,
+                                    title = title,
+                                    content = content,
+                                    tags = it2,
+                                    isPublished = isPublished,
+                                    imageUrls = it1,
+                                    videoUrls = it
+                                )
+                            }
+                        }
+                    }
 
 
                 if (response != null) {
@@ -253,22 +271,26 @@ class PostViewModel(
     ): MultipartBody.Part? {
         return try {
             val inputStream = context.contentResolver.openInputStream(fileUri)
-            val tempFile = File.createTempFile("upload_", ".jpg", context.cacheDir)
+            val mimeType = context.contentResolver.getType(fileUri) ?: "application/octet-stream"
+            val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "tmp"
+            val tempFile = File.createTempFile("upload_", ".$extension", context.cacheDir)
+
             tempFile.outputStream().use { outputStream ->
                 inputStream?.copyTo(outputStream)
             }
 
-            val requestFile = tempFile.asRequestBody("image/*".toMediaTypeOrNull())
+            val requestFile = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
             MultipartBody.Part.createFormData(partName, tempFile.name, requestFile)
         } catch (e: Exception) {
-            Log.e("PostViewModel", "Error preparing file part", e)
+            Log.e("Upload", "Error preparing file part", e)
             null
         }
     }
 
-    fun loadMorePosts() {
+    fun loadMorePosts(getPostRequest: GetPostRequest) {
         if (canLoadMore && !_isLoadingMore.value) {
-            fetchPosts(GetPostRequest(page = currentPage), isLoadMore = true)
+            val updatedRequest = getPostRequest.copy(page = currentPage)
+            fetchPosts(updatedRequest, isLoadMore = true)
         }
     }
     suspend fun votePost(postId: String?, type: String, index: Int): VoteResponse? {
@@ -337,6 +359,7 @@ class PostViewModel(
 
 
     fun refreshPosts(getPostRequest: GetPostRequest) {
+        Log.d("check data when refresh",getPostRequest.toString())
         fetchPosts(getPostRequest, isRefresh = true)
     }
 

@@ -25,6 +25,7 @@ import java.time.LocalDate
 fun AdminScreenLayout(
     title: String,
     itemCount: Int,
+    addComposed: @Composable () -> Unit = {},
     content: @Composable (String, LocalDate?, LocalDate?) -> Unit
 ) {
     var searchText by remember { mutableStateOf("") }
@@ -99,11 +100,17 @@ fun AdminScreenLayout(
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            Box(
-                modifier = Modifier.size(width = 200.dp, height = 50.dp).background(Color(0xFF7BD88F)),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text(text = "Tổng số: $itemCount")
+                Box(
+                    modifier = Modifier.size(width = 150.dp, height = 50.dp).background(Color(0xFF7BD88F)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Tổng số: $itemCount")
+                }
+                addComposed()
             }
             Spacer(modifier = Modifier.height(16.dp))
 

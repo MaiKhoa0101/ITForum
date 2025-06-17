@@ -37,6 +37,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.itforum.admin.adminAccount.AccountManagementScreen
+import com.example.itforum.admin.adminComplaint.ManagementComplaintDetailScreen
+import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
 import com.example.itforum.admin.adminController.ControllerManagerScreen
 import com.example.itforum.admin.modeldata.sidebarItems
 import com.example.itforum.admin.postManagement.PostManagementScreen
@@ -45,6 +47,11 @@ import com.example.itforum.utilities.DrawerContent
 import kotlinx.coroutines.launch
 import kotlin.collections.contains
 import com.example.itforum.admin.adminCrashlytic.CrashLogScreen
+import com.example.itforum.admin.adminNews.CreateNewsScreen
+import com.example.itforum.admin.adminNews.ManagementNewsScreen
+import com.example.itforum.user.news.DetailNewsPage
+import com.example.itforum.user.root.Root
+
 @Composable
 fun AdminScreen(sharedPreferences: SharedPreferences) {
     val navHostController = rememberNavController()
@@ -71,6 +78,7 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                 DrawerContent(
                     sidebarItem = sidebarItems,
                     navHostController = navHostController,
+                    sharedPreferences = sharedPreferences,
                     closedrawer = {
                         if (showTopBars) {
                             scope.launch {
@@ -131,14 +139,37 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                         posts = emptyList()
                     )
                 }
-                composable("NewsManager") {
-
-                }
                 composable("NotificationManager") {
 
                 }
                 composable("Crashlytics") {
                     CrashLogScreen(navHostController = navHostController)
+                }
+                composable("ComplaintManager"){
+                    ManagementComplaintScreen(navHostController,sharedPreferences)
+                }
+                composable("NewsManager"){
+                    ManagementNewsScreen(navHostController, sharedPreferences)
+                }
+                composable("create_news"){
+                    CreateNewsScreen(navHostController, sharedPreferences)
+                }
+                composable("detail_news/{newsId}") { backStackEntry ->
+                    val newsId = backStackEntry.arguments?.getString("newsId")
+                    if (newsId != null) {
+                        DetailNewsPage(newsId, navHostController, sharedPreferences)
+                    }
+                }
+                composable("complaint_detail/{complaintId}"){ backStackEntry ->
+                    val complaintId = backStackEntry.arguments?.getString("complaintId")
+                    if (complaintId != null) {
+                        ManagementComplaintDetailScreen(navHostController,sharedPreferences,complaintId)
+                    } else {
+                        androidx.compose.material.Text("Không tìm thấy khiếu nại.")
+                    }
+                }
+                composable("root"){
+                    Root(sharedPreferences)
                 }
 
             }

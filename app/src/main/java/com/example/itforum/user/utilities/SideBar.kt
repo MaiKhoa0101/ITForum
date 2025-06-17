@@ -1,5 +1,6 @@
 package com.example.itforum.utilities
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -25,6 +26,7 @@ import com.example.itforum.admin.modeldata.SidebarItem
 fun DrawerContent(
     sidebarItem: List<SidebarItem>, // List of sidebar items
     navHostController: NavHostController,
+    sharedPreferences: SharedPreferences,
     closedrawer: () -> Unit,
     modifier: Modifier = Modifier
     ) {
@@ -70,6 +72,10 @@ fun DrawerContent(
                     label = item.nameField,
                     isSelected = currentDestination == item.navigationField,
                     onClick = {
+                        if(item.navigationField == "root"){
+                            val removeRole = sharedPreferences.edit().remove("role").apply()
+                            val removeToken = sharedPreferences.edit().remove("access_token").apply()
+                        }
                         navHostController.navigate(item.navigationField) {
                             // Avoid multiple copies of the same destination in the back stack
                             popUpTo(navHostController.graph.startDestinationId) { saveState = true }

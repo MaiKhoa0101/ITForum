@@ -9,6 +9,7 @@ data class PostResponse(
     var title: String? = null,
     val content: String? = null,
     val imageUrls: List<String>? = null,
+    val videoUrls: List<String>? = null,
     val tags: List<String>? = null,
     val isPublished: String? = null,
     var totalUpvotes: Int? = null,
