@@ -54,6 +54,8 @@ class PostViewModel(
 
     private val _isLoadingMore = MutableStateFlow(false)
     val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     private var currentPage = 1
     private var canLoadMore = true
@@ -94,6 +96,7 @@ class PostViewModel(
             allPostsWithVotes.clear()
             currentPage = 1
             canLoadMore = true
+            _isLoading.value = true
             Log.d("load state", canLoadMore.toString())
         }
 
@@ -165,6 +168,9 @@ class PostViewModel(
                 }
                 if (isLoadMore) {
                     _isLoadingMore.value = false
+                }
+                if (!isRefresh && !isLoadMore) {
+                    _isLoading.value = false
                 }
             }
         }
@@ -281,10 +287,10 @@ class PostViewModel(
         }
     }
 
-
-    fun loadMorePosts() {
+    fun loadMorePosts(getPostRequest: GetPostRequest) {
         if (canLoadMore && !_isLoadingMore.value) {
-            fetchPosts(GetPostRequest(page = currentPage), isLoadMore = true)
+            val updatedRequest = getPostRequest.copy(page = currentPage)
+            fetchPosts(updatedRequest, isLoadMore = true)
         }
     }
     suspend fun votePost(postId: String?, type: String, index: Int): VoteResponse? {
@@ -353,6 +359,7 @@ class PostViewModel(
 
 
     fun refreshPosts(getPostRequest: GetPostRequest) {
+        Log.d("check data when refresh",getPostRequest.toString())
         fetchPosts(getPostRequest, isRefresh = true)
     }
 

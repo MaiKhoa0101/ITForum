@@ -146,35 +146,31 @@ fun ProfileContent(
     tabs: List<String>,
     sharedPreferences: SharedPreferences
 ) {
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        item { UserHeader(user) }
+   Column(modifier = modifier.fillMaxSize()) {
+        UserHeader(user)
 
-        stickyHeader {
-            UserTabRow(
+
+       UserTabRow(
                 tabs = tabs,
                 selectedTabIndex = selectedTabIndex,
                 onTabSelected = onTabSelected
             )
-        }
 
-        when (selectedTabIndex) {
-            0 -> {
-                item {UserInfoDetail(user) }
-            }
-            1 -> {
-               item {
-                   PostListScreen(
-                       sharedPreferences,
-                       navController,
-                       GetPostRequest(
-                           page = 1,
-                           userId = sharedPreferences
-                               .getString("userId", null)
-                       )
-                   )
-               }
-            }
-        }
+       when (selectedTabIndex) {
+           0 -> {
+               UserInfoDetail(user)
+           }
+           1 -> {
+               PostListScreen(
+                   sharedPreferences,
+                   navController,
+                   GetPostRequest(
+                       page = 1,
+                       userId = sharedPreferences.getString("userId", null)
+                   ), reloadKey = selectedTabIndex
+               )
+           }
+       }
     }
 }
 

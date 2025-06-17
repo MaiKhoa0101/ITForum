@@ -2,6 +2,7 @@ package com.example.itforum.retrofit
 
 
 import com.example.itforum.service.ComplaintService
+import com.example.itforum.service.FollowService
 import com.example.itforum.service.UserService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -37,4 +38,5 @@ object RetrofitInstance {
     val newsService: NewsService by lazy { retrofit.create(NewsService::class.java) }
     val postService: PostService by lazy {retrofit.create(PostService::class.java) }
     val complaintService: ComplaintService by lazy {retrofit.create(ComplaintService::class.java) }
+    val followService: FollowService by lazy { retrofit.create(FollowService::class.java) }
 }

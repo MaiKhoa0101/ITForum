@@ -513,10 +513,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 
             BookMarkScreen(navHostController, sharedPreferences)
         }
-
-//        composable("follow"){
-//            FollowScreen()
-//        }
         composable("follow") {
             val context = LocalContext.current
             LaunchedEffect(Unit) {
@@ -524,7 +520,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 delay(1200)
             }
 
-            FollowScreen()
+            FollowScreen(navHostController,sharedPreferences)
         }
 
 //        composable ("searchscreen"){

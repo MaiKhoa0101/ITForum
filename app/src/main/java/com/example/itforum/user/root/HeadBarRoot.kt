@@ -100,6 +100,7 @@ fun TopBarRoot(
                         selectedTabIndex = index
                         when (index) {
                             0 -> navHostController.navigate("home")
+                            2 -> navHostController.navigate("follow")
                             3 -> navHostController.navigate("bookmark")
                         }
 

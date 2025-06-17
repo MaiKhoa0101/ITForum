@@ -70,7 +70,8 @@ import kotlinx.coroutines.launch
 fun PostListScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
-    getPostRequest: GetPostRequest
+    getPostRequest: GetPostRequest,
+    reloadKey: Any? = null
 ) {
     fun handleUpVote(viewModel: PostViewModel, postWithVote: PostWithVote, index: Int, scope: CoroutineScope) {
         scope.launch {
@@ -121,15 +122,18 @@ fun PostListScreen(
     var selectedPostId by remember { mutableStateOf<String?>(null) }
     var userId = sharedPreferences.getString("userId", null)
 
+    val isLoading by viewModel.isLoading.collectAsState()
     // Fetch posts when screen loads
-    LaunchedEffect(getPostRequest) {
+    LaunchedEffect(reloadKey,getPostRequest) {
         postsWithVotes = emptyList()
         viewModel.fetchPosts(getPostRequest)
-        Log.d("PostListScreen", "Fetching posts for request: $getPostRequest")
+        Log.d("PostListScreen", postsFromVm.toString())
 
     }
-    LaunchedEffect(postsFromVm) {
-        postsWithVotes = postsFromVm
+    LaunchedEffect(isLoading, postsFromVm) {
+        if (!isLoading && postsFromVm.isNotEmpty()) {
+            postsWithVotes = postsFromVm
+        }
         Log.d("load page when postfromvm",postsWithVotes.toString())
     }// keep local data async
 
@@ -227,7 +231,7 @@ fun PostListScreen(
                     // Load more when reaching near the end
                     if (index >= postsWithVotes.size - 3 && !isLoadingMore) {
                         LaunchedEffect(index) {
-                            viewModel.loadMorePosts()
+                            viewModel.loadMorePosts(getPostRequest)
                         }
                     }
                 }
