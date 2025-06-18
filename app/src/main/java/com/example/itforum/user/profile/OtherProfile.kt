@@ -34,7 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
-import com.example.itforum.user.Analytics.logScreenView
+
 import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.profile.viewmodel.UserViewModel
 

@@ -40,8 +40,9 @@ fun ReportedPostScreen(navController: NavHostController,
     }
 
     val menuOptions = listOf(
-        icontext(Icons.Default.Visibility, "Xem chi tiết"),
-        icontext(Icons.Default.Delete, "Xóa")
+        icontext(Icons.Default.Visibility, "Xem chi tiết", { postId ->
+            navController.navigate("detail_reported_post/$postId")})
+
     )
 
     AdminScreenLayout(
@@ -64,14 +65,11 @@ fun ReportedPostScreen(navController: NavHostController,
         }
 
         TableData(
-            headers = listOf("ID", "Post ID", "Tiêu đề", "Lý do", "Ngày tạo"),
+            headers = listOf("ID", "Post ID", "Tiêu đề", "Lý do", "Ngày tạo","Tùy chỉnh"),
             menuOptions = menuOptions,
             rows = convertToTableRows(filteredPosts),
             sharedPreferences = sharedPreferences,
-            onClickOption = { reportId ->
-                println("🟢 reportId được chọn: $reportId")
-                navController.navigate("post_detail/$reportId")
-            }
+
 
         )
     }

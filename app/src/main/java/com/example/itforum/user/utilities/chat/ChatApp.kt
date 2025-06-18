@@ -14,7 +14,7 @@ import com.example.itforum.utilities.chat.ChatHistoryScreen
 import com.example.itforum.utilities.chat.ChatScreen
 import com.example.itforum.utilities.chat.ChatSession
 import com.example.itforum.utilities.chat.Message
-import com.example.itforum.user.Analytics.logScreenView
+
 @Composable
 fun ChatAIApp(
     context: Context = LocalContext.current,

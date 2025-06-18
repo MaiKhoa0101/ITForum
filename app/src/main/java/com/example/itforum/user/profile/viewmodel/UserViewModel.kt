@@ -22,15 +22,22 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import java.io.File
 
-class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel(){
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
+
+class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
     private var userId = sharedPreferences.getString("userId", null)
+
     init {
         userId = sharedPreferences.getString("userId", null)
     }
+
     private val _user = MutableStateFlow<UserProfileResponse?>(null)
-    val user: StateFlow<UserProfileResponse?>get() = _user
+    val user: StateFlow<UserProfileResponse?> get() = _user
+
 
     fun getUser() {
         viewModelScope.launch {
@@ -45,20 +52,18 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel(){
                     _uiState.value = UiState.FetchSuccess(
                         response.body()?.message ?: "Lấy thành công"
                     )
-                    _user.value  = response.body()?.userProfileResponse
+                    _user.value = response.body()?.userProfileResponse
                     delay(500)
                     _uiState.value = UiState.Idle
                     println("UI state value is idle")
-                }
-                else {
+                } else {
                     showError("Response get không hợp lệ")
-                    _uiState.value = UiState.FetchFail(response.message())                }
-            }
-            catch (e: IOException) {
+                    _uiState.value = UiState.FetchFail(response.message())
+                }
+            } catch (e: IOException) {
                 _uiState.value = UiState.FetchFail("Lỗi kết nối mạng: ${e.localizedMessage}")
                 showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 _uiState.value = UiState.FetchFail(e.message ?: "Lỗi hệ thống, vui lòng thử lại")
                 showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
             }
@@ -79,20 +84,18 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel(){
                     _uiState.value = UiState.FetchSuccess(
                         response.body()?.message ?: "Lấy thành công"
                     )
-                    _user.value  = response.body()?.userProfileResponse
+                    _user.value = response.body()?.userProfileResponse
                     delay(500)
                     _uiState.value = UiState.Idle
                     println("UI state value is idle")
-                }
-                else {
+                } else {
                     showError("Response get không hợp lệ")
-                    _uiState.value = UiState.FetchFail(response.message())                }
-            }
-            catch (e: IOException) {
+                    _uiState.value = UiState.FetchFail(response.message())
+                }
+            } catch (e: IOException) {
                 _uiState.value = UiState.FetchFail("Lỗi kết nối mạng: ${e.localizedMessage}")
                 showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 _uiState.value = UiState.FetchFail(e.message ?: "Lỗi hệ thống, vui lòng thử lại")
                 showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
             }
@@ -181,6 +184,7 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel(){
             }
         }
     }
+
     private fun prepareFilePart(
         context: Context,
         fileUri: Uri,
@@ -200,9 +204,59 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel(){
             null
         }
     }
+
     private fun showError(message: String) {
         _uiState.value = UiState.Error(message)
         Log.e("UserViewModel", message)
     }
+
+    fun getUserFromFirestore() {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try {
+                println("vao duoc day")
+                val uid = FirebaseAuth.getInstance().currentUser?.uid
+                if (uid == null) {
+                    showError("Không tìm thấy UID từ FirebaseAuth")
+                    return@launch
+                }
+
+                val document = FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(uid)
+                    .get()
+                    .await()
+                println("document duoc lay ra la"+ document.toString())
+
+                if (document.exists()) {
+                    val email = document.getString("email") ?: ""
+                    val name = document.getString("displayName") ?: "Người dùng"
+                    val photoUrl = document.getString("photoUrl") ?: ""
+                    println("document ton tai")
+                    _user.value = UserProfileResponse(
+                        id = uid,
+                        email = email,          // ✅ gán email từ Firestore
+                        name = name,
+                        avatar = photoUrl,
+                        username = "",          // dùng giá trị mặc định nếu không có
+                        phone = "",
+                        introduce = "",
+                        skill = emptyList(),
+                        certificate = emptyList()
+                    )
+
+                    _uiState.value = UiState.FetchSuccess("Lấy thông tin từ Firestore thành công")
+                } else {
+                    showError("Không tìm thấy user trong Firestore")
+                }
+
+            } catch (e: Exception) {
+                val msg = "Lỗi đọc Firestore: ${e.localizedMessage ?: "Không rõ"}"
+                Log.e("UserViewModel", msg, e)
+                _uiState.value = UiState.Error(msg)
+            }
+        }
+    }
+
 
 }

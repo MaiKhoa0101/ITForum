@@ -12,7 +12,20 @@
           "package_name": "com.example.itforum"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "984462885199-tmuq4ensvstme4d41of7p4ugd6o97o9p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.itforum",
+            "certificate_hash": "cd4f80eeac15dd14adff64946936b57e155530cd"
+          }
+        },
+        {
+          "client_id": "984462885199-k7lsbk0o5dnnjgn8sebaj9hmt0d919lj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDmWaI4KJ_HMI1s3CEJoWrRjlC1fCYjFGY"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "984462885199-k7lsbk0o5dnnjgn8sebaj9hmt0d919lj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

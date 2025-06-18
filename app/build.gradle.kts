@@ -61,6 +61,12 @@ android {
 }
 
 dependencies {
+    //login by google
+
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4")
+
+    implementation ("com.google.firebase:firebase-auth-ktx")
+    implementation ("com.google.android.gms:play-services-auth:21.0.0")
     //firebase analytics
     implementation ("com.google.firebase:firebase-analytics:21.6.1")
     //firebase crashlytic

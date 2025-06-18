@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,7 +26,8 @@ import com.example.itforum.user.post.icontext
 @Composable
 fun ManagementComplaintScreen (
     navController: NavHostController,
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+
 ) {
     var complaintViewModel: ComplaintViewModel = viewModel()
     LaunchedEffect(Unit) {
@@ -76,7 +78,7 @@ fun ManagementComplaintScreen (
             headers = listOf("ID", "Người dùng", "Tiêu đề", "Lý do", "Thời gian", "Trạng thái", "Tùy chỉnh"),
             rows = convertToTableRows(filteredUsers),
             menuOptions = menuOptions,
-            sharedPreferences = sharedPreferences,
+            sharedPreferences = sharedPreferences
         )
     }
     }

@@ -15,6 +15,7 @@ import com.example.itforum.service.ReportPostService
 import com.example.itforum.service.NewsService
 import com.example.itforum.service.PostService
 import com.example.itforum.service.ReportAccountService
+//import com.example.itforum.service.AuthApi
 
 object RetrofitInstance {
 //    private const val BASE_URL = "http://192.168.1.171:4000"
@@ -38,5 +39,15 @@ object RetrofitInstance {
     val newsService: NewsService by lazy { retrofit.create(NewsService::class.java) }
     val postService: PostService by lazy {retrofit.create(PostService::class.java) }
     val complaintService: ComplaintService by lazy {retrofit.create(ComplaintService::class.java) }
-    val followService: FollowService by lazy { retrofit.create(FollowService::class.java) }
+
+
+//    val api: AuthApi by lazy {
+//        Retrofit.Builder()
+//            .baseUrl(BASE_URL)
+//            .addConverterFactory(GsonConverterFactory.create())
+//            .build()
+//            .create(AuthApi::class.java)
+//    }
+val followService: FollowService by lazy { retrofit.create(FollowService::class.java) }
+
 }
