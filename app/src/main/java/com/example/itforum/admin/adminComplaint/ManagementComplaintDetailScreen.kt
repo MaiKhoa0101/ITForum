@@ -89,28 +89,28 @@ fun FormComplaint(
         ) {
             item{
                 IconWithText(
-                    "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
-                    "Trạng thái: ${complaint.status}",
+                    avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+                    name = "Trạng thái: ${complaint.status}",
                     sizeIcon = 35.dp
                 )
                 IconWithText(
-                    "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
-                    "Ngày: ${ getTimeAgo(complaint.createdAt) } • ${""}",
+                    avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+                    name = "Ngày: ${ getTimeAgo(complaint.createdAt) } • ${""}",
                     sizeIcon = 35.dp
                 )
                 IconWithText(
-                    "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
-                    "Từ: ${user?.name}",
+                    avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+                    name = "Từ: ${user?.name}",
                     sizeIcon = 35.dp
                 )
                 IconWithText(
-                    "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
-                    "Tiêu đề: ${complaint.title}",
+                    avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+                    name = "Tiêu đề: ${complaint.title}",
                     sizeIcon = 35.dp
                 )
                 IconWithText(
-                    "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
-                    "Nội dung:",
+                    avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+                    name = "Nội dung:",
                     sizeIcon = 35.dp
                 )
 

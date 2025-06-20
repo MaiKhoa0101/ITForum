@@ -89,7 +89,7 @@ fun ListLikePage(navHostController: NavHostController) {
             ) {
                 ListUserLike.forEach { (avatar, name)->
                     item {
-                        IconWithText("avatar",name)
+                        IconWithText(avatar = "avatar",name = name)
                     }
                 }
             }

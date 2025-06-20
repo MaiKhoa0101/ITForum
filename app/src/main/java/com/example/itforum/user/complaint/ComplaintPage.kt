@@ -133,7 +133,7 @@ fun ComplaintPage(
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.secondaryContainer),
                 ) {
-                    userInfo?.let { IconWithText(it.avatar, it.name) }
+                    userInfo?.let { IconWithText(avatar = it.avatar, name = it.name) }
                     TitleChild(){ title=it }
                     WritePost(){input ->
                         content = input

@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -36,7 +37,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.itforum.admin.adminAccount.AccountDetailScreen
 import com.example.itforum.admin.adminAccount.AccountManagementScreen
 import com.example.itforum.admin.adminComplaint.ManagementComplaintDetailScreen
 import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
@@ -136,7 +136,6 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                         AccountManagementScreen(
                             modifier = Modifier.padding(innerPadding),
                             navHostController = navHostController,
-                            users = emptyList(),
                             sharedPreferences
                         )
                     }
