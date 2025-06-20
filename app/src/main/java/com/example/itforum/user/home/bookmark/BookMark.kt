@@ -31,6 +31,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
 import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.post.PostListScreen
 import com.example.itforum.user.post.viewmodel.PostViewModel
@@ -48,6 +49,8 @@ fun BookMarkScreen(
     val userId = sharedPreferences.getString("userId", null)
 
     var isLoading by remember { mutableStateOf(true) }
+    var showReportDeatil by remember { mutableStateOf(false) }
+    var postId by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         val response = viewModel.getSavePost(userId)
@@ -68,9 +71,18 @@ fun BookMarkScreen(
             PostListScreen(
                 sharedPreferences = sharedPreferences,
                 navHostController = navHostController,
-                getPostRequest = GetPostRequest(postsId = bookmarkedPostIds, page = 1)
+                getPostRequest = GetPostRequest(postsId = bookmarkedPostIds, page = 1),
+                onReportClick = {
+                    postId = it
+                    showReportDeatil = true
+                }
             )
         }
+    }
+    if (showReportDeatil){
+        CreateReportPostScreen (sharedPreferences, postId, onDismiss = {
+            showReportDeatil = false
+        })
     }
 }
 

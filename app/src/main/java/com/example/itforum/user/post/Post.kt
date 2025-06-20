@@ -71,7 +71,8 @@ fun PostListScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
     getPostRequest: GetPostRequest,
-    reloadKey: Any? = null
+    reloadKey: Any? = null,
+    onReportClick: (String) -> Unit
 ) {
     fun handleUpVote(viewModel: PostViewModel, postWithVote: PostWithVote, index: Int, scope: CoroutineScope) {
         scope.launch {
@@ -204,6 +205,7 @@ fun PostListScreen(
                         post = postWithVote.post,
                         vote = postWithVote.vote,
                         isBookMark = postWithVote.isBookMark,
+                        navHostController = navHostController,
                         onUpvoteClick = {
                             handleUpVote(viewModel, postWithVote, index, scope)
                         },
@@ -217,7 +219,9 @@ fun PostListScreen(
                         onBookmarkClick = {
                             handleBookmark(viewModel, postWithVote, userId, scope)
                         },
-                        onShareClick = { }
+                        onReportClick = {
+                            onReportClick(it)
+                        }
                     )
 
 
