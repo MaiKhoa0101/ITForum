@@ -36,17 +36,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
-fun Setting(navHostController: NavHostController, sharedPreferences: SharedPreferences,onToggleTheme:()->Unit, darkTheme:Boolean){
+fun Setting(
+    navHostController: NavHostController,
+    sharedPreferences: SharedPreferences,
+    onToggleTheme: () -> Unit,
+    darkTheme: Boolean
+) {
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Box (
-            modifier =  Modifier
+        Box(
+            modifier = Modifier
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .fillMaxWidth()
                 .padding(top = 30.dp)
@@ -69,6 +78,7 @@ fun Setting(navHostController: NavHostController, sharedPreferences: SharedPrefe
                         }
                 )
             }
+
             Row(
                 modifier = Modifier
                     .padding(vertical = 30.dp, horizontal = 10.dp)
@@ -84,33 +94,58 @@ fun Setting(navHostController: NavHostController, sharedPreferences: SharedPrefe
                 )
             }
         }
-        SectionSetting("Chế độ tối",darkTheme, onToggleTheme)
+
+        SectionSetting("Chế độ tối", darkTheme, onToggleTheme)
+
         SectionSetting(
             "Chỉnh sửa thông tin cá nhân",
             iconVector = Icons.Default.Person,
             onPress = {
                 navHostController.navigate("editProfile")
             })
+
         SectionSetting(
             "Đánh giá ứng dụng",
             iconVector = Icons.Default.StarRate,
             onPress = {})
+
         SectionSetting(
             "Góp ý về ứng dụng",
             iconVector = Icons.Default.QuestionMark,
             onPress = {
                 navHostController.navigate("complaint")
             })
+
         SectionSetting(
-            "Đăng xuất",
+            nameField = "Đăng xuất",
             iconVector = Icons.Default.Logout,
             onPress = {
-                val removeRole = sharedPreferences.edit().remove("role").apply()
-                val removeToken = sharedPreferences.edit().remove("access_token").apply()
-                navHostController.navigate("login")
-            })
+                // Xóa dữ liệu local
+                sharedPreferences.edit().remove("role").apply()
+                sharedPreferences.edit().remove("access_token").apply()
+                sharedPreferences.edit().remove("loginType").apply() // ✅ Quan trọng!
+
+                // Đăng xuất Firebase
+                FirebaseAuth.getInstance().signOut()
+
+                // Đăng xuất Google
+                val googleSignInClient = GoogleSignIn.getClient(
+                    context,
+                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                )
+                googleSignInClient.signOut().addOnCompleteListener {
+                    navHostController.navigate("login") {
+                        popUpTo(0)
+                        launchSingleTop = true
+                    }
+                }
+            }
+
+        )
+
     }
 }
+
 
 @Composable
 fun SectionSetting(nameField:String,iconVector:ImageVector,onPress:()->Unit, ){
