@@ -15,6 +15,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -46,26 +49,19 @@ import com.example.itforum.utilities.SearchScreen
 import com.example.itforum.utilities.note.NotesApp
 
 
-import com.example.itforum.admin.adminAccount.AccountDetailScreen
-import com.example.itforum.admin.adminAccount.AccountManagementScreen
-import com.example.itforum.admin.adminController.ControllerManagerScreen
-import com.example.itforum.admin.postManagement.PostManagementScreen
 import com.example.itforum.admin.adminComplaint.ManagementComplaintDetailScreen
 import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
-import com.example.itforum.admin.adminReport.ReportPost.model.request.ReportedPost
-import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailScreen
-import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
 import com.example.itforum.user.Analytics.logScreenEnter
 import com.example.itforum.user.Analytics.logScreenExit
 
 import com.example.itforum.user.complaint.ComplaintPage
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.PostCommentScreen
+import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.profile.OtherUserProfileScreen
 import com.example.itforum.user.profile.UserProfileScreen
 import com.example.itforum.user.setting.Setting
 import com.example.itforum.user.utilities.chat.ChatAIApp
-import kotlinx.coroutines.delay
 import org.json.JSONObject
 
 fun isTokenExpired(token: String): Boolean {
@@ -114,7 +110,9 @@ fun SplashScreen(
 }
 @Composable
 fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier, onToggleTheme: () -> Unit, darkTheme: Boolean = false){
-
+    var postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
+        initializer { PostViewModel(navHostController,sharedPreferences) }
+    })
     NavHost(navHostController, startDestination = "splash") {
         composable ("home") {
 
@@ -130,7 +128,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 }
             }
 
-            HomePage(navHostController, modifier, sharedPreferences)
+            HomePage(navHostController, modifier, sharedPreferences, postViewModel)
         }
 
         composable("splash") {
@@ -354,7 +352,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 }
             }
 
-            CreatePostPage(modifier, navHostController, sharedPreferences)
+            CreatePostPage(modifier, navHostController, sharedPreferences, postViewModel)
         }
 
 //        composable("detail_post"){

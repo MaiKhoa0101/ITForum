@@ -1,5 +1,6 @@
 package com.example.itforum.user.modelData.response
 
+import com.example.itforum.admin.components.TableRowConvertible
 import com.google.gson.annotations.SerializedName
 
 data class UserResponse(
@@ -17,4 +18,8 @@ data class UserResponse(
     val isBanned: Boolean,
     val certificate: List<Certificate>,
     val skill: List<Skill>
-)
+): TableRowConvertible {
+    override fun toTableRow(): List<String> {
+        return listOf(id, name, email, phone, if(isBanned) "Bị khóa" else "Hoạt động")
+    }
+}

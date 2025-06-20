@@ -56,6 +56,7 @@ import com.example.itforum.user.FilterWords.ToastHelper
 import com.google.firebase.messaging.FirebaseMessaging
 import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
 import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
+import com.example.itforum.user.post.test
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.tasks.await
 
@@ -82,6 +83,7 @@ class MainActivity : ComponentActivity() {
             ITForumTheme {
                 Root(sharedPreferences)
 //                CrashLogScreen()
+//                test()
             }
         }
     }

@@ -47,30 +47,27 @@ fun ReportedPostScreen(navController: NavHostController,
 
     AdminScreenLayout(
         title = "Quản lý báo cáo bài viết",
-        itemCount = posts.size
-    ) { searchText, _, _ ->
+        itemCount = posts.size,
+        searchTable =  { searchText->
+            val filteredPosts = posts.filter {
+                it.reportedPostId.contains(searchText, ignoreCase = true) ||
+                        it.reportedPostTitle.contains(searchText, ignoreCase = true) ||
+                        it.reason.contains(searchText, ignoreCase = true)
+            }
 
-        val filteredPosts = posts.filter {
-            it.reportedPostId.contains(searchText, ignoreCase = true) ||
-                    it.reportedPostTitle.contains(searchText, ignoreCase = true) ||
-                    it.reason.contains(searchText, ignoreCase = true)
+            if (error != null) {
+                Text("Lỗi: $error", color = MaterialTheme.colorScheme.error)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            TableData(
+                headers = listOf("ID", "Post ID", "Tiêu đề", "Lý do", "Ngày tạo","Tùy chỉnh"),
+                menuOptions = menuOptions,
+                rows = convertToTableRows(filteredPosts),
+                sharedPreferences = sharedPreferences,
+
+
+                )
         }
-
-
-
-
-        if (error != null) {
-            Text("Lỗi: $error", color = MaterialTheme.colorScheme.error)
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        TableData(
-            headers = listOf("ID", "Post ID", "Tiêu đề", "Lý do", "Ngày tạo","Tùy chỉnh"),
-            menuOptions = menuOptions,
-            rows = convertToTableRows(filteredPosts),
-            sharedPreferences = sharedPreferences,
-
-
-        )
-    }
+    )
 }

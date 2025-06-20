@@ -29,11 +29,14 @@ import androidx.navigation.NavHostController
 import androidx.room.Room
 import com.example.itforum.admin.components.AdminScreenLayout
 import com.example.itforum.admin.components.TableData
+import com.example.itforum.admin.components.TableRowConvertible
 import com.example.itforum.admin.components.convertToTableRows
+import com.example.itforum.user.modelData.response.News
 import com.example.itforum.user.news.NewsDatabase
 import com.example.itforum.user.news.viewmodel.NewsViewModel
 import com.example.itforum.user.news.viewmodel.NewsViewModelFactory
 import com.example.itforum.user.post.icontext
+import java.time.Instant
 
 @Composable
 fun ManagementNewsScreen (
@@ -65,9 +68,12 @@ fun ManagementNewsScreen (
             newsViewModel.DeleteNews(newsId)
         })
     )
+    val filterOptions = mapOf(
+        "Thời gian" to listOf("Mới nhất", "Cũ nhất")
+    )
     listNews?.let {
         AdminScreenLayout(
-            title = "Quản lý báo cáo người dùng",
+            title = "Quản lý tin tức",
             itemCount = it.size,
             addComposed = {
                 Button(
@@ -86,20 +92,41 @@ fun ManagementNewsScreen (
                         modifier = Modifier.padding(3.dp),
                     )
                 }
+            },
+            searchTable = { searchText ->
+                val dataFiltered = listNews!!.filter { item ->
+                    searchText.isBlank() || listOf(
+                        item.adminId,
+                        item.createdAt,
+                        item.title,
+                        item.content
+                    ).any { it.contains(searchText, ignoreCase = true) }
+                }
+                return@AdminScreenLayout dataFiltered
+            },
+            filterOptions = filterOptions,
+            filterField = { field, value, data ->
+                data as List<News>
+                val dataFiltered = when (field) {
+                    "Thời gian" -> {
+                        when (value) {
+                            "Mới nhất" -> data.sortedByDescending { Instant.parse(it.createdAt) }
+                            "Cũ nhất" -> data.sortedBy { Instant.parse(it.createdAt) }
+                            else -> data
+                        }
+                    }
+                    else -> data
+                }
+                return@AdminScreenLayout dataFiltered
+            },
+            table = {dataFiltered ->
+                TableData(
+                    headers = listOf("ID", "Người dùng", "Tiêu đề", "Nội dung", "Thời gian", "Tùy chỉnh"),
+                    rows = convertToTableRows(dataFiltered as List<TableRowConvertible>),
+                    menuOptions = menuOptions,
+                    sharedPreferences = sharedPreferences,
+                )
             }
-        ) { searchText, _, _ ->
-            val filteredUsers = listNews!!.filter {
-                it.adminId.contains(searchText, ignoreCase = true) ||
-                it.createdAt.contains(searchText, ignoreCase = true) ||
-                it.title.contains(searchText, ignoreCase = true) ||
-                it.content.contains(searchText, ignoreCase = true)
-            }
-            TableData(
-                headers = listOf("ID", "Người dùng", "Tiêu đề", "Nội dung", "Thời gian", "Tùy chỉnh"),
-                rows = convertToTableRows(filteredUsers),
-                menuOptions = menuOptions,
-                sharedPreferences = sharedPreferences,
-            )
-        }
+        )
     }
 }

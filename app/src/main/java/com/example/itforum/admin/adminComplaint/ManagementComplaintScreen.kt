@@ -19,9 +19,13 @@ import com.example.itforum.admin.components.TableData
 import com.example.itforum.admin.components.convertToTableRows
 import com.example.itforum.admin.adminComplaint.viewmodel.ComplaintViewModel
 import com.example.itforum.admin.components.AdminScreenLayout
+import com.example.itforum.admin.components.TableRowConvertible
 import com.example.itforum.user.complaint.SuccessDialog
 import com.example.itforum.user.effect.model.UiState
+import com.example.itforum.user.modelData.response.Complaint
+import com.example.itforum.user.modelData.response.News
 import com.example.itforum.user.post.icontext
+import java.time.Instant
 
 @Composable
 fun ManagementComplaintScreen (
@@ -65,21 +69,56 @@ fun ManagementComplaintScreen (
             complaintViewModel.handleRejected(complaintId)
         })
     )
+    val filterOptions = mapOf(
+        "Thời gian" to listOf("Mới nhất", "Cũ nhất"),
+        "Trạng thái" to listOf("Chưa xử lý", "Đã xử lý", "Từ chối")
+    )
     complaints?.let {
         AdminScreenLayout(
-        title = "Quản lý khiếu nại người dùng",
-        itemCount = it.size
-    ) { searchText, _, _ ->
-        val filteredUsers = complaints!!.filter {
-            it.userId.contains(searchText, ignoreCase = true) ||
-                    it.status.contains(searchText, ignoreCase = true)
-        }
-        TableData(
-            headers = listOf("ID", "Người dùng", "Tiêu đề", "Lý do", "Thời gian", "Trạng thái", "Tùy chỉnh"),
-            rows = convertToTableRows(filteredUsers),
-            menuOptions = menuOptions,
-            sharedPreferences = sharedPreferences
+            title = "Quản lý khiếu nại người dùng",
+            itemCount = it.size,
+            searchTable = { searchText ->
+                val dataFiltered = complaints!!.filter { item ->
+                    searchText.isBlank() || listOf(
+                        item.userId,
+                        item.createdAt,
+                        item.title,
+                        item.reason
+                    ).any { it.contains(searchText, ignoreCase = true) }
+                }
+                return@AdminScreenLayout dataFiltered
+            },
+            filterOptions = filterOptions,
+            filterField = { field, value, data ->
+                data as List<Complaint>
+                val dataFiltered = when (field) {
+                    "Thời gian" -> {
+                        when (value) {
+                            "Mới nhất" -> data.sortedByDescending { Instant.parse(it.createdAt) }
+                            "Cũ nhất" -> data.sortedBy { Instant.parse(it.createdAt) }
+                            else -> data
+                        }
+                    }
+                    "Trạng thái"->{
+                        when (value) {
+                            "Chưa xử lý" -> data.filter { it.status == "pending" }
+                            "Đã xử lý" -> data.filter { it.status == "approved" }
+                            "Từ chối" -> data.filter { it.status == "rejected" }
+                            else -> data
+                        }
+                    }
+                    else -> data
+                }
+                return@AdminScreenLayout dataFiltered
+            },
+            table = {dataFiltered ->
+                TableData(
+                    headers = listOf("ID", "Người dùng", "Tiêu đề", "Lý do", "Thời gian", "Trạng thái", "Tùy chỉnh"),
+                    rows = convertToTableRows(dataFiltered as List<TableRowConvertible>),
+                    menuOptions = menuOptions,
+                    sharedPreferences = sharedPreferences
+                )
+            }
         )
-    }
     }
 }

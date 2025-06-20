@@ -46,26 +46,27 @@ fun ReportedAccountScreen(navController: NavHostController,
 
     AdminScreenLayout(
         title = "Quản lý báo cáo người dùng",
-        itemCount = users.size
-    ) { searchText, _, _ ->
-        val filteredUsers = users.filter {
-            it._id .contains(searchText, ignoreCase = true) ||
-                    it.reason.contains(searchText, ignoreCase = true)||
-                    it.reportedUserId.contains(searchText, ignoreCase = true)||
-                    it.createdAt.contains(searchText, ignoreCase = true)
+        itemCount = users.size,
+        searchTable = { searchText->
+            val filteredUsers = users.filter {
+                it._id .contains(searchText, ignoreCase = true) ||
+                        it.reason.contains(searchText, ignoreCase = true)||
+                        it.reportedUserId.contains(searchText, ignoreCase = true)||
+                        it.createdAt.contains(searchText, ignoreCase = true)
+            }
+
+            if (error != null) {
+                Text("Lỗi: $error", color = MaterialTheme.colorScheme.error)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            TableData(
+                headers = listOf("ID báo cáo", "ID người bị báo cáo", "ID người báo cáo", "Lý do", "Thời gian","Tùy chỉnh"),
+                rows = convertToTableRows(filteredUsers),
+                menuOptions = menuOptions,
+                sharedPreferences = sharedPreferences
+
+            )
         }
-
-        if (error != null) {
-            Text("Lỗi: $error", color = MaterialTheme.colorScheme.error)
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        TableData(
-            headers = listOf("ID báo cáo", "ID người bị báo cáo", "ID người báo cáo", "Lý do", "Thời gian","Tùy chỉnh"),
-            rows = convertToTableRows(filteredUsers),
-            menuOptions = menuOptions,
-            sharedPreferences = sharedPreferences
-
-        )
-    }
+    )
 }

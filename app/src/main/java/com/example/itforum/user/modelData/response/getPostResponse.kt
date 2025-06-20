@@ -30,3 +30,7 @@ data class PostWithVote(
     val vote: GetVoteResponse?,
     var isBookMark: Boolean = false
 )
+data class PostListWrapper(
+    @SerializedName("listPost")
+    val listPost: List<PostResponse>
+)
