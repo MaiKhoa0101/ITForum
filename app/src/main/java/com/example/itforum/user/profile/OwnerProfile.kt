@@ -57,6 +57,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
 
 import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.modelData.response.Certificate
@@ -79,9 +80,10 @@ fun UserProfileScreen(
     val user by viewModel.user.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-//    LaunchedEffect(Unit) {
-//        viewModel.getUser()
-//    }
+    var showReportDeatil by remember { mutableStateOf(false) }
+    var postId by remember { mutableStateOf("") }
+
+
     LaunchedEffect(Unit) {
         val loginType = sharedPreferences.getString("loginType", "") ?: ""
 
@@ -143,8 +145,17 @@ fun UserProfileScreen(
             navController = navHostController,
             modifier = Modifier.padding(innerPadding),
             tabs = tabs,
-            sharedPreferences = sharedPreferences
+            sharedPreferences = sharedPreferences,
+            onReportClick = {
+                postId = it
+                showReportDeatil = true
+            }
         )
+    }
+    if (showReportDeatil){
+        CreateReportPostScreen (sharedPreferences, postId, onDismiss = {
+            showReportDeatil = false
+        })
     }
 }
 
@@ -156,7 +167,8 @@ fun ProfileContent(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     tabs: List<String>,
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+    onReportClick: (String) -> Unit
 ) {
    Column(modifier = modifier.fillMaxSize()) {
         UserHeader(user)
@@ -179,7 +191,11 @@ fun ProfileContent(
                    GetPostRequest(
                        page = 1,
                        userId = sharedPreferences.getString("userId", null)
-                   ), reloadKey = selectedTabIndex
+                   ),
+                   reloadKey = selectedTabIndex,
+                   onReportClick = {
+                       onReportClick(it)
+                   }
                )
            }
        }
