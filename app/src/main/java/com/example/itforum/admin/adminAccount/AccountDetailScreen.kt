@@ -1,18 +1,12 @@
 package com.example.itforum.admin.adminAccount
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.itforum.admin.adminAccount.model.UserAccountManagerAdmin
 import com.example.itforum.admin.adminPost.DropdownMenuBox
 import com.example.itforum.admin.components.DetailItem
@@ -30,8 +24,8 @@ fun generateAccounts(): List<UserAccountManagerAdmin> { // Definition 1
         ) 
     }
 }@Composable
-fun AccountDetailScreen(accountId: Int) {
-    val account = remember(accountId) { generateAccounts().find { it.id == accountId } }
+fun AccountDetailScreen(accountId: String?) {
+    val account = remember(accountId) { generateAccounts().find { it.id.toString() == accountId } }
     var isLocked by remember { mutableStateOf(false) }
     var selectedDuration by remember { mutableStateOf("1 tháng") }
 
@@ -71,8 +65,3 @@ fun AccountDetailScreen(accountId: Int) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewAccountDetailScreen() {
-    AccountDetailScreen(accountId = 1)
-}

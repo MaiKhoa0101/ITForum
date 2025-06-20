@@ -98,6 +98,8 @@ import androidx.media3.ui.PlayerView
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
+import com.example.itforum.user.FilterWords.ToastHelper
+import com.example.itforum.user.FilterWords.WordFilter
 
 import com.example.itforum.user.effect.UiStateMessage
 
@@ -126,7 +128,7 @@ fun CreatePostPage(
     var postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(navHostController,sharedPreferences) }
     })
-
+    val userId = sharedPreferences.getString("userId", null)
     val userInfo by userViewModel.user.collectAsState()
     val uiStateCreate by postViewModel.uiStateCreate.collectAsState()
     var enable by remember { mutableStateOf<Boolean>(true) }
@@ -160,6 +162,15 @@ fun CreatePostPage(
 
             stickyHeader {
                 TopPost("Bài viết mới", "Đăng", navHostController, enable, uiStateCreate) {
+                    val combinedText = "$title $content"
+                    if (userId!=null) {
+                        val hasBadWords = WordFilter.containsBannedWordsAndLog(userId, combinedText)
+
+                        if (hasBadWords) {
+                            ToastHelper.show("Nội dung vi phạm chính sách ngôn từ")
+                            return@TopPost
+                        }
+                    }
                     Log.d("tags", tags.toString())
                     postViewModel.createPost(
                         CreatePostRequest(

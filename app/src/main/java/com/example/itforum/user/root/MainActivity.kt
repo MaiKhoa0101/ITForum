@@ -52,9 +52,9 @@ import com.example.itforum.admin.adminCrashlytic.CrashLogScreen
 
 import com.example.itforum.admin.modeldata.sidebarItems
 import com.example.itforum.admin.modeldata.sidebarUserItems
+import com.example.itforum.user.FilterWords.ToastHelper
 import com.google.firebase.messaging.FirebaseMessaging
 import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
-import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.tasks.await
 
@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
 
 
         val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-
+        ToastHelper.init(this)
         setContent {
             ITForumTheme {
                 Root(sharedPreferences)

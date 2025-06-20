@@ -57,6 +57,7 @@ import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailS
 import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
 import com.example.itforum.user.Analytics.logScreenEnter
 import com.example.itforum.user.Analytics.logScreenExit
+import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
 
 import com.example.itforum.user.complaint.ComplaintPage
 import com.example.itforum.user.news.DetailNewsPage
@@ -159,7 +160,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 
             PostCommentScreen(navHostController, postId, sharedPreferences)
         }
-
 
         composable("notification") {
             val context = LocalContext.current
@@ -830,9 +830,8 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                     }
                 }
 
-                AccountDetailScreen(accountId)
-            } else {
-                Text("Không tìm thấy tài khoản.")
+
+
             }
         }
 

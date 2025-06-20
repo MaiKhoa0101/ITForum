@@ -70,25 +70,7 @@ fun AccountManagementScreen(
         icontext(Icons.Default.Delete,"Xóa")
     )
     Column(modifier = modifier.fillMaxWidth().background(Color.White)) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(69.dp)
-                .background(Color(0xFF00AEFF))
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize().padding(start = 25.dp, end = 25.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Icon(Icons.Default.Menu, contentDescription = "Menu")
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "xin chao user", color = Color.White)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(Icons.Default.AccountCircle, contentDescription = "User")
-                }
-            }
-        }
+
         Spacer(modifier = Modifier.height(17.dp))
         Column(modifier = Modifier.padding(horizontal = 25.dp)) {
             Text(text = "Quan li tai khoan", fontSize = 20.sp, color = Color.Black)

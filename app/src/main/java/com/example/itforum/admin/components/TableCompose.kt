@@ -74,7 +74,7 @@ fun TableData(
         .heightIn(max = maxTableHeight)) {
         val horizontalScrollState = rememberScrollState()
 
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+        LazyColumn(modifier = Modifier.fillMaxWidth(),) {
             item {
                 Row(modifier = Modifier
                     .background(Color(0xFF2B544F))
@@ -120,7 +120,7 @@ fun TableData(
                                 }
                             }
                             else if (i == rowUser){
-                                LaunchedEffect(Unit) {
+                                LaunchedEffect(row[i]) {
                                     userViewModel.getUser(row[i])
                                 }
                                 val user by userViewModel.user.collectAsState()

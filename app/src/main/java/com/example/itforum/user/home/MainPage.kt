@@ -17,6 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -31,6 +34,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import androidx.navigation.NavController
 import androidx.room.Room
+import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
 import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.news.NewsDatabase
 import com.example.itforum.user.news.viewmodel.NewsViewModel
@@ -44,6 +48,8 @@ fun HomePage(
     modifier: Modifier,
     sharePreferences: SharedPreferences
 ){
+    var showReportDeatil by remember { mutableStateOf(false) }
+    var postId by remember { mutableStateOf("") }
     Column(
         modifier=modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -94,6 +100,20 @@ fun HomePage(
                 )
             }
         }
-        PostListScreen(sharePreferences, navHostController, GetPostRequest(page = 1));
+        PostListScreen(
+            sharePreferences,
+            navHostController,
+            GetPostRequest(page = 1),
+            onReportClick = {
+                postId = it
+                showReportDeatil = true
+
+            }
+        );
+        if (showReportDeatil){
+            CreateReportPostScreen (sharePreferences, postId, onDismiss = {
+                showReportDeatil = false
+            })
+        }
     }
 }
