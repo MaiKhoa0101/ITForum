@@ -1,6 +1,7 @@
 package com.example.itforum.user.profile
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -86,7 +87,7 @@ fun UserProfileScreen(
 
     LaunchedEffect(Unit) {
         val loginType = sharedPreferences.getString("loginType", "") ?: ""
-
+        Log.d("UserProfileScreen", "Login type: $loginType")
         if (loginType == "google") {
 
             viewModel.getUserFromFirestore()
@@ -225,7 +226,7 @@ fun UserHeader(user: UserProfileResponse?) {
             Spacer(modifier = Modifier.width(50.dp))
             Column{
                 Text(user?.username?:"Người dùng", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Text(user?.email?:"")
+                Text(user?.email?:"hi@gmail.com")
 
 
                 Text(
