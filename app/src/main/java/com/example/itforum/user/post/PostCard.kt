@@ -2,6 +2,7 @@ package com.example.itforum.user.post
 
 import android.R.bool
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,6 +45,7 @@ fun PostCardWithVote(
     onCommentClick: () -> Unit = {},
     onBookmarkClick: () -> Unit = {},
     onShareClick: () -> Unit = {},
+    onCardClick : () -> Unit = {}
 )
  {
     var isChange by remember { mutableStateOf(false) }
@@ -60,7 +62,7 @@ fun PostCardWithVote(
         elevation = 4.dp,
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth()
+            .fillMaxWidth().clickable{onCardClick()}
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(

@@ -73,49 +73,14 @@ fun PostListScreen(
     getPostRequest: GetPostRequest,
     reloadKey: Any? = null
 ) {
-    fun handleUpVote(viewModel: PostViewModel, postWithVote: PostWithVote, index: Int, scope: CoroutineScope) {
-        scope.launch {
-            val voteResponse = viewModel.votePost(
-                postId = postWithVote.post.id,
-                type = "upvote",
-                index = index
-            )
-            voteResponse?.let { response ->
-                postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
-                postWithVote.vote?.data?.userVote = response.data?.userVote
-            }
-        }
-    }
-    fun handleDownVote(viewModel: PostViewModel, postWithVote: PostWithVote, index: Int, scope: CoroutineScope) {
-        scope.launch {
-            val voteResponse = viewModel.votePost(
-                postId = postWithVote.post.id,
-                type = "downvote",
-                index = index
-            )
-            voteResponse?.let { response ->
-                postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
-                postWithVote.vote?.data?.userVote = response.data?.userVote
-            }
-        }
-    }
 
-    fun handleBookmark(viewModel: PostViewModel, postWithVote: PostWithVote, userId: String?, scope: CoroutineScope) {
-        scope.launch {
-            val bookmarkResponse = viewModel.savePost(
-                postId = postWithVote.post.id,
-                userId = userId
-            )
-            postWithVote.isBookMark = !postWithVote.isBookMark
-        }
-    }
 
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(navHostController, sharedPreferences) }
     })
 
-    val postsFromVm by viewModel.postsWithVotes.collectAsState()
-    var postsWithVotes by remember { mutableStateOf(postsFromVm) }
+    val postsWithVotes by viewModel.postsWithVotes.collectAsState()
+   // var postsWithVotes by remember { mutableStateOf(postsFromVm) }
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoadingMore by viewModel.isLoadingMore.collectAsState()
     var showCommentDialog by remember { mutableStateOf(false) }
@@ -124,18 +89,9 @@ fun PostListScreen(
 
     val isLoading by viewModel.isLoading.collectAsState()
     // Fetch posts when screen loads
-    LaunchedEffect(reloadKey,getPostRequest) {
-        postsWithVotes = emptyList()
+    LaunchedEffect(getPostRequest) {
         viewModel.fetchPosts(getPostRequest)
-        Log.d("PostListScreen", postsFromVm.toString())
-
     }
-    LaunchedEffect(isLoading, postsFromVm) {
-        if (!isLoading && postsFromVm.isNotEmpty()) {
-            postsWithVotes = postsFromVm
-        }
-        Log.d("load page when postfromvm",postsWithVotes.toString())
-    }// keep local data async
 
     // Pull to refresh state
     val pullRefreshState = rememberPullRefreshState(
@@ -204,19 +160,25 @@ fun PostListScreen(
                         vote = postWithVote.vote,
                         isBookMark = postWithVote.isBookMark,
                         onUpvoteClick = {
-                            handleUpVote(viewModel, postWithVote, index, scope)
+                            viewModel.handleUpVote("upvote",index,postWithVote.post.id)
                         },
                         onDownvoteClick = {
-                            handleDownVote(viewModel, postWithVote, index, scope)
+                            viewModel.handleDownVote("downvote",index,postWithVote.post.id)
                         },
                         onCommentClick = {
                             selectedPostId = postWithVote.post.id
                             showCommentDialog = true
                         },
                         onBookmarkClick = {
-                            handleBookmark(viewModel, postWithVote, userId, scope)
+                            viewModel.handleBookmark(index,postWithVote.post.id,userId)
                         },
-                        onShareClick = { }
+                        onShareClick = { },
+                        onCardClick ={ scope.launch {
+                            viewModel.clearSelectedPost()
+                            viewModel.setSelectedPost(postWithVote.post,postWithVote.vote)
+                            navHostController.navigate("detail_post")
+                        }
+                        Log.d("dd","postdetail")}
                     )
 
 
