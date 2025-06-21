@@ -25,8 +25,11 @@ import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.post.icontext
 
 @Composable
-fun ReportedPostScreen(navController: NavHostController,
-                       sharedPreferences: SharedPreferences) {
+fun ReportedPostScreen(
+    navController: NavHostController,
+    sharedPreferences: SharedPreferences,
+    modifier: Modifier
+) {
     val viewModel: ReportedPostViewModel = viewModel(
         factory = ReportedPostViewModelFactory(
             ReportPostRepository(RetrofitInstance.reportPostService)
@@ -48,6 +51,7 @@ fun ReportedPostScreen(navController: NavHostController,
     AdminScreenLayout(
         title = "Quản lý báo cáo bài viết",
         itemCount = posts.size,
+        modifier = modifier,
         searchTable =  { searchText->
             val filteredPosts = posts.filter {
                 it.reportedPostId.contains(searchText, ignoreCase = true) ||

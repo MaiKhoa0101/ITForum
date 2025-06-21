@@ -41,7 +41,8 @@ import java.time.Instant
 @Composable
 fun ManagementNewsScreen (
     navController: NavHostController,
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+    modifier: Modifier
 ) {
     val context = LocalContext.current
 
@@ -75,6 +76,7 @@ fun ManagementNewsScreen (
         AdminScreenLayout(
             title = "Quản lý tin tức",
             itemCount = it.size,
+            modifier = modifier,
             addComposed = {
                 Button(
                     onClick = {

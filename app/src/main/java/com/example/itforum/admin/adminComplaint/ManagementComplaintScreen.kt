@@ -31,11 +31,11 @@ import java.time.Instant
 fun ManagementComplaintScreen (
     navController: NavHostController,
     sharedPreferences: SharedPreferences,
-
+    modifier: Modifier
 ) {
     var complaintViewModel: ComplaintViewModel = viewModel()
     LaunchedEffect(Unit) {
-        complaintViewModel.getComplaint()
+        complaintViewModel.getAllComplaint()
     }
     val uiState by complaintViewModel.uiStateCreate.collectAsState()
     var showSuccessDialog by remember { mutableStateOf(false) }
@@ -77,6 +77,7 @@ fun ManagementComplaintScreen (
         AdminScreenLayout(
             title = "Quản lý khiếu nại người dùng",
             itemCount = it.size,
+            modifier = modifier,
             searchTable = { searchText ->
                 val dataFiltered = complaints!!.filter { item ->
                     searchText.isBlank() || listOf(

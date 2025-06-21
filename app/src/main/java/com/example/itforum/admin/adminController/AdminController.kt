@@ -1,5 +1,6 @@
 package com.example.itforum.admin.adminController
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,7 +29,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,11 +51,53 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import com.example.itforum.admin.adminComplaint.viewmodel.ComplaintViewModel
+import com.example.itforum.user.profile.viewmodel.UserViewModel
+import java.time.LocalDate
+import java.time.OffsetDateTime
 
 
 @Composable
-fun ControllerManagerScreen(navHostController:NavHostController,modifier: Modifier) {
+fun ControllerManagerScreen(
+    navHostController:NavHostController,
+    sharedPreferences: SharedPreferences,
+    modifier: Modifier
+) {
+    val userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
+        initializer { UserViewModel(sharedPreferences) }
+    })
+
+    LaunchedEffect(Unit) {
+        userViewModel.getAllUser()
+    }
+
+    val listUser by userViewModel.listUser.collectAsState()
+    var totalActiveUsers by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(listUser) {
+        totalActiveUsers = listUser.count { !it.isBanned }
+    }
+
+    val complaintViewModel: ComplaintViewModel = viewModel()
+    LaunchedEffect(Unit) {
+        complaintViewModel.getAllComplaint()
+    }
+    val listComplaint by complaintViewModel.listComplaint.collectAsState()
+    var totalComplaintsNew by remember { mutableIntStateOf(0) }
+    LaunchedEffect(listComplaint) {
+        totalComplaintsNew = listComplaint?.count { complaint ->
+            try {
+                val complaintDate = OffsetDateTime.parse(complaint.createdAt).toLocalDate()
+                complaintDate == LocalDate.now()
+            } catch (e: Exception) {
+                false // Nếu parse lỗi thì bỏ qua
+            }
+        } ?: 0
+    }
     LazyColumn (
         modifier = modifier.background(MaterialTheme.colorScheme.background)
     ){
@@ -69,9 +115,9 @@ fun ControllerManagerScreen(navHostController:NavHostController,modifier: Modifi
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            ActiveAccount()
+            ActiveAccount(totalActiveUsers)
             RevenueReportScreen()
-            NotificationCard()
+            NotificationCard(totalComplaintsNew)
             AppointmentRevenueCard()
         }
     }
@@ -79,7 +125,9 @@ fun ControllerManagerScreen(navHostController:NavHostController,modifier: Modifi
 
 
 @Composable
-fun ActiveAccount() {
+fun ActiveAccount(
+    activeUsers: Int
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -105,7 +153,7 @@ fun ActiveAccount() {
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 InfoCard(
-                    value = "44",
+                    value = "$activeUsers",
                     title = "Người dùng đang hoạt động",
                     backgroundColor = Color(0xFF00BCD4),
                     icon = Icons.Default.Person
@@ -254,7 +302,9 @@ fun RevenueReportScreen() {
 }
 
 @Composable
-fun NotificationCard() {
+fun NotificationCard(
+    totalComplaintsNew: Int
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -272,7 +322,7 @@ fun NotificationCard() {
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             NotificationItem(Icons.Default.Person, "10 tài khoản mới", Color(0xFFB3E5FC), Color.Black)
-            NotificationItem(Icons.Default.Report, "4 khiếu nại mới", Color(0xFFC8FACC), Color.Black)
+            NotificationItem(Icons.Default.Report, "$totalComplaintsNew khiếu nại mới", Color(0xFFC8FACC), Color.Black)
         }
     }
 }

@@ -47,6 +47,7 @@ fun AccountManagementScreen(
     AdminScreenLayout(
         title = "Quản lý khiếu nại người dùng",
         itemCount = listUser.size,
+        modifier = modifier,
         searchTable = { searchText ->
             val dataFiltered = listUser.filter { item ->
                 searchText.isBlank() || listOf(

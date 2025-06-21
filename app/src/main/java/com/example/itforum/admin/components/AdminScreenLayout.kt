@@ -33,6 +33,7 @@ fun AdminScreenLayout(
     itemCount: Int,
     filterOptions: Map<String,List<String>> = mapOf(),
     onOpenDrawer: () -> Unit = {},
+    modifier: Modifier,
     addComposed: @Composable () -> Unit = {},
     filterField: (String, String, Any) -> Any = { it1, it2, it3-> it3 },
     searchTable: @Composable (String) -> Any,
@@ -54,8 +55,7 @@ fun AdminScreenLayout(
     LaunchedEffect(selectedFilterField) {
         selectedFilterValue = "Tất cả"
     }
-    Column {
-        HeadBarAdmin()
+    Column(modifier = modifier) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {

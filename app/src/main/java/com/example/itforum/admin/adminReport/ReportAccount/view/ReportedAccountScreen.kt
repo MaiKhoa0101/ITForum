@@ -24,8 +24,11 @@ import com.example.itforum.repository.ReportRepository
 import com.example.itforum.retrofit.RetrofitInstance
 
 @Composable
-fun ReportedAccountScreen(navController: NavHostController,
-                          sharedPreferences: SharedPreferences) {
+fun ReportedAccountScreen(
+    navController: NavHostController,
+    sharedPreferences: SharedPreferences,
+    modifier: Modifier
+) {
     val viewModel: ReportedUserViewModel = viewModel(factory = ReportViewModelFactory(
         ReportRepository(
             RetrofitInstance.reportAccountService)
@@ -47,6 +50,7 @@ fun ReportedAccountScreen(navController: NavHostController,
     AdminScreenLayout(
         title = "Quản lý báo cáo người dùng",
         itemCount = users.size,
+        modifier = modifier,
         searchTable = { searchText->
             val filteredUsers = users.filter {
                 it._id .contains(searchText, ignoreCase = true) ||
