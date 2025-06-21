@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.itforum.user.setting
 
 import android.annotation.SuppressLint
@@ -123,7 +125,7 @@ fun Setting(
                 // Xóa dữ liệu local
                 sharedPreferences.edit().remove("role").apply()
                 sharedPreferences.edit().remove("access_token").apply()
-                sharedPreferences.edit().remove("loginType").apply() // ✅ Quan trọng!
+                sharedPreferences.edit().remove("loginType").apply()
 
                 // Đăng xuất Firebase
                 FirebaseAuth.getInstance().signOut()

@@ -45,7 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
+import com.example.itforum.admin.adminAnalytics.AnalyticsScreen
 import com.example.itforum.admin.adminCrashlytic.CrashLogScreen
 
 
@@ -80,7 +80,8 @@ class MainActivity : ComponentActivity() {
         ToastHelper.init(this)
         setContent {
             ITForumTheme {
-                Root(sharedPreferences)
+                AnalyticsScreen()
+//                Root(sharedPreferences)
 //                CrashLogScreen()
             }
         }

@@ -35,7 +35,7 @@ import com.example.itforum.user.complaint.SuccessDialog
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.effect.UiStateMessage
 import com.example.itforum.user.login.loginGoogle.GoogleSignInButton
-import com.example.itforum.user.login.loginGoogle.saveUserToFirestore
+
 import com.example.itforum.user.login.viewmodel.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 

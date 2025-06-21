@@ -1,6 +1,7 @@
 package com.example.itforum.retrofit
 
 
+import com.example.itforum.service.AnalyticsApi
 import com.example.itforum.service.ComplaintService
 import com.example.itforum.service.FollowService
 import com.example.itforum.service.UserService
@@ -48,6 +49,13 @@ object RetrofitInstance {
 //            .build()
 //            .create(AuthApi::class.java)
 //    }
-val followService: FollowService by lazy { retrofit.create(FollowService::class.java) }
+    val followService: FollowService by lazy { retrofit.create(FollowService::class.java) }
+    val retrofit_analytics = Retrofit.Builder()
+        .baseUrl("https://beitforum.onrender.com/api/screen-stats") // 👈 Link từ Render
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+
+    val analyticsApi = retrofit_analytics.create(AnalyticsApi::class.java)
 
 }
