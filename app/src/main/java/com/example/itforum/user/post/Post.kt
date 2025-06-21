@@ -235,30 +235,16 @@ fun PostListScreen(
         )
 
         if (showCommentDialog && selectedPostId != null) {
-            Dialog(
-                onDismissRequest = {
-                    showCommentDialog = false
+            CommentDialogWrapper(
+                postId = selectedPostId!!,
+                sharedPreferences = sharedPreferences,
+                onDismiss = {
                     selectedPostId = null
-                },
-                properties = DialogProperties(
-                    usePlatformDefaultWidth = false
-                )
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color.White,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.9f)
-                ) {
-                    PostCommentScreen(
-                        navController = navHostController,
-                        postId = selectedPostId!!,
-                        sharedPreferences = sharedPreferences
-                    )
+                    showCommentDialog = false
                 }
-            }
+            )
         }
+
     }
 }
 

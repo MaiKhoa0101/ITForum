@@ -48,6 +48,8 @@ import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailS
 import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
 import com.example.itforum.user.Analytics.logScreenView
 import com.example.itforum.user.complaint.ComplaintPage
+import com.example.itforum.user.modelData.response.GetVoteResponse
+import com.example.itforum.user.modelData.response.PostResponse
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.profile.OtherUserProfileScreen
@@ -81,7 +83,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 delay(1200)
             }
 
-            PostCommentScreen(navHostController, postId, sharedPreferences)
+            PostCommentScreen( postId, sharedPreferences)
         }
 
         composable ("notification") {
@@ -219,7 +221,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 logScreenView(context, "detail_post")
             }
 
-            DetailPostPage(navHostController)
+            DetailPostPage(navHostController,sharedPreferences)
         }
 
 //        composable("listlike") {

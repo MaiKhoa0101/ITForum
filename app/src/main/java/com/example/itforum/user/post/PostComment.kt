@@ -1,5 +1,4 @@
 package com.example.itforum.user.post
-
 import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -18,19 +18,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.user.effect.model.UiStateComment
 import com.example.itforum.user.modelData.response.Comment
 import com.example.itforum.user.modelData.response.Reply
 import com.example.itforum.user.post.viewmodel.CommentViewModel
 
+
+
 @Composable
 fun PostCommentScreen(
-    navController: NavHostController,
     postId: String,
     sharedPreferences: SharedPreferences,
 ) {
@@ -41,30 +43,52 @@ fun PostCommentScreen(
     var comments by remember { mutableStateOf(listOf<Comment>()) }
     var isSubmittingComment by remember { mutableStateOf(false) }
 
-    // Fetch comments only once when postId changes (first load)
-    LaunchedEffect(postId) {
-        viewModel.fetchComment(postId)
-    }
-    // When comments loaded, store them
+    LaunchedEffect(postId) { viewModel.fetchComment(postId) }
     LaunchedEffect(uiState) {
         if (uiState is UiStateComment.SuccessFetchComment) {
             comments = (uiState as UiStateComment.SuccessFetchComment).comments
         }
     }
 
-    Column(Modifier.fillMaxSize().background(Color(0xFFF0F2F5))) {
-        Text("Comments", style = MaterialTheme.typography.h6, modifier = Modifier.padding(16.dp))
+    // Use fillMaxSize instead of fillMaxHeight(0.9f)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF0F2F5))
+    ) {
+        Text(
+            text = "Comments",
+            modifier = Modifier.padding(16.dp),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
         Divider()
 
         when (uiState) {
-            is UiStateComment.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+            is UiStateComment.Loading -> {
+                Box(
+                    modifier = Modifier.weight(1f), // Use weight instead of fillMaxSize
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-            is UiStateComment.Error -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Error: ${(uiState as UiStateComment.Error).message}", color = Color.Red)
+            is UiStateComment.Error -> {
+                Box(
+                    modifier = Modifier.weight(1f), // Use weight instead of fillMaxSize
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Error: ${(uiState as UiStateComment.Error).message}",
+                        color = Color.Red
+                    )
+                }
             }
             else -> {
-                LazyColumn(Modifier.weight(1f)) {
+                // Comments list takes available space
+                LazyColumn(
+                    modifier = Modifier.weight(1f) // This will take all available space
+                ) {
                     items(comments, key = { it.id }) { comment ->
                         CommentCard(
                             comment = comment,
@@ -72,7 +96,6 @@ fun PostCommentScreen(
                                 viewModel.fetchReply(commentId, onLoaded)
                             },
                             onSubmitReply = { commentId, replyText, onReplyPosted ->
-                                // Submit reply via viewModel and update state on success
                                 viewModel.postReply(commentId, replyText) { newReply ->
                                     onReplyPosted(newReply)
                                 }
@@ -80,24 +103,116 @@ fun PostCommentScreen(
                         )
                         Divider()
                     }
+
+                    // Add some bottom padding to ensure last item is visible above input
+                    item {
+                        Spacer(modifier = Modifier.height(80.dp))
+                    }
                 }
 
-                // Comment input at the bottom
+                // Comment input section at the bottom
                 CommentInputSection(
                     onSubmitComment = { commentText ->
                         isSubmittingComment = true
                         viewModel.postComment(postId, commentText) { newComment ->
-                            // This callback runs when comment is successfully posted
-                            comments = listOf(newComment) + comments // Add new comment to top
+                            comments = listOf(newComment) + comments
                             isSubmittingComment = false
                         }
                     },
-                    isLoading = isSubmittingComment
+                    isLoading = isSubmittingComment,
+                    modifier = Modifier.fillMaxWidth() // Ensure input takes full width
                 )
             }
         }
     }
 }
+
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun PostCommentBottomSheet(
+    onDismissRequest: () -> Unit,
+    postId: String,
+    sharedPreferences: SharedPreferences,
+) {
+    val bottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Expanded,
+        skipHalfExpanded =true
+
+    )
+
+    LaunchedEffect(bottomSheetState.currentValue) {
+        if (bottomSheetState.currentValue == ModalBottomSheetValue.Hidden) {
+            onDismissRequest()
+        }
+    }
+
+    ModalBottomSheetLayout(
+        sheetState = bottomSheetState,
+        sheetContent = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight() // Take most of the screen height
+            ) {
+                // Drag handle
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(32.dp)
+                            .height(4.dp)
+                            .background(
+                                Color.Gray.copy(alpha = 0.4f),
+                                RoundedCornerShape(2.dp)
+                            )
+                    )
+                }
+
+                // Comment screen content
+                PostCommentScreen(
+                    postId = postId,
+                    sharedPreferences = sharedPreferences
+                )
+            }
+        },
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Transparent)
+        )
+    }
+}
+@Composable
+fun CommentDialogWrapper(
+    postId: String,
+    sharedPreferences: SharedPreferences,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false) // ✅ full width
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize() // ✅ full width + full height
+        ) {
+            PostCommentBottomSheet(
+                postId = postId,
+                sharedPreferences = sharedPreferences,
+                onDismissRequest = onDismiss
+            )
+        }
+    }
+}
+
+
 
 // Updated CommentCard with fixed reply logic
 @Composable
