@@ -50,6 +50,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
+import com.example.itforum.user.ReportPost.view.ReportPostDialog
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.effect.model.UiStatePost
 import com.example.itforum.user.modelData.request.GetPostRequest
@@ -86,6 +88,7 @@ fun PostListScreen(
     var showCommentDialog by remember { mutableStateOf(false) }
     var selectedPostId by remember { mutableStateOf<String?>(null) }
     var userId = sharedPreferences.getString("userId", null)
+    var showReportDialog by remember { mutableStateOf(false) }
 
     val isLoading by viewModel.isLoading.collectAsState()
     // Fetch posts when screen loads
@@ -160,25 +163,31 @@ fun PostListScreen(
                         vote = postWithVote.vote,
                         isBookMark = postWithVote.isBookMark,
                         onUpvoteClick = {
-                            viewModel.handleUpVote("upvote",index,postWithVote.post.id)
+                            viewModel.handleUpVote("upvote", index, postWithVote.post.id)
                         },
                         onDownvoteClick = {
-                            viewModel.handleDownVote("downvote",index,postWithVote.post.id)
+                            viewModel.handleDownVote("downvote", index, postWithVote.post.id)
                         },
                         onCommentClick = {
                             selectedPostId = postWithVote.post.id
                             showCommentDialog = true
                         },
                         onBookmarkClick = {
-                            viewModel.handleBookmark(index,postWithVote.post.id,userId)
+                            viewModel.handleBookmark(index, postWithVote.post.id, userId)
                         },
                         onShareClick = { },
-                        onCardClick ={ scope.launch {
-                            viewModel.clearSelectedPost()
-                            viewModel.setSelectedPost(postWithVote.post,postWithVote.vote)
-                            navHostController.navigate("detail_post")
-                        }
-                        Log.d("dd","postdetail")}
+                        onCardClick = {
+                            scope.launch {
+                                viewModel.clearSelectedPost()
+                                viewModel.setSelectedPost(postWithVote.post, postWithVote.vote)
+                                navHostController.navigate("detail_post")
+                            }
+                        },
+                        onReportClick = {
+                            selectedPostId = postWithVote.post.id
+                            showReportDialog =  true
+                        },
+                        navHostController = navHostController,
                     )
 
 
@@ -244,6 +253,17 @@ fun PostListScreen(
                 }
             )
         }
+        if (showReportDialog && selectedPostId != null) {
+            ReportPostDialog(
+                sharedPreferences = sharedPreferences,
+                reportedPostId = selectedPostId!!,
+                onDismissRequest = {
+                    showReportDialog = false
+                    selectedPostId = null
+                }
+            )
+        }
+
 
     }
 }

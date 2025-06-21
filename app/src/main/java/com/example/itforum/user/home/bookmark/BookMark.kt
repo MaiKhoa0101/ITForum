@@ -72,10 +72,7 @@ fun BookMarkScreen(
                 sharedPreferences = sharedPreferences,
                 navHostController = navHostController,
                 getPostRequest = GetPostRequest(postsId = bookmarkedPostIds, page = 1),
-                onReportClick = {
-                    postId = it
-                    showReportDeatil = true
-                }
+
             )
         }
     }

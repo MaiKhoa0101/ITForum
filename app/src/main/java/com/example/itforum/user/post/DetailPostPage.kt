@@ -63,7 +63,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.R
-import com.example.itforum.user.Analytics.logScreenView
+
 import com.example.itforum.user.modelData.response.GetVoteResponse
 import com.example.itforum.user.modelData.response.PostResponse
 import com.example.itforum.user.post.viewmodel.PostViewModel

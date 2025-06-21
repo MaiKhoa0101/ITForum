@@ -197,11 +197,11 @@ fun CommentDialogWrapper(
 ) {
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false) // ✅ full width
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Box(
             modifier = Modifier
-                .fillMaxSize() // ✅ full width + full height
+                .fillMaxSize()
         ) {
             PostCommentBottomSheet(
                 postId = postId,
