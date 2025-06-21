@@ -1,5 +1,6 @@
 package com.example.itforum.user.post
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -35,6 +36,8 @@ import androidx.compose.material.icons.outlined.InsertComment
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MovableContent
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,16 +57,33 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.R
 
+import com.example.itforum.user.modelData.response.GetVoteResponse
+import com.example.itforum.user.modelData.response.PostResponse
+import com.example.itforum.user.post.viewmodel.PostViewModel
 
 @Composable
 fun DetailPostPage(
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    sharedPreferences : SharedPreferences
 ) {
 
+    var showImageDetail by remember { mutableStateOf(false) }
+    var selectedImageIndex by remember { mutableStateOf(0) }
+    val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
+        initializer { PostViewModel(navHostController, sharedPreferences) }
+    })
+    val post by viewModel.selectedPost.collectAsState()
+    val vote by viewModel.selectedVote.collectAsState()
+    LaunchedEffect(post) {
+
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -83,11 +103,31 @@ fun DetailPostPage(
                 item{
                     AvatarNameDetail(
                         avatar = R.drawable.avatar,
-                        name = "Nguyễn Thành Đạt",
-                        time = "2025-06-01T08:14:16.547+00:00"
+                        name = post?.userName?:"unknown",
+                        time = post?.createdAt.toString()
                     )
-                    ContentPost()
-                    MediaPost()
+                    ContentPost(post?.title?:"",post?.content?:"",  post?.tags ?: emptyList())
+                    // Post image
+                    Spacer(modifier = Modifier.height(12.dp))
+                    if (!post?.imageUrls.isNullOrEmpty()) {
+                        ImageGrid(
+                            imageUrls = post?.imageUrls!!,
+                            onImageClick = { _, index ->
+                                selectedImageIndex = index
+                                showImageDetail = true
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    // Image detail dialog
+                    if (showImageDetail && !post?.imageUrls.isNullOrEmpty()) {
+                        ImageDetailDialog(
+                            imageUrls = post?.imageUrls!!,
+                            initialIndex = selectedImageIndex,
+                            onDismiss = { showImageDetail = false }
+                        )
+                    }
                     ActionsPost(navHostController)
                     ContentCommentPost(navHostController)
                 }
@@ -175,21 +215,25 @@ fun AvatarNameDetail(avatar: Int, name: String, time: String) {
 }
 
 @Composable
-fun ContentPost() {
+fun ContentPost(title : String,content: String,tags : List<String>) {
     Column(
         modifier = Modifier.padding(start = 18.dp, end = 15.dp, bottom = 7.dp)
     ) {
         Text(
-            text = "Mn nghĩ sao về thuật toán này nếu chúng ta bỏ đi lệnh abc thì chúng ta sẽ được dòng code ",
+            text = title,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = content,
             fontSize = 12.sp
         )
-        TagPost()
+        TagPost(tags)
     }
 }
 
 @Composable
-fun TagPost() {
-    val tags = listOf("Python", "Kotlin", "C++")
+fun TagPost(tags: List<String>) {
     val tagText = tags.joinToString(" ") { "#$it" }
     Spacer(modifier = Modifier.padding(top = 10.dp))
     Text(

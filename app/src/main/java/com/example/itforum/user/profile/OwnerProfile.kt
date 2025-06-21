@@ -194,9 +194,7 @@ fun ProfileContent(
                        userId = sharedPreferences.getString("userId", null)
                    ),
                    reloadKey = selectedTabIndex,
-                   onReportClick = {
-                       onReportClick(it)
-                   }
+
                )
            }
        }

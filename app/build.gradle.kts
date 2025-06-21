@@ -158,6 +158,7 @@ dependencies {
     //Tải và hiển thị hình ảnh online
     implementation(platform("androidx.compose:compose-bom:2025.05.00"))
     implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("io.coil-kt.coil3:coil-compose:3.2.0")
 
     //Hiển thị video
     implementation("androidx.media3:media3-exoplayer:1.7.1")
@@ -168,7 +169,6 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation("com.google.accompanist:accompanist-flowlayout:0.36.0")
 
-    implementation("io.coil-kt.coil3:coil-compose:3.2.0")
 
     val nav_version = "2.9.0"
 

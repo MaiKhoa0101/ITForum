@@ -38,7 +38,6 @@ import com.example.itforum.user.modelData.response.PostResponse
 
 @Composable
 fun PostCardWithVote(
-
     post: PostResponse,
     vote: GetVoteResponse?,
     isBookMark: Boolean,
@@ -46,6 +45,8 @@ fun PostCardWithVote(
     onDownvoteClick: () -> Unit = {},
     onCommentClick: () -> Unit = {},
     onBookmarkClick: () -> Unit = {},
+    onShareClick: () -> Unit = {},
+    onCardClick : () -> Unit = {},
     onReportClick: (String) -> Unit = {},
     navHostController: NavHostController
 )
@@ -55,15 +56,16 @@ fun PostCardWithVote(
     var isVote by remember { mutableStateOf(vote?.data?.userVote) }
     var isSavedPost by remember { mutableStateOf(isBookMark) }
     Log.d("bookmark", isSavedPost.toString())
-     var selectedImageIndex by remember { mutableStateOf(0) }
      var showImageDetail by remember { mutableStateOf(false) }
+     var selectedImageIndex by remember { mutableStateOf(0) }
+
 
 
     Card(
         elevation = 4.dp,
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth()
+            .fillMaxWidth().clickable{onCardClick()}
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(

@@ -56,6 +56,8 @@ import com.example.itforum.user.Analytics.logScreenExit
 import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
 
 import com.example.itforum.user.complaint.ComplaintPage
+import com.example.itforum.user.modelData.response.GetVoteResponse
+import com.example.itforum.user.modelData.response.PostResponse
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.post.viewmodel.PostViewModel
@@ -156,7 +158,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 }
             }
 
-            PostCommentScreen(navHostController, postId, sharedPreferences)
+            PostCommentScreen( postId, sharedPreferences)
         }
 
         composable("notification") {
@@ -374,7 +376,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 }
             }
 
-            DetailPostPage(navHostController)
+            DetailPostPage(navHostController,sharedPreferences)
         }
 
 
