@@ -1,18 +1,26 @@
     package com.example.itforum.admin.adminReport.ReportPost.view
 
+    import androidx.compose.foundation.clickable
     import androidx.compose.foundation.layout.*
+    import androidx.compose.foundation.lazy.LazyRow
     import androidx.compose.material3.*
     import androidx.compose.runtime.*
     import androidx.compose.ui.Modifier
     import androidx.compose.ui.unit.dp
     import androidx.lifecycle.viewmodel.compose.viewModel
+    import coil.compose.AsyncImage
     import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModel
     import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostDetailViewModelFactory
     import com.example.itforum.admin.components.DetailItem
     import com.example.itforum.admin.components.DetailScreenLayout
     import com.example.itforum.repository.ReportPostRepository
     import com.example.itforum.retrofit.RetrofitInstance
+    import com.example.itforum.user.post.VideoPlayer
     import kotlinx.coroutines.launch
+    import android.net.Uri
+    import androidx.compose.ui.Alignment
+    import androidx.compose.ui.text.font.FontWeight
+    import androidx.core.net.toUri
 
     @Composable
     fun ReportedPostDetailScreen(
@@ -42,6 +50,48 @@
                 DetailItem("Tác giả", data!!.reportedPost.userId)
                 DetailItem("Ngày đăng", data!!.reportedPost.createdAt)
                 DetailItem("Tags", data!!.reportedPost.tags.joinToString(", "))
+                if (!data!!.reportedPost.imageUrls.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Hình ảnh:", style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(data!!.reportedPost.imageUrls.size) { index ->
+                            AsyncImage(
+                                model = data!!.reportedPost.imageUrls[index],
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .width(250.dp)
+                                    .height(200.dp)
+                            )
+                        }
+                    }
+                }
+
+                if (!data!!.reportedPost.videoUrls.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Video:", style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(data!!.reportedPost.videoUrls.size) { index ->
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "📹 Video ${index + 1}",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                VideoPlayer(
+                                    uri = data!!.reportedPost.videoUrls[index].toUri()
+                                )
+                                println(data!!.reportedPost.videoUrls[index])
+                            }
+                        }
+                    }
+                }
+
+
 
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Người tố cáo: ${data!!.reporterUser.name}", style = MaterialTheme.typography.titleMedium)

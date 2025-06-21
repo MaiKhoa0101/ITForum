@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.itforum.user.Analytics.logScreenView
+
 import com.example.itforum.user.post.IconWithText
 import com.example.itforum.user.post.TopListLike
 
@@ -63,9 +63,9 @@ fun DetailNotify(
                 )
             ) {
                 IconWithText(
-                    "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
-                    "Liên hệ hỗ trợ",
-                    25.dp,
+                    avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+                    name = "Liên hệ hỗ trợ",
+                    sizeIcon = 25.dp,
                     modifier = Modifier.padding(0.dp)
                     )
             }
@@ -93,9 +93,9 @@ fun FormNotify() {
                modifier = Modifier.fillMaxWidth(),
                textAlign = TextAlign.Center
            )
-           IconWithText("https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg","Ngày: 01/04/2025 11:35 AM", sizeIcon = 35.dp)
-           IconWithText("https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg","Từ: Admin hệ thống", sizeIcon = 35.dp)
-           IconWithText("https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg","Nội dung thông báo:", sizeIcon = 35.dp)
+           IconWithText(avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg", name = "Ngày: 01/04/2025 11:35 AM", sizeIcon = 35.dp)
+           IconWithText(avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg", name = "Từ: Admin hệ thống", sizeIcon = 35.dp)
+           IconWithText(avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg", name = "Nội dung thông báo:", sizeIcon = 35.dp)
            Text(
                text = "Chúng tôi xing thông báo rằng chính sách sử dụng dịch vụ" +
                        " ádaskdasdafjafjs sjfsjsifjsdfjjsd fdfkjdf  sdfsd fsf  sf" +

@@ -30,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.R
 import com.example.itforum.user.modelData.response.GetVoteResponse
@@ -45,7 +46,9 @@ fun PostCardWithVote(
     onCommentClick: () -> Unit = {},
     onBookmarkClick: () -> Unit = {},
     onShareClick: () -> Unit = {},
-    onCardClick : () -> Unit = {}
+    onCardClick : () -> Unit = {},
+    onReportClick: (String) -> Unit = {},
+    navHostController: NavHostController
 )
  {
     var isChange by remember { mutableStateOf(false) }
@@ -107,7 +110,10 @@ fun PostCardWithVote(
                             modifier = Modifier.size(24.dp)
                         )
                     }
-                    IconButton(onClick = { /* Handle more options */ }) {
+                    IconButton(onClick = {
+                        post.id?.let { onReportClick(it) }
+                    }
+                    ) {
                         Icon(
                             painter = painterResource(id = R.drawable.more),
                             contentDescription = "more",
@@ -227,14 +233,7 @@ fun PostCardWithVote(
                             tint = if (isSavedPost) Color.Green else Color.Unspecified
                         )
                     }
-                    IconButton(onClick = onShareClick) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.share),
-                            contentDescription = "Share",
-                            modifier = Modifier.size(30.dp),
-                            tint = Color.Unspecified
-                        )
-                    }
+
                 }
             }
         }

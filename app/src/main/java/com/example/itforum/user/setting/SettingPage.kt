@@ -1,5 +1,8 @@
 package com.example.itforum.user.setting
 
+import android.annotation.SuppressLint
+import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.StarRate
@@ -32,17 +36,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.itforum.user.Analytics.logScreenView
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
+
 
 @Composable
-fun Setting(navHostController: NavHostController,onToggleTheme:()->Unit, darkTheme:Boolean){
+fun Setting(
+    navHostController: NavHostController,
+    sharedPreferences: SharedPreferences,
+    onToggleTheme: () -> Unit,
+    darkTheme: Boolean
+) {
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Box (
-            modifier =  Modifier
+        Box(
+            modifier = Modifier
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .fillMaxWidth()
                 .padding(top = 30.dp)
@@ -65,6 +78,7 @@ fun Setting(navHostController: NavHostController,onToggleTheme:()->Unit, darkThe
                         }
                 )
             }
+
             Row(
                 modifier = Modifier
                     .padding(vertical = 30.dp, horizontal = 10.dp)
@@ -80,25 +94,58 @@ fun Setting(navHostController: NavHostController,onToggleTheme:()->Unit, darkThe
                 )
             }
         }
-        SectionSetting("Chế độ tối",darkTheme, onToggleTheme)
+
+        SectionSetting("Chế độ tối", darkTheme, onToggleTheme)
+
         SectionSetting(
             "Chỉnh sửa thông tin cá nhân",
             iconVector = Icons.Default.Person,
             onPress = {
                 navHostController.navigate("editProfile")
             })
+
         SectionSetting(
             "Đánh giá ứng dụng",
             iconVector = Icons.Default.StarRate,
             onPress = {})
+
         SectionSetting(
             "Góp ý về ứng dụng",
             iconVector = Icons.Default.QuestionMark,
             onPress = {
                 navHostController.navigate("complaint")
             })
+
+        SectionSetting(
+            nameField = "Đăng xuất",
+            iconVector = Icons.Default.Logout,
+            onPress = {
+                // Xóa dữ liệu local
+                sharedPreferences.edit().remove("role").apply()
+                sharedPreferences.edit().remove("access_token").apply()
+                sharedPreferences.edit().remove("loginType").apply() // ✅ Quan trọng!
+
+                // Đăng xuất Firebase
+                FirebaseAuth.getInstance().signOut()
+
+                // Đăng xuất Google
+                val googleSignInClient = GoogleSignIn.getClient(
+                    context,
+                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                )
+                googleSignInClient.signOut().addOnCompleteListener {
+                    navHostController.navigate("login") {
+                        popUpTo(0)
+                        launchSingleTop = true
+                    }
+                }
+            }
+
+        )
+
     }
 }
+
 
 @Composable
 fun SectionSetting(nameField:String,iconVector:ImageVector,onPress:()->Unit, ){

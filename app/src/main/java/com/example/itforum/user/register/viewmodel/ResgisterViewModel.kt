@@ -24,13 +24,14 @@ class RegisterViewModel(private var sharedPreferences: SharedPreferences)  : Vie
             _uiState.value = UiState.Loading
             try {
                 val response = RetrofitInstance.userService.register(registerUser)
+                Log.d("Đăng ký",registerUser.toString())
                 if (response.isSuccessful) {
                     _uiState.value = UiState.Success(
                         response.body()?.message ?: "Đăng ký thành công"
                     )
                     delay(500)
                 } else {
-                    showError("Đăng ký thất bại: ${response.message()}")
+                    showError("Đăng ký thất bại: ${response.body()?.message}")
                     _uiState.value = UiState.Error(response.message())
                     delay(500)
                 }

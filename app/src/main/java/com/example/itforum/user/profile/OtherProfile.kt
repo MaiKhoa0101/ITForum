@@ -28,13 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
-import com.example.itforum.user.Analytics.logScreenView
+
 import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.profile.viewmodel.UserViewModel
 
@@ -130,4 +131,9 @@ fun OtherInfoOverview() {
         Spacer(modifier = Modifier.height(10.dp))
         Divider(thickness = 1.dp)
     }
+}
+@Preview(showBackground = true)
+@Composable
+fun OtherInfoOverviewPreview() {
+    OtherUserProfileScreen(sharedPreferences = LocalContext.current.getSharedPreferences("user_info", 0), navHostController = NavHostController(LocalContext.current))
 }

@@ -1,21 +1,27 @@
 package com.example.itforum.admin.components
 
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.itforum.admin.AdminRoot.HeadBarAdmin
+import com.example.itforum.admin.postManagement.Post
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
@@ -25,8 +31,12 @@ import java.time.LocalDate
 fun AdminScreenLayout(
     title: String,
     itemCount: Int,
+    filterOptions: Map<String,List<String>> = mapOf(),
+    onOpenDrawer: () -> Unit = {},
     addComposed: @Composable () -> Unit = {},
-    content: @Composable (String, LocalDate?, LocalDate?) -> Unit
+    filterField: (String, String, Any) -> Any = { it1, it2, it3-> it3 },
+    searchTable: @Composable (String) -> Any,
+    table: @Composable (Any) -> Unit = {}
 ) {
     var searchText by remember { mutableStateOf("") }
     val dateDialogStateStart = rememberMaterialDialogState()
@@ -35,44 +45,43 @@ fun AdminScreenLayout(
     var endDate by remember { mutableStateOf<LocalDate?>(null) }
     var showDateFilters by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth().background(Color.White)) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(69.dp)
-                .background(Color(0xFF00AEFF))
+    var selectedFilterField by remember { mutableStateOf("Chọn cột") }
+    var expandedFilterField by remember { mutableStateOf(false) }
+
+    var selectedFilterValue by remember { mutableStateOf("Tất cả") }
+    var expandedFilterValue by remember { mutableStateOf(false) }
+    var dataFiltered: Any
+    LaunchedEffect(selectedFilterField) {
+        selectedFilterValue = "Tất cả"
+    }
+    Column {
+        HeadBarAdmin()
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Row(
-                modifier = Modifier.fillMaxSize().padding(start = 25.dp, end = 25.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Icon(Icons.Default.Menu, contentDescription = "Menu")
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "xin chao user", color = Color.White)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(Icons.Default.AccountCircle, contentDescription = "User")
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(17.dp))
-        Column(modifier = Modifier.padding(horizontal = 25.dp)) {
-            Text(text = title, fontSize = 20.sp, color = Color.Black)
+            Text(
+                text = title,
+                modifier = Modifier.padding(start = 20.dp, top = 20.dp),
+                color = Color.Black,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
             Spacer(modifier = Modifier.height(14.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 TextField(
                     value = searchText,
                     onValueChange = { searchText = it },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("Tìm kiếm") }
+                    modifier = Modifier.width(270.dp),
+                    placeholder = {
+                        Row {
+                            Icon(Icons.Default.Search, contentDescription = "search")
+                            Text("Tìm kiếm")
+                        }
+                    }
                 )
-                IconButton(onClick = { showDateFilters = !showDateFilters }) {
-                    Icon(Icons.Default.Search, contentDescription = "search", tint = Color.Black)
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Button(onClick = { showDateFilters = !showDateFilters }) {
-                    Text("Lọc")
-                }
+
+                Spacer(modifier = Modifier.width(10.dp))
+                addComposed()
             }
 
             if (showDateFilters) {
@@ -102,7 +111,6 @@ fun AdminScreenLayout(
             Spacer(modifier = Modifier.height(20.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Box(
                     modifier = Modifier.size(width = 150.dp, height = 50.dp).background(Color(0xFF7BD88F)),
@@ -110,11 +118,101 @@ fun AdminScreenLayout(
                 ) {
                     Text(text = "Tổng số: $itemCount")
                 }
-                addComposed()
+                Spacer(modifier = Modifier.weight(1f))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                ) {
+                    Text(
+                        text = "Lọc: ",
+                        modifier = Modifier.padding(5.dp),
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Box {
+                        Button(
+                            onClick = { expandedFilterField = true },
+                            shape = RoundedCornerShape(0.dp), // Bo góc viền
+                            contentPadding = PaddingValues(5.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White
+                            ),
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = "$selectedFilterField",
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.ExpandMore,
+                                    contentDescription = "",
+                                    modifier = Modifier.size(15.dp),
+                                )
+                            }
+
+                        }
+                        DropdownMenu(expanded = expandedFilterField, onDismissRequest = { expandedFilterField = false }) {
+                            DropdownMenuItem(text = { Text("Chọn cột") }, onClick = {
+                                selectedFilterField = "Chọn cột"
+                                expandedFilterField = false
+
+                            })
+                            filterOptions.keys.forEach { option ->
+                                DropdownMenuItem(text = { Text(option) }, onClick = {
+                                    selectedFilterField = option
+                                    expandedFilterField = false
+                                })
+                            }
+                        }
+                    }
+                    Box {
+                        Button(
+                            onClick = { expandedFilterValue = true },
+                            shape = RoundedCornerShape(0.dp), // Bo góc viền
+                            contentPadding = PaddingValues(0.dp),
+                            modifier = Modifier.padding(end = 5.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White
+                            ),
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = "$selectedFilterValue",
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.ExpandMore,
+                                    contentDescription = "",
+                                    modifier = Modifier.size(15.dp),
+                                )
+                            }
+
+                        }
+                        DropdownMenu(expanded = expandedFilterValue, onDismissRequest = { expandedFilterValue = false }) {
+                            DropdownMenuItem(text = { Text("Tất cả") }, onClick = {
+                                selectedFilterValue = "Tất cả"
+                                expandedFilterValue = false
+
+                            })
+                            filterOptions[selectedFilterField]?.forEach { option ->
+                                DropdownMenuItem(text = { Text(option) }, onClick = {
+                                    selectedFilterValue = option
+                                    expandedFilterValue = false
+                                })
+                            }
+                        }
+                    }
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            content(searchText, startDate, endDate)
+            dataFiltered = searchTable(searchText)
+            dataFiltered = filterField(selectedFilterField, selectedFilterValue, dataFiltered)
+            table(dataFiltered)
         }
 
         Spacer(modifier = Modifier.height(20.dp))

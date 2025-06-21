@@ -10,6 +10,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.itforum.retrofit.RetrofitInstance
+import com.example.itforum.service.toEntity
+import com.example.itforum.service.toModel
+import com.example.itforum.user.ProgressRequestBody.ProgressRequestBody
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.effect.model.UiStatePost
 import com.example.itforum.user.modelData.request.CreatePostRequest
@@ -20,8 +23,10 @@ import com.example.itforum.user.modelData.response.GetBookMarkResponse
 import com.example.itforum.user.modelData.response.GetVoteResponse
 import com.example.itforum.user.modelData.response.PostResponse
 import com.example.itforum.user.modelData.response.PostWithVote
-import com.example.itforum.user.modelData.response.UserProfileResponse
+import com.example.itforum.user.modelData.response.Vote
 import com.example.itforum.user.modelData.response.VoteResponse
+import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -29,13 +34,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MultipartBody
-import java.io.IOException
-import com.google.gson.Gson
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody.Companion.asRequestBody
-import retrofit2.http.Part
 import java.io.File
+import java.io.IOException
+import java.util.concurrent.atomic.AtomicInteger
 
 
 class PostViewModel(
@@ -48,6 +51,9 @@ class PostViewModel(
 
     private val _uiStateCreate = MutableStateFlow<UiState>(UiState.Idle)
     val uiStateCreate: StateFlow<UiState> = _uiStateCreate.asStateFlow()
+
+    private val _uploadProgress = MutableStateFlow(0f)
+    val uploadProgress: StateFlow<Float> = _uploadProgress
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -74,6 +80,49 @@ class PostViewModel(
     private val _postsWithVotes = MutableStateFlow<List<PostWithVote>>(emptyList())
     val postsWithVotes: StateFlow<List<PostWithVote>> = _postsWithVotes
 
+    private val _listPost = MutableStateFlow<List<PostResponse>>(emptyList())
+    val listPost: StateFlow<List<PostResponse>> = _listPost
+
+    private val _listVote = MutableStateFlow<List<Vote>>(emptyList())
+    val listVote: StateFlow<List<Vote>> = _listVote
+
+    fun getAllVote() {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.postService.getAllVote()
+                if (response.isSuccessful) {
+                    _listVote.value = response.body()?.listVote ?: emptyList()
+                }
+                else {
+                    showError("Response get không hợp lệ")            }
+            }
+            catch (e: IOException) {
+                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+            }
+            catch (e: Exception) {
+                showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+            }
+        }
+    }
+
+    fun getAllPost() {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.postService.getAllPost()
+                if (response.isSuccessful) {
+                    _listPost.value = response.body()?.listPost ?: emptyList()
+                }
+                else {
+                    showError("Response get không hợp lệ")            }
+            }
+            catch (e: IOException) {
+                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+            }
+            catch (e: Exception) {
+                showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+            }
+        }
+    }
 
 
     private suspend fun getVoteDataByPostId(postId: String?, userId: String?): GetVoteResponse? {
@@ -185,16 +234,32 @@ class PostViewModel(
     fun createPost(createPostRequest: CreatePostRequest, context: Context) {
         viewModelScope.launch {
             _uiStateCreate.value = UiState.Loading
+            _uploadProgress.value = 0f
             try {
-                Log.d("UserViewModel", "Request: $createPostRequest")
+                Log.d("PostViewModel", "Request: $createPostRequest")
+                var uploadedFilesRef = AtomicInteger(0)
+                val totalFiles = (createPostRequest.imageUrls?.size ?: 0) + (createPostRequest.videoUrls?.size ?: 0)
 
-                val imageUrls = createPostRequest.imageUrls?.mapNotNull { uri ->
-                    prepareFilePart(context, uri, "imageUrls")
+                val imageUrls: List<MultipartBody.Part>
+                val videoUrls: List<MultipartBody.Part>
+                withContext(Dispatchers.IO) {
+                    imageUrls = prepareAndUploadFiles(
+                        context,
+                        createPostRequest.imageUrls,
+                        "imageUrls",
+                        totalFiles,
+                        uploadedFilesRef
+                    )
+
+                    videoUrls = prepareAndUploadFiles(
+                        context,
+                        createPostRequest.videoUrls,
+                        "videoUrls",
+                        totalFiles,
+                        uploadedFilesRef
+                    )
                 }
 
-                val videoUrls = createPostRequest.videoUrls?.mapNotNull { uri ->
-                    prepareFilePart(context, uri, "videoUrls")
-                }
 
                 // Chỉ tạo MultipartBody.Part cho các trường không null
                 val userId = createPostRequest.userId?.let {
@@ -209,22 +274,24 @@ class PostViewModel(
                 val isPublished = createPostRequest.isPublished?.let {
                     MultipartBody.Part.createFormData("isPublished", it)
                 }
-                val tags = createPostRequest.tags?.let {
+                val tags = createPostRequest.tags?.mapNotNull  {
                     MultipartBody.Part.createFormData("tags", Gson().toJson(it))
                 }
 
                 val response =
-                    videoUrls?.let {
-                        imageUrls?.let { it1 ->
-                            RetrofitInstance.postService.createPost(
-                                userId = userId,
-                                title = title,
-                                content = content,
-                                tags = tags,
-                                isPublished = isPublished,
-                                imageUrls = it1,
-                                videoUrls = it
-                            )
+                    videoUrls.let {
+                        imageUrls.let { it1 ->
+                            tags?.let { it2 ->
+                                RetrofitInstance.postService.createPost(
+                                    userId = userId,
+                                    title = title,
+                                    content = content,
+                                    tags = it2,
+                                    isPublished = isPublished,
+                                    imageUrls = it1,
+                                    videoUrls = it
+                                )
+                            }
                         }
                     }
 
@@ -236,6 +303,7 @@ class PostViewModel(
                         _uiStateCreate.value = UiState.Success(
                             responseBody?.message ?: "Đăng bài thành công"
                         )
+                        _uploadProgress.value = 0f
                         delay(500) // Cho Compose thời gian phản ứng trước khi đổi trạng thái
                         _uiStateCreate.value = UiState.Idle
                     } else {
@@ -267,27 +335,43 @@ class PostViewModel(
             }
         }
     }
-    private fun prepareFilePart(
+    private suspend fun prepareAndUploadFiles(
         context: Context,
-        fileUri: Uri,
-        partName: String
-    ): MultipartBody.Part? {
-        return try {
-            val inputStream = context.contentResolver.openInputStream(fileUri)
-            val mimeType = context.contentResolver.getType(fileUri) ?: "application/octet-stream"
-            val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "tmp"
-            val tempFile = File.createTempFile("upload_", ".$extension", context.cacheDir)
+        uris: List<Uri>?,
+        partName: String,
+        totalFiles: Int,
+        uploadedFilesRef: AtomicInteger
+    ): List<MultipartBody.Part> {
+        val parts = mutableListOf<MultipartBody.Part>()
+        if (uris.isNullOrEmpty()) return parts
+        for (uri in uris) {
+            try {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                val mimeType = context.contentResolver.getType(uri) ?: "application/octet-stream"
+                val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "tmp"
+                val tempFile = withContext(Dispatchers.IO) {
+                    File.createTempFile("upload_", ".$extension", context.cacheDir)
+                }
 
-            tempFile.outputStream().use { outputStream ->
-                inputStream?.copyTo(outputStream)
+                tempFile.outputStream().use { outputStream ->
+                    inputStream?.copyTo(outputStream)
+                }
+                val progressBody = ProgressRequestBody(tempFile, mimeType) { bytesWritten, contentLength ->
+                    val percent = bytesWritten.toFloat() / contentLength.toFloat()
+                    val overallProgress = (uploadedFilesRef.get() + percent) / totalFiles
+                    this._uploadProgress.value = overallProgress
+                    if(bytesWritten.toFloat() == contentLength.toFloat()) uploadedFilesRef.incrementAndGet()
+                }
+
+                val part = MultipartBody.Part.createFormData(partName, tempFile.name, progressBody)
+                parts.add(part)
+            } catch (e: Exception) {
+                Log.e("Upload", "Error preparing file part for $uri", e)
+                // Optional: continue to next URI
             }
-
-            val requestFile = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
-            MultipartBody.Part.createFormData(partName, tempFile.name, requestFile)
-        } catch (e: Exception) {
-            Log.e("Upload", "Error preparing file part", e)
-            null
         }
+
+        return parts
     }
 
     fun loadMorePosts(getPostRequest: GetPostRequest) {

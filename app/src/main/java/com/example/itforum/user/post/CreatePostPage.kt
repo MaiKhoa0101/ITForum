@@ -1,9 +1,9 @@
 package com.example.itforum.user.post
 
 import android.content.SharedPreferences
-import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,7 +15,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,7 +29,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -51,6 +49,7 @@ import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -71,8 +70,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -97,6 +94,8 @@ import androidx.media3.ui.PlayerView
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
+import com.example.itforum.user.FilterWords.ToastHelper
+import com.example.itforum.user.FilterWords.WordFilter
 
 import com.example.itforum.user.effect.UiStateMessage
 
@@ -104,6 +103,7 @@ import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.request.CreatePostRequest
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.profile.viewmodel.UserViewModel
+import kotlinx.coroutines.delay
 
 data class icontext(
     val icon: ImageVector = Icons.Default.Visibility,
@@ -115,29 +115,18 @@ data class icontext(
 fun CreatePostPage(
     modifier: Modifier,
     navHostController: NavHostController,
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+    postViewModel: PostViewModel
 ) {
     val context = LocalContext.current
     var userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
     })
 
-    var postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(navHostController,sharedPreferences) }
-    })
-
+    val userId = sharedPreferences.getString("userId", null)
     val userInfo by userViewModel.user.collectAsState()
-    val uiStateCreate by postViewModel.uiStateCreate.collectAsState()
-    var enable by remember { mutableStateOf<Boolean>(true) }
-    LaunchedEffect(uiStateCreate) {
-        println("UI State duoc thay doi")
-        if (uiStateCreate is UiState.Success) {
-            println("uiState là success")
-            navHostController.navigate("home")
-        }else if(uiStateCreate is UiState.Loading){
-            enable = false
-        }
-    }
+    val progress by postViewModel.uploadProgress.collectAsState()
+
     LaunchedEffect(Unit) {
         userViewModel.getUser()
     }
@@ -147,7 +136,7 @@ fun CreatePostPage(
     var applicationUrls by remember  { mutableStateOf<List<Uri>?>(emptyList()) }
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
-    var tags by remember { mutableStateOf(listOf<String?>(null)) }
+    var tags by remember { mutableStateOf<List<String?>?>(emptyList()) }
     var isPublished by remember { mutableStateOf("public") }
     Box(
         modifier = Modifier
@@ -158,7 +147,16 @@ fun CreatePostPage(
         ) {
 
             stickyHeader {
-                TopPost("Bài viết mới", "Đăng", navHostController, enable, uiStateCreate) {
+                TopPost("Bài viết mới", "Đăng", navHostController) {
+                    val combinedText = "$title $content"
+                    if (userId!=null) {
+                        val hasBadWords = WordFilter.containsBannedWordsAndLog(userId, combinedText)
+
+                        if (hasBadWords) {
+                            ToastHelper.show("Nội dung vi phạm chính sách ngôn từ")
+                            return@TopPost
+                        }
+                    }
                     postViewModel.createPost(
                         CreatePostRequest(
                             imageUrls = imageUrls,
@@ -171,7 +169,19 @@ fun CreatePostPage(
                         ),
                         context
                     )
+                    navHostController.navigate("home")
                 }
+            }
+            item{
+                if (progress in 0f..1f && progress != 0f) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        CircularProgressIndicator(progress = progress)
+                        Text("Đang đăng bài: ${(progress * 100).toInt()}%")
+                    }
+                }
+
             }
             item {
 
@@ -180,7 +190,7 @@ fun CreatePostPage(
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.secondaryContainer),
                 ) {
-                    userInfo?.let { IconWithText(it.avatar, it.name) }
+                    userInfo?.let { IconWithText(avatar = it.avatar, name = it.name) }
                     WritePost(){input ->
                         title = input
                         content = input
@@ -262,8 +272,9 @@ fun TopPost(
 
 @Composable
 fun IconWithText(
-    avatar: String,
+    avatar: String? = null,
     name: String,
+    fallbackIcon: ImageVector? = null,
     sizeIcon: Dp = 45.dp,
     textStyle: TextStyle = TextStyle(fontSize = 20.sp),
     modifier: Modifier = Modifier
@@ -277,11 +288,22 @@ fun IconWithText(
             .background(MaterialTheme.colorScheme.background),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = avatar,
-            contentDescription = "Avatar tài khoản",
-            modifier = Modifier.size(sizeIcon)
-        )
+        if (!avatar.isNullOrEmpty()) {
+            AsyncImage(
+                model = avatar,
+                contentDescription = "Avatar tài khoản",
+                modifier = Modifier.size(sizeIcon)
+            )
+        } else {
+            fallbackIcon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = "Default icon",
+                    modifier = Modifier.size(sizeIcon),
+                    tint = Color.Gray // tuỳ chọn
+                )
+            }
+        }
         Spacer(modifier = Modifier.width(5.dp))
         Text(
             text = name,
@@ -342,7 +364,7 @@ fun WritePost(onChange: (String) -> Unit) {
 
 @Composable
 fun AddTagPost(
-    onChange: (List<String?>) -> Unit
+    onChange: (List<String?>?) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -875,7 +897,6 @@ fun TagFile(
     }
 }
 
-
 //VideoPlayer(uri = Uri.parse("https://www.example.com/video.mp4"))
 @OptIn(UnstableApi::class)
 @Composable
@@ -914,9 +935,6 @@ fun VideoPlayer(
                     controllerAutoShow = false // ⛔ KHÔNG tự hiện controller khi chưa phát
                 }
             },
-//            modifier = Modifier
-////                .size(150.dp)
-//                .aspectRatio(16 / 9f)
         )
     }
 }

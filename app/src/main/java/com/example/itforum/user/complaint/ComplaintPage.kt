@@ -97,10 +97,6 @@ fun ComplaintPage(
                 enable = false
             }
         }
-
-        LaunchedEffect(Unit) {
-            userViewModel.getUser()
-        }
         // UI hiển thị
         if (showSuccessDialog) {
             SuccessDialog(
@@ -111,6 +107,10 @@ fun ComplaintPage(
                 }
             )
         }
+        LaunchedEffect(Unit) {
+            userViewModel.getUser()
+        }
+
         LazyColumn (
             modifier = Modifier.fillMaxSize()
         ) {
@@ -133,7 +133,7 @@ fun ComplaintPage(
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.secondaryContainer),
                 ) {
-                    userInfo?.let { IconWithText(it.avatar, it.name) }
+                    userInfo?.let { IconWithText(avatar = it.avatar, name = it.name) }
                     TitleChild(){ title=it }
                     WritePost(){input ->
                         content = input
@@ -299,7 +299,7 @@ fun SuccessDialog(
                     painter = painterResource(id = R.drawable.icon_success),
                     contentDescription = "Success",
                     modifier = Modifier.size(30.dp),
-                    tint = Color.Transparent
+                    tint = Color.Unspecified
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(

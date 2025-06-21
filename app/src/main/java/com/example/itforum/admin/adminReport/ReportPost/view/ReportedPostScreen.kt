@@ -40,39 +40,34 @@ fun ReportedPostScreen(navController: NavHostController,
     }
 
     val menuOptions = listOf(
-        icontext(Icons.Default.Visibility, "Xem chi tiết"),
-        icontext(Icons.Default.Delete, "Xóa")
+        icontext(Icons.Default.Visibility, "Xem chi tiết", { postId ->
+            navController.navigate("detail_reported_post/$postId")})
+
     )
 
     AdminScreenLayout(
         title = "Quản lý báo cáo bài viết",
-        itemCount = posts.size
-    ) { searchText, _, _ ->
-
-        val filteredPosts = posts.filter {
-            it.reportedPostId.contains(searchText, ignoreCase = true) ||
-                    it.reportedPostTitle.contains(searchText, ignoreCase = true) ||
-                    it.reason.contains(searchText, ignoreCase = true)
-        }
-
-
-
-
-        if (error != null) {
-            Text("Lỗi: $error", color = MaterialTheme.colorScheme.error)
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        TableData(
-            headers = listOf("ID", "Post ID", "Tiêu đề", "Lý do", "Ngày tạo"),
-            menuOptions = menuOptions,
-            rows = convertToTableRows(filteredPosts),
-            sharedPreferences = sharedPreferences,
-            onClickOption = { reportId ->
-                println("🟢 reportId được chọn: $reportId")
-                navController.navigate("post_detail/$reportId")
+        itemCount = posts.size,
+        searchTable =  { searchText->
+            val filteredPosts = posts.filter {
+                it.reportedPostId.contains(searchText, ignoreCase = true) ||
+                        it.reportedPostTitle.contains(searchText, ignoreCase = true) ||
+                        it.reason.contains(searchText, ignoreCase = true)
             }
 
-        )
-    }
+            if (error != null) {
+                Text("Lỗi: $error", color = MaterialTheme.colorScheme.error)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            TableData(
+                headers = listOf("ID", "Post ID", "Tiêu đề", "Lý do", "Ngày tạo","Tùy chỉnh"),
+                menuOptions = menuOptions,
+                rows = convertToTableRows(filteredPosts),
+                sharedPreferences = sharedPreferences,
+
+
+                )
+        }
+    )
 }

@@ -18,12 +18,14 @@ import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -31,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -49,7 +50,13 @@ import kotlin.collections.contains
 import com.example.itforum.admin.adminCrashlytic.CrashLogScreen
 import com.example.itforum.admin.adminNews.CreateNewsScreen
 import com.example.itforum.admin.adminNews.ManagementNewsScreen
+import com.example.itforum.admin.adminReport.ReportAccount.view.ReportedAccountDetailScreen
+import com.example.itforum.admin.adminReport.ReportAccount.view.ReportedAccountScreen
+import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailScreen
+import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostScreen
+import com.example.itforum.admin.components.LocalDrawerOpener
 import com.example.itforum.user.news.DetailNewsPage
+import com.example.itforum.user.root.Root
 
 @Composable
 fun AdminScreen(sharedPreferences: SharedPreferences) {
@@ -62,11 +69,16 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
         "Controller",
         "UserManager",
         "PostManager",
+        "ComplaintManager",
         "ReportManager",
         "NewsManager",
         "NotificationManager",
-        "Crashlytics"
-    )
+        "Crashlytics",
+        "ReportAccount",
+        "ReportPost"
+
+
+        )
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -77,6 +89,7 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                 DrawerContent(
                     sidebarItem = sidebarItems,
                     navHostController = navHostController,
+                    sharedPreferences = sharedPreferences,
                     closedrawer = {
                         if (showTopBars) {
                             scope.launch {
@@ -88,91 +101,131 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
             }
         }
     ) {
-        Scaffold(
-            topBar = {
-                if (showTopBars) {
-                    HeadBarAdmin(
-                        opendrawer = {
-                            scope.launch {
-                                drawerState.open()
-                            }
-                        }
-                    )
-                }
-            },
-        ){ innerPadding ->
-            NavHost(navHostController, startDestination = "Controller") {
-                composable("login") {
-                    LoginScreen(
-                        navHostController = navHostController,
-                        sharedPreferences = sharedPreferences,
-                        onRegisterClick = { navHostController.navigate("register") },
-                        onForgotPasswordClick = { navHostController.navigate("forgot_password") },
-                    )
-                }
-                composable("Controller") {
-                    ControllerManagerScreen(
-                        navHostController,
-                        modifier = Modifier.padding(innerPadding))
-                }
-                composable("UserManager") {
-                    AccountManagementScreen(
-                        modifier = Modifier.padding(innerPadding),
-                        navHostController = navHostController,
-                        users = emptyList(),
-                        sharedPreferences
-                    )
-                }
-                composable("ReportManager") {
-                    PostManagementScreen(
-                        modifier = Modifier.padding(innerPadding),
-                        navHostController = navHostController,
-                        posts = emptyList()
-                    )
-                }
-                composable("PostManager") {
-                    PostManagementScreen(
-                        modifier = Modifier.padding(innerPadding),
-                        navHostController = navHostController,
-                        posts = emptyList()
-                    )
-                }
-                composable("NotificationManager") {
+        CompositionLocalProvider(LocalDrawerOpener provides {
+            scope.launch { drawerState.open() }
+        }) {
+            Scaffold(
+                topBar = {
+                    if (showTopBars) {
+                        HeadBarAdmin(
+//                            opendrawer = {
+//                                scope.launch {
+//                                    drawerState.open()
+//                                }
+//                            }
+                        )
+                    }
+                },
+            ) { innerPadding ->
+                NavHost(navHostController, startDestination = "Controller") {
+                    composable("login") {
+                        LoginScreen(
+                            navHostController = navHostController,
+                            sharedPreferences = sharedPreferences,
+                            onRegisterClick = { navHostController.navigate("register") },
+                            onForgotPasswordClick = { navHostController.navigate("forgot_password") },
+                        )
+                    }
+                    composable("Controller") {
+                        ControllerManagerScreen(
+                            navHostController,
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
+                    composable("UserManager") {
+                        AccountManagementScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            navHostController = navHostController,
+                            sharedPreferences
+                        )
+                    }
+                    composable("PostManager") {
+                        PostManagementScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            navHostController = navHostController,
+                            posts = emptyList()
+                        )
+                    }
+                    composable("NotificationManager") {
 
-                }
-                composable("Crashlytics") {
-                    CrashLogScreen(navHostController = navHostController)
-                }
-                composable("ComplaintManager"){
-                    ManagementComplaintScreen(navHostController,sharedPreferences)
-                }
-                composable("NewsManager"){
-                    ManagementNewsScreen(navHostController, sharedPreferences)
-                }
-                composable("create_news"){
-                    CreateNewsScreen(navHostController, sharedPreferences)
-                }
-                composable("detail_news/{newsId}") { backStackEntry ->
-                    val newsId = backStackEntry.arguments?.getString("newsId")
-                    if (newsId != null) {
-                        DetailNewsPage(newsId, navHostController, sharedPreferences)
+                    }
+                    composable("Crashlytics") {
+                        CrashLogScreen(navHostController = navHostController)
+                    }
+                    composable("ComplaintManager") {
+                        ManagementComplaintScreen(
+                            navHostController,
+                            sharedPreferences
+                        )
+                    }
+                    composable("NewsManager") {
+                        ManagementNewsScreen(navHostController, sharedPreferences)
+                    }
+                    composable("create_news") {
+                        CreateNewsScreen(navHostController, sharedPreferences)
+                    }
+                    composable("detail_news/{newsId}") { backStackEntry ->
+                        val newsId = backStackEntry.arguments?.getString("newsId")
+                        if (newsId != null) {
+                            DetailNewsPage(newsId, navHostController, sharedPreferences)
+                        }
+                    }
+                    composable("Report_account_detail/{accountId}") {backStackEntry ->
+                        val accountId = backStackEntry.arguments?.getString("accountId")
+                        if (accountId != null) {
+                            ReportedAccountDetailScreen(accountId,
+                                onBack = { navHostController.popBackStack() })
+                        } else {
+                            androidx.compose.material.Text("Không tìm thấy tài khoản.")
+                        }
+
+                    }
+                    composable("detail_reported_post/{postId}") { backStackEntry ->
+                        val postId = backStackEntry.arguments?.getString("postId")
+                        if (postId != null) {
+                            ReportedPostDetailScreen(postId,
+                                onBack = { navHostController.popBackStack() })
+                        } else {
+                            androidx.compose.material.Text("Không tìm thấy tài khoản.")
+                        }
+                        }
+                    composable("complaint_detail/{complaintId}") { backStackEntry ->
+                        val complaintId = backStackEntry.arguments?.getString("complaintId")
+                        if (complaintId != null) {
+                            ManagementComplaintDetailScreen(
+                                navHostController,
+                                sharedPreferences,
+                                complaintId
+                            )
+                        } else {
+                            androidx.compose.material.Text("Không tìm thấy khiếu nại.")
+                        }
+                    }
+                    composable("ReportPost") {
+                        ReportedPostScreen(
+                            navController = navHostController,
+                            sharedPreferences
+                        )
+                    }
+                    composable("ReportAccount") {
+                        ReportedAccountScreen(
+                           navController = navHostController,
+                            sharedPreferences
+                        )
+                    }
+                    composable("root"){
+                        Root(sharedPreferences)
                     }
                 }
-                composable("complaint_detail/{complaintId}"){ backStackEntry ->
-                    val complaintId = backStackEntry.arguments?.getString("complaintId")
-                    if (complaintId != null) {
-                        ManagementComplaintDetailScreen(navHostController,sharedPreferences,complaintId)
-                    } else {
-                        androidx.compose.material.Text("Không tìm thấy khiếu nại.")
-                    }
-                }
+
+
             }
         }
     }
 }
-
 @Composable
-fun HeadBarAdmin(opendrawer:()->Unit){
+fun HeadBarAdmin(){
+    val openDrawer = LocalDrawerOpener.current
     Box(
         modifier = Modifier
             .height(100.dp)
@@ -195,7 +248,7 @@ fun HeadBarAdmin(opendrawer:()->Unit){
         ) {
             // Left Icon (Menu)
             IconButton(
-                onClick = { opendrawer() },
+                onClick = { openDrawer() },
                 modifier = Modifier.size(40.dp)
             ) {
                 Icon(

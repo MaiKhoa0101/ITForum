@@ -1,7 +1,9 @@
 package com.example.itforum.user.ReportPost.view
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -15,9 +17,9 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateReportPostScreen(
-    reporterUserId: String,
+    sharedPreferences: SharedPreferences,
     reportedPostId: String,
-    onBack: () -> Unit
+    onDismiss: () -> Unit
 ) {
     val repository = ReportPostRepository(RetrofitInstance.reportPostService)
     val scope = rememberCoroutineScope()
@@ -26,19 +28,17 @@ fun CreateReportPostScreen(
     var isLoading by remember { mutableStateOf(false) }
     var successMessage by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Tố cáo bài viết", color = MaterialTheme.colorScheme.onPrimaryContainer) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MainTheme)
-            )
-        }
-    ) { innerPadding ->
+    ModalBottomSheet(
+        modifier = Modifier.padding(top = 50.dp),
+        onDismissRequest = { onDismiss()  },
+        sheetState = sheetState,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ){
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -64,7 +64,7 @@ fun CreateReportPostScreen(
                         try {
                             val result = repository.createReportPost(
                                 reportedPostId = reportedPostId,
-                                reporterUserId = reporterUserId,
+                                reporterUserId = sharedPreferences.getString("userId", null) ?: "",
                                 reason = reason
                             )
                             if (result.isSuccessful) {

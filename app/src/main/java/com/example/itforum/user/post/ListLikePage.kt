@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.itforum.user.Analytics.logScreenView
+
 
 @Composable
 fun ListLikePage(navHostController: NavHostController) {
@@ -89,7 +89,7 @@ fun ListLikePage(navHostController: NavHostController) {
             ) {
                 ListUserLike.forEach { (avatar, name)->
                     item {
-                        IconWithText("avatar",name)
+                        IconWithText(avatar = "avatar",name = name)
                     }
                 }
             }

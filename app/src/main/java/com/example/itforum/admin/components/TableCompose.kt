@@ -1,6 +1,7 @@
 package com.example.itforum.admin.components
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.border
@@ -28,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.post.IconWithText
 import com.example.itforum.user.post.icontext
 import com.example.itforum.user.profile.viewmodel.UserViewModel
@@ -68,13 +71,14 @@ fun TableData(
     var userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
     })
+    val user by userViewModel.user.collectAsState()
     Box(modifier = Modifier
         .fillMaxWidth()
         .border(1.dp, Color.Gray)
         .heightIn(max = maxTableHeight)) {
         val horizontalScrollState = rememberScrollState()
 
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+        LazyColumn(modifier = Modifier.fillMaxWidth(),) {
             item {
                 Row(modifier = Modifier
                     .background(Color(0xFF2B544F))
@@ -117,14 +121,21 @@ fun TableData(
                                         color = Color(0xFFFF0004)
                                         text = "Từ chối"
                                     }
+                                    "Hoạt động" -> {
+                                        color = Color(0xFF00BB00)
+                                        text = row[i]
+                                    }
+                                    "Bị khóa" -> {
+                                        color = Color(0xFFFF0004)
+                                        text = row[i]
+                                    }
                                 }
                             }
                             else if (i == rowUser){
-                                LaunchedEffect(Unit) {
+                                LaunchedEffect(row[i]) {
                                     userViewModel.getUser(row[i])
                                 }
-                                val user by userViewModel.user.collectAsState()
-                                text = user?.name ?: "Đang tải..."
+                                text = user?.name?: "Đang tải..."
                             }
 
                             Text(
@@ -153,8 +164,8 @@ fun TableData(
                                 menuOptions.forEach(){item->
                                     DropdownMenuItem(
                                         text = {
-                                            IconWithText("https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",item.text,25.dp,
-                                                TextStyle(fontSize = 14.sp),
+                                            IconWithText(name = item.text, fallbackIcon = item.icon, sizeIcon = 25.dp,
+                                                textStyle = TextStyle(fontSize = 14.sp),
                                                 modifier = Modifier.padding(horizontal = 0.dp, vertical = 0.dp)
                                             )
                                        },

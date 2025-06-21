@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ITForum</string>
+    <string name="default_web_client_id">984462885199-k7lsbk0o5dnnjgn8sebaj9hmt0d919lj.apps.googleusercontent.com</string>
+
 </resources>

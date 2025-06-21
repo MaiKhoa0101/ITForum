@@ -3,12 +3,15 @@ package com.example.itforum.admin.modeldata
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Interests
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.NoteAlt
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.filled.ReportGmailerrorred
+import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class SidebarItem(
@@ -54,7 +57,23 @@ val sidebarItems = listOf(
         nameField = "Quản lý crash hệ thống",
         iconField = Icons.Default.Message,
         navigationField = "Crashlytics"
-)
+),
+    SidebarItem(
+        nameField = "Quản lý báo cáo tài khoản",
+        iconField = Icons.Default.ReportProblem,
+        navigationField = "ReportAccount"
+    ),
+    SidebarItem(
+        nameField = "Quản lý báo cáo bài viết",
+        iconField = Icons.Default.ReportGmailerrorred,
+        navigationField = "ReportPost"
+
+    ),
+    SidebarItem(
+        nameField = "Đăng xuất",
+        iconField = Icons.Default.Logout,
+        navigationField = "root"
+    )
 )
 
 // Sidebar item list

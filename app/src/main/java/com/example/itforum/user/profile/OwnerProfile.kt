@@ -1,6 +1,7 @@
 package com.example.itforum.user.profile
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,7 +58,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.itforum.user.Analytics.logScreenView
+import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
+
 import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.modelData.response.Certificate
 import com.example.itforum.user.modelData.response.Skill
@@ -79,9 +81,22 @@ fun UserProfileScreen(
     val user by viewModel.user.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
+    var showReportDeatil by remember { mutableStateOf(false) }
+    var postId by remember { mutableStateOf("") }
+
+
     LaunchedEffect(Unit) {
-        viewModel.getUser()
+        val loginType = sharedPreferences.getString("loginType", "") ?: ""
+        Log.d("UserProfileScreen", "Login type: $loginType")
+        if (loginType == "google") {
+
+            viewModel.getUserFromFirestore()
+        } else {
+
+            viewModel.getUser()
+        }
     }
+
 
     Scaffold(
         modifier = Modifier
@@ -131,8 +146,17 @@ fun UserProfileScreen(
             navController = navHostController,
             modifier = Modifier.padding(innerPadding),
             tabs = tabs,
-            sharedPreferences = sharedPreferences
+            sharedPreferences = sharedPreferences,
+            onReportClick = {
+                postId = it
+                showReportDeatil = true
+            }
         )
+    }
+    if (showReportDeatil){
+        CreateReportPostScreen (sharedPreferences, postId, onDismiss = {
+            showReportDeatil = false
+        })
     }
 }
 
@@ -144,7 +168,8 @@ fun ProfileContent(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     tabs: List<String>,
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+    onReportClick: (String) -> Unit
 ) {
    Column(modifier = modifier.fillMaxSize()) {
         UserHeader(user)
@@ -167,7 +192,11 @@ fun ProfileContent(
                    GetPostRequest(
                        page = 1,
                        userId = sharedPreferences.getString("userId", null)
-                   ), reloadKey = selectedTabIndex
+                   ),
+                   reloadKey = selectedTabIndex,
+                   onReportClick = {
+                       onReportClick(it)
+                   }
                )
            }
        }
@@ -197,7 +226,7 @@ fun UserHeader(user: UserProfileResponse?) {
             Spacer(modifier = Modifier.width(50.dp))
             Column{
                 Text(user?.username?:"Người dùng", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Text(user?.email?:"maikhoa@gmail.com")
+                Text(user?.email?:"hi@gmail.com")
 
 
                 Text(

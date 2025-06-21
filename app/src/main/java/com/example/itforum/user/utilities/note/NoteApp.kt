@@ -1,6 +1,6 @@
 package com.example.itforum.utilities.note
 
-import com.example.itforum.user.Analytics.logScreenView
+
 import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.*

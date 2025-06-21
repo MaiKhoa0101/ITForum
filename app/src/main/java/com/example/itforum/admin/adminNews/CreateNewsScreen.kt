@@ -23,6 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import androidx.room.Room
 import com.example.itforum.admin.adminComplaint.viewmodel.ComplaintViewModel
 import com.example.itforum.user.complaint.AddImage
 import com.example.itforum.user.complaint.SuccessDialog
@@ -30,7 +31,9 @@ import com.example.itforum.user.complaint.TitleChild
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.request.ComplaintRequest
 import com.example.itforum.user.modelData.request.NewsRequest
+import com.example.itforum.user.news.NewsDatabase
 import com.example.itforum.user.news.viewmodel.NewsViewModel
+import com.example.itforum.user.news.viewmodel.NewsViewModelFactory
 import com.example.itforum.user.post.IconWithText
 import com.example.itforum.user.post.TopPost
 import com.example.itforum.user.post.WritePost
@@ -53,9 +56,16 @@ fun CreateNewsScreen(
         var userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
             initializer { UserViewModel(sharedPreferences) }
         })
-        val newsViewModel: NewsViewModel = viewModel(factory = viewModelFactory {
-            initializer { NewsViewModel(sharedPreferences) }
-        })
+        val db = Room.databaseBuilder(
+            context,
+            NewsDatabase::class.java,
+            "news-db"
+        ).build()
+
+        val newsDao = db.newsDao()
+        val newsViewModel: NewsViewModel = viewModel(
+            factory = NewsViewModelFactory(newsDao, sharedPreferences)
+        )
 
         val userInfo by userViewModel.user.collectAsState()
         val uiState by newsViewModel.uiStateCreate.collectAsState()
@@ -105,7 +115,7 @@ fun CreateNewsScreen(
                         .fillMaxSize()
                         .background(Color.White),
                 ) {
-                    userInfo?.let { IconWithText(it.avatar, it.name) }
+                    userInfo?.let { IconWithText(avatar = it.avatar, name = it.name) }
                     TitleChild(){ title=it }
                     WritePost(){input ->
                         content = input

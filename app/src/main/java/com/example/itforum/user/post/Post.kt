@@ -254,7 +254,7 @@ fun AdvancedMarqueeTextList(
     navHostController: NavHostController,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = TextStyle.Default,
-    durationMillis: Int = 10000,
+    durationMillis: Int = 3000,
     separator: String = "   •   "
 ) {
     var isPaused by remember { mutableStateOf(false) }
@@ -271,7 +271,7 @@ fun AdvancedMarqueeTextList(
                 }
                 animOffset.animateTo(
                     targetValue = -contentWidth,
-                    animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing)
+                    animationSpec = tween(durationMillis = durationMillis*items.size, easing = LinearEasing)
                 )
             } else {
                 delay(100)

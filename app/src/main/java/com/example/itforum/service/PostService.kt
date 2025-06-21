@@ -13,9 +13,12 @@ import com.example.itforum.user.modelData.response.GetBookMarkResponse
 import com.example.itforum.user.modelData.response.GetVoteResponse
 import com.example.itforum.user.modelData.response.PostCommentResponse
 import com.example.itforum.user.modelData.response.PostListResponse
+import com.example.itforum.user.modelData.response.PostListWrapper
 import com.example.itforum.user.modelData.response.PostReplyResponse
 import com.example.itforum.user.modelData.response.PostResponse
 import com.example.itforum.user.modelData.response.ReplyResponse
+import com.example.itforum.user.modelData.response.Vote
+import com.example.itforum.user.modelData.response.VoteListWrapper
 
 import com.example.itforum.user.modelData.response.VoteResponse
 import okhttp3.MultipartBody
@@ -34,6 +37,8 @@ import retrofit2.http.Query
 
 interface PostService {
 
+    @GET("posts/all")
+    suspend fun getAllPost(): Response<PostListWrapper>
 
     @POST("posts/search")
     suspend fun getPost(@Body getPostRequest : GetPostRequest) : Response<PostListResponse>
@@ -65,7 +70,7 @@ interface PostService {
         @Part userId: MultipartBody.Part?,
         @Part title: MultipartBody.Part?,
         @Part content: MultipartBody.Part?,
-        @Part tags: MultipartBody.Part?,
+        @Part tags: List<MultipartBody.Part?>,
         @Part isPublished: MultipartBody.Part?,
         @Part imageUrls: List<MultipartBody.Part?>,
         @Part videoUrls: List<MultipartBody.Part?>
@@ -79,4 +84,7 @@ interface PostService {
     suspend fun savedPost(@Path("postId")postId: String,@Path("userId")userId: String) : Response<BookMarkResponse>
     @GET("posts/bookmarks/{userId}")
     suspend fun getSavedPost(@Path("userId")userId: String): Response<GetBookMarkResponse>
+
+    @GET("vote/all")
+    suspend fun getAllVote(): Response<VoteListWrapper>
 }
