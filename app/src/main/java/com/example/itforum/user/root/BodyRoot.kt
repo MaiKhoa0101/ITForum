@@ -441,6 +441,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             LoginScreen(
                 navHostController = navHostController,
                 sharedPreferences = sharedPreferences,
+
                 onRegisterClick = { navHostController.navigate("register") },
                 onForgotPasswordClick = { navHostController.navigate("forgot_password") },
             )

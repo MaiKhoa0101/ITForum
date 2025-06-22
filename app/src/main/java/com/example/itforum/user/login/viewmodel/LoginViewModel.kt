@@ -12,9 +12,13 @@ import com.example.itforum.admin.adminCrashlytic.UserSession
 
 
 import com.example.itforum.retrofit.RetrofitInstance
+import com.example.itforum.retrofit.RetrofitInstance.userService
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.request.LoginUser
+import com.example.itforum.user.modelData.request.RegisterUser
+
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +28,7 @@ import kotlinx.coroutines.launch
 import okio.IOException
 
 import kotlinx.coroutines.tasks.await
+import okhttp3.ResponseBody.Companion.toResponseBody
 
 
 import org.json.JSONObject
@@ -79,59 +84,43 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
 
         }
     }
-    fun handleGoogleLogin(uid: String) {
+
+    fun handleGoogleLoginWithToken(firebaseUser: FirebaseUser) {
         viewModelScope.launch {
             try {
-                val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                val userRef = db.collection("users").document(uid)
+                val name = firebaseUser.displayName ?: "unknown"
+                val email = firebaseUser.email ?: "unknown@gmail.com"
+                val password = "12345678"
+                val phone = firebaseUser.phoneNumber
 
-                val document = userRef.get().await() // ✅ dùng await() để truy cập trong coroutine
+                val registerRequest = RegisterUser(name = name, email = email,phone = phone,password= password)
+                println("RegisterRequest: "+registerRequest)
+                val loginRequest = LoginUser(email, password)
+                println("LoginRequest: "+loginRequest)
 
-                if (document.exists()) {
-                    val email = document.getString("email") ?: "unknown@gmail.com"
-                    val role = document.getString("role") ?: "user"
-
-                    saveUserEmail(email)         // ✅ Ghi email lấy từ Firestore
-                    saveUserId(uid)
-                    saveUserRole(role)
-
-                    _uiState.value = UiState.Success("Đăng nhập Google thành công")
-                } else {
-                    _uiState.value = UiState.Error("Không tìm thấy user trong Firestore")
+                val registerResponse = userService.register(registerRequest)
+                println("RegisterResponse:  "+registerResponse)
+                println("RegisterResponseError:  "+registerResponse.message())
+                if (registerResponse.isSuccessful || registerResponse.message()=="Unauthorized" ) {
+                    println(registerResponse)
+                    val loginResponse = userService.login(loginRequest)
+                    if (loginResponse.isSuccessful) {
+                        val token = loginResponse.body()?.accessToken
+                        handleToken(token!!)
+                        _uiState.value = UiState.Success(
+                            loginResponse.body()?.message ?: "Đăng nhập thành công"
+                        )
+                        delay(500) // Cho phép UI xử lý trạng thái Success
+                    }
                 }
 
+
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Lỗi đọc Firestore: ${e.message}")
+                e.printStackTrace()
+                _uiState.value = UiState.Error("Lỗi khi xử lý đăng nhập Google: ${e.localizedMessage}")
             }
         }
     }
-//fun handleGoogleLogin(uid: String) {
-//    viewModelScope.launch {
-//        try {
-//            val firebaseUser = FirebaseAuth.getInstance().currentUser
-//            val idToken = firebaseUser?.getIdToken(true)?.await()?.token
-//
-//            if (idToken == null) {
-//                _uiState.value = UiState.Error("Không lấy được idToken từ Firebase")
-//                return@launch
-//            }
-//
-//            // 🔥 Gửi idToken về backend
-////            val response = RetrofitInstance.api.loginWithFirebase(mapOf("idToken" to idToken))
-//
-//            if (response.isSuccessful) {
-//                val backendUserId = response.body()?.userId
-//                saveUserId(backendUserId ?: "")
-//                _uiState.value = UiState.Success("Đăng nhập thành công")
-//            } else {
-//                _uiState.value = UiState.Error("Lỗi backend: ${response.message()}")
-//            }
-//
-//        } catch (e: Exception) {
-//            _uiState.value = UiState.Error("Lỗi đăng nhập Google: ${e.message}")
-//        }
-//    }
-//}
 
 
 

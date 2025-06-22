@@ -48,6 +48,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 fun LoginScreen(
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences,
+
     onRegisterClick: () -> Unit = {},
     onForgotPasswordClick: () -> Unit = {},
 ) {
@@ -74,6 +75,7 @@ fun LoginScreen(
     LaunchedEffect(uiState) {
         println("uiState da bi thay doi: $uiState")
         if (uiState is UiState.Success) {
+            println("Vao dc day")
             val role = sharedPreferences.getString("role", null)
             if (role != null) {
                 val destination = if (role == "admin") "admin_root" else "home"
@@ -150,20 +152,17 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // ✅ Nút Google đã đóng gói xử lý bên trong
-        GoogleSignInButton(sharedPreferences) { user ->
-            if (user != null) {
-                loginViewModel.handleGoogleLogin(user.uid)
-
-                // Nếu muốn điều hướng sau khi login:
-                navHostController.navigate("home") {
-                    popUpTo("login") { inclusive = true }
+        GoogleSignInButton(
+            onTokenReceived = { firebaseUser ->
+                println("Firebase User: "+firebaseUser)
+                if (firebaseUser != null) {
+                    loginViewModel.handleGoogleLoginWithToken(firebaseUser)
                 }
-
-
-            } else {
-                Toast.makeText(context, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show()
+                else{
+                    Toast.makeText(context, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
+        )
 
 
 
