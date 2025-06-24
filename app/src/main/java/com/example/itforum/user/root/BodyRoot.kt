@@ -101,8 +101,14 @@ fun SplashScreen(
         } else {
             val remove = sharedPreferences.edit().remove("access_token")
         }
+        Log.d("splash1",destination)
         navController.navigate(destination) {
-            popUpTo("splash") { inclusive = true }
+            if(destination == "login"){
+                Log.d("splash2",destination)
+                popUpTo(0) { inclusive = true }  // xóa hết stack
+                launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
+            }
+            else popUpTo("splash") { inclusive = true }
         }
     }
 
@@ -656,7 +662,12 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 onBackClick = { navHostController.popBackStack() },
                 onSubmitClick = { navHostController.navigate("success") },
                 onResendClick = { /* xử lý gửi lại */ },
-                onLoginClick = { navHostController.navigate("login") }
+                onLoginClick = {
+                    navHostController.navigate("login") {
+                        popUpTo(0) { inclusive = true }  // xóa hết stack
+                        launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
+                    }
+                }
             )
         }
 
@@ -679,7 +690,12 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             }
 
             RegistrationSuccessScreen(
-                onLoginClick = { navHostController.navigate("login") }
+                onLoginClick = {
+                    navHostController.navigate("login") {
+                        popUpTo(0) { inclusive = true }  // xóa hết stack
+                        launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
+                    }
+                }
             )
         }
 

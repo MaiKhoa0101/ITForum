@@ -36,9 +36,7 @@ fun handleGoogleLogin(
                             .putString("email", it.email ?: "") // ✅ fallback nếu email null
                             .apply()
 
-                        navHostController.navigate("home") {
-                            popUpTo(0) { inclusive = true }
-                        }
+                        navHostController.navigate("home")
                     } ?: run {
                         Log.e("GoogleLogin", "User null sau khi đăng nhập")
                     }

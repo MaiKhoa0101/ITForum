@@ -19,8 +19,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Interests
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.filled.ReportGmailerrorred
+import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -44,11 +47,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,6 +56,18 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.example.itforum.admin.adminComplaint.viewmodel.ComplaintViewModel
+import com.example.itforum.admin.adminReport.ReportAccount.model.response.ReportedUser
+import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportViewModelFactory
+import com.example.itforum.admin.adminReport.ReportAccount.viewmodel.ReportedUserViewModel
+import com.example.itforum.admin.adminReport.ReportPost.model.response.ReportedPostList
+import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostViewModel
+import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostViewModelFactory
+import com.example.itforum.repository.ReportPostRepository
+import com.example.itforum.repository.ReportRepository
+import com.example.itforum.retrofit.RetrofitInstance
+import com.example.itforum.user.modelData.response.Complaint
+import com.example.itforum.user.modelData.response.PostResponse
+import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.profile.viewmodel.UserViewModel
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -70,34 +82,51 @@ fun ControllerManagerScreen(
     val userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
     })
+    val postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
+        initializer { PostViewModel(navHostController, sharedPreferences) }
+    })
+    val complaintViewModel: ComplaintViewModel = viewModel()
+    val rpPostViewModel: ReportedPostViewModel = viewModel(
+        factory = ReportedPostViewModelFactory(
+            ReportPostRepository(RetrofitInstance.reportPostService)
+        )
+    )
+    val rpUserViewModel: ReportedUserViewModel = viewModel(factory = ReportViewModelFactory(
+        ReportRepository(
+            RetrofitInstance.reportAccountService)
+        )
+    )
+
+    val listUser by userViewModel.listUser.collectAsState()
+    val listPost by postViewModel.listPost.collectAsState()
+    val listComplaint by complaintViewModel.listComplaint.collectAsState()
+    val listRpPosts by rpPostViewModel.Posts.collectAsState()
+    val listRpUsers by rpUserViewModel.users.collectAsState()
+
+    var totalActiveUsers by remember { mutableIntStateOf(0) }
+    var totalUsersBanned by remember { mutableIntStateOf(0) }
+    var totalPostsNew by remember { mutableIntStateOf(0) }
+    var totalComplaintsNew by remember { mutableIntStateOf(0) }
+    var totalRpPostsNew by remember { mutableIntStateOf(0) }
+    var totalRpUsersNew by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         userViewModel.getAllUser()
-    }
-
-    val listUser by userViewModel.listUser.collectAsState()
-    var totalActiveUsers by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(listUser) {
-        totalActiveUsers = listUser.count { !it.isBanned }
-    }
-
-    val complaintViewModel: ComplaintViewModel = viewModel()
-    LaunchedEffect(Unit) {
+        postViewModel.getAllPost()
         complaintViewModel.getAllComplaint()
+        rpPostViewModel.loadReportedPosts()
+        rpUserViewModel.loadUsers()
     }
-    val listComplaint by complaintViewModel.listComplaint.collectAsState()
-    var totalComplaintsNew by remember { mutableIntStateOf(0) }
-    LaunchedEffect(listComplaint) {
-        totalComplaintsNew = listComplaint?.count { complaint ->
-            try {
-                val complaintDate = OffsetDateTime.parse(complaint.createdAt).toLocalDate()
-                complaintDate == LocalDate.now()
-            } catch (e: Exception) {
-                false // Nếu parse lỗi thì bỏ qua
-            }
-        } ?: 0
+
+    LaunchedEffect(listUser, listComplaint, listPost, listRpPosts, listRpUsers) {
+        totalActiveUsers = listUser.count { !it.isBanned }
+        totalUsersBanned = listUser.count { it.isBanned }
+        totalPostsNew = countItemsCreatedToday(listPost) { (it as PostResponse).createdAt }
+        totalComplaintsNew = countItemsCreatedToday(listComplaint) { (it as Complaint).createdAt }
+        totalRpPostsNew = countItemsCreatedToday(listRpPosts) { (it as ReportedPostList).createdAt }
+        totalRpUsersNew = countItemsCreatedToday(listRpUsers) { (it as ReportedUser).createdAt }
     }
+
     LazyColumn (
         modifier = modifier.background(MaterialTheme.colorScheme.background)
     ){
@@ -117,7 +146,7 @@ fun ControllerManagerScreen(
 
             ActiveAccount(totalActiveUsers)
             RevenueReportScreen()
-            NotificationCard(totalComplaintsNew)
+            NotificationCard(totalUsersBanned, totalPostsNew, totalComplaintsNew, totalRpPostsNew, totalRpUsersNew)
             AppointmentRevenueCard()
         }
     }
@@ -303,7 +332,11 @@ fun RevenueReportScreen() {
 
 @Composable
 fun NotificationCard(
-    totalComplaintsNew: Int
+    totalUsersBanned: Int,
+    totalPostsNew: Int,
+    totalComplaintsNew: Int,
+    totalRpPostsNew: Int,
+    totalRpUsersNew: Int,
 ) {
     Column(
         modifier = Modifier
@@ -321,8 +354,11 @@ fun NotificationCard(
         Spacer(modifier = Modifier.height(12.dp))
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            NotificationItem(Icons.Default.Person, "10 tài khoản mới", Color(0xFFB3E5FC), Color.Black)
-            NotificationItem(Icons.Default.Report, "$totalComplaintsNew khiếu nại mới", Color(0xFFC8FACC), Color.Black)
+            NotificationItem(Icons.Default.Person, "$totalUsersBanned tài khoản bị khóa", Color(0xFFFFE5E5), Color.Black)
+            NotificationItem(Icons.Default.Interests, "$totalPostsNew bài viết mới hôm nay", Color(0xFFB3E5FC), Color.Black)
+            NotificationItem(Icons.Default.Report, "$totalComplaintsNew khiếu nại mới hôm nay", Color(0xFFE6F4FF), Color.Black)
+            NotificationItem(Icons.Default.ReportGmailerrorred, "$totalRpPostsNew tố cáo bài viết mới hôm nay", Color(0xFFFFF4CC), Color.Black)
+            NotificationItem(Icons.Default.ReportProblem, "$totalRpUsersNew tố cáo tài khoản mới hôm nay", Color(0xFFFFE5E5), Color.Black)
         }
     }
 }
@@ -452,4 +488,15 @@ fun FilterDropdown(
             }
         }
     }
+}
+
+fun countItemsCreatedToday(list: List<Any>?, getCreatedAt: (Any) -> String?): Int {
+    return list?.count { item ->
+        try {
+            val createdDate = OffsetDateTime.parse(getCreatedAt(item)).toLocalDate()
+            createdDate == LocalDate.now()
+        } catch (e: Exception) {
+            false
+        }
+    } ?: 0
 }

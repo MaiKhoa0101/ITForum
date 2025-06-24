@@ -13,6 +13,7 @@ data class UserProfileResponse(
     val avatar: String = "",
     val numberPost: Int = 0,
     val numberComment: Int = 0,
+    val isBanned: Boolean = false,
     val certificate: List<Certificate> = emptyList(),
     val skill: List<Skill> = emptyList()
 )

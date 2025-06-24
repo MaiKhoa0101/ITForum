@@ -110,21 +110,29 @@ fun ComplaintPage(
         LaunchedEffect(Unit) {
             userViewModel.getUser()
         }
-
+        var isErrorContent by remember { mutableStateOf(false) }
+        var isErrorTitle by remember { mutableStateOf(false) }
+        LaunchedEffect(title, content) {
+            isErrorContent = false
+            isErrorTitle = false
+        }
         LazyColumn (
             modifier = Modifier.fillMaxSize()
         ) {
             stickyHeader { TopPost("Góp ý", "Gửi",navHostController, enable, uiState) {
-                complaintViewModel.createComplaint(
-                    ComplaintRequest(
-                        userId = userInfo?.id ?: "",
-                        title = title,
-                        reason = content,
-                        img = imageUrl
-                    ),
-                    context
-                )
-                Log.d("Img", imageUrl.toString())
+                isErrorTitle = title.trim().isEmpty()
+                isErrorContent = content.trim().isEmpty()
+                if (!isErrorTitle && !isErrorContent) {
+                    complaintViewModel.createComplaint(
+                        ComplaintRequest(
+                            userId = userInfo?.id ?: "",
+                            title = title,
+                            reason = content,
+                            img = imageUrl
+                        ),
+                        context
+                    )
+                }
             }
             }
             item {
@@ -134,8 +142,8 @@ fun ComplaintPage(
                         .background(MaterialTheme.colorScheme.secondaryContainer),
                 ) {
                     userInfo?.let { IconWithText(avatar = it.avatar, name = it.name) }
-                    TitleChild(){ title=it }
-                    WritePost(){input ->
+                    TitleChild(isErrorTitle){ title=it }
+                    WritePost(isErrorContent){input ->
                         content = input
                     }
                     AddImage(){imageUrl=it}
@@ -147,17 +155,15 @@ fun ComplaintPage(
 
 @Composable
 fun TitleChild(
+    isError: Boolean = false,
     onChange: (String) -> Unit
 ){
     var text by remember { mutableStateOf("") }
-    var isError by remember { mutableStateOf(false) }
-    var isFocused by remember { mutableStateOf(false) }
     OutlinedTextField(
         value = text,
         onValueChange = {
             text = it
             onChange(text)
-            isError = it.trim().isEmpty()
         },
         placeholder = { Text("Nhập tiêu đề", color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp) },
         shape = RoundedCornerShape(7.dp),
@@ -167,14 +173,13 @@ fun TitleChild(
         textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground),
         modifier = Modifier
             .padding(horizontal = 10.dp)
-            .onFocusChanged { focusState ->
-                isFocused = focusState.isFocused
-                // Khi mất focus, reset lỗi
-                if (!focusState.isFocused) {
-                    isError = false
-                }
-            }
     )
+    if (isError) {
+        Text(
+            text = "Không được để trống",
+            color = Color.Red,
+        )
+    }
 }
 
 @Composable
@@ -242,40 +247,6 @@ fun AddImage(
                     }
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun SuccessDialogExample() {
-    var showDialog by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Button (onClick = { showDialog = true }) {
-            Text("Hiển thị thông báo")
-        }
-
-        if (showDialog) {
-            AlertDialog(
-                onDismissRequest = { showDialog = false },
-                title = {
-                    Text(text = "Thành công", fontWeight = FontWeight.Bold)
-                },
-                text = {
-                    Text("Thao tác của bạn đã được thực hiện thành công!")
-                },
-                confirmButton = {
-                    TextButton(onClick = { showDialog = false }) {
-                        Text("Đồng ý")
-                    }
-                }
-            )
         }
     }
 }

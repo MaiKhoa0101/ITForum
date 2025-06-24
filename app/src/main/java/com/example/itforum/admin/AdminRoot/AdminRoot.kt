@@ -42,6 +42,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.itforum.admin.adminAccount.AccountDetailScreen
 import com.example.itforum.admin.adminAccount.AccountManagementScreen
 import com.example.itforum.admin.adminComplaint.ManagementComplaintDetailScreen
 import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
@@ -55,6 +56,10 @@ import kotlin.collections.contains
 import com.example.itforum.admin.adminCrashlytic.CrashLogScreen
 import com.example.itforum.admin.adminNews.CreateNewsScreen
 import com.example.itforum.admin.adminNews.ManagementNewsScreen
+import com.example.itforum.admin.adminNotification.AdminNotification
+import com.example.itforum.admin.adminNotification.CreateNotificationScreen
+import com.example.itforum.admin.adminNotification.NotificationDetailScreen
+import com.example.itforum.admin.adminPost.PostDetailScreen
 import com.example.itforum.admin.adminReport.ReportAccount.view.ReportedAccountDetailScreen
 import com.example.itforum.admin.adminReport.ReportAccount.view.ReportedAccountScreen
 import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailScreen
@@ -82,9 +87,7 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
         "Crashlytics",
         "ReportAccount",
         "ReportPost"
-
-
-        )
+    )
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -147,15 +150,47 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                             sharedPreferences
                         )
                     }
+
+                    composable("user_detail/{userId}") {backStackEntry ->
+                        val userId = backStackEntry.arguments?.getString("userId")
+                        if (userId != null) {
+                            AccountDetailScreen(
+                                navHostController = navHostController,
+                                sharedPreferences = sharedPreferences,
+                                userId = userId
+                            )
+                        }
+                    }
                     composable("PostManager") {
                         PostManagementScreen(
                             modifier = Modifier.padding(innerPadding),
                             navHostController = navHostController,
-                            posts = emptyList()
+                            sharedPreferences = sharedPreferences
                         )
                     }
+                    composable("post_detail/{postId}") {backStackEntry ->
+                        val postId = backStackEntry.arguments?.getString("postId")
+                        if (postId != null) {
+                            PostDetailScreen(
+                                navHostController = navHostController,
+                                sharedPreferences = sharedPreferences,
+                                postId = postId
+                            )
+                        }
+                    }
                     composable("NotificationManager") {
-
+                        AdminNotification(
+                            navController = navHostController,
+                            sharedPreferences = sharedPreferences,
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
+                    composable("create_notify") {
+                        CreateNotificationScreen(
+                            navHostController = navHostController,
+                            sharedPreferences = sharedPreferences,
+                            modifier = Modifier.padding(innerPadding)
+                        )
                     }
                     composable("Crashlytics") {
                         CrashLogScreen(navHostController = navHostController)
@@ -185,7 +220,7 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                             ReportedAccountDetailScreen(accountId,
                                 onBack = { navHostController.popBackStack() })
                         } else {
-                            androidx.compose.material.Text("Không tìm thấy tài khoản.")
+                            Text("Không tìm thấy tài khoản.")
                         }
 
                     }
@@ -227,9 +262,13 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                     composable("root"){
                         Root(sharedPreferences)
                     }
+                    composable("detail_notify") {
+                        NotificationDetailScreen(
+                            navHostController = navHostController,
+                            sharedPreferences = sharedPreferences
+                        )
+                    }
                 }
-
-
             }
         }
     }

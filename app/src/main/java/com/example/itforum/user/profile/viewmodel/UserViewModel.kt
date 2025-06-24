@@ -1,5 +1,6 @@
 package com.example.itforum.user.profile.viewmodel
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
@@ -92,27 +93,27 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel() {
         }
     }
 
-    fun getUser(id: String) {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitInstance.userService.getUser(id)
-                Log.d("ID", id)
-                Log.d("UserViewModel", "Response: $response")
-                Log.d("UserViewModel", "ResponseBody: ${response.body()?.userProfileResponse}")
+    suspend fun getUser(id: String): UserProfileResponse? {
+        var userProfileResponse: UserProfileResponse? = null
+        try {
+            val response = RetrofitInstance.userService.getUser(id)
+            Log.d("ID", id)
+            Log.d("UserViewModel", "Response: $response")
+            Log.d("UserViewModel", "ResponseBody: ${response.body()?.userProfileResponse}")
 
-                if (response.isSuccessful) {
-                    _user.value = response.body()?.userProfileResponse
-                    println("UI state value is idle")
-                } else {
-                    showError("Response get không hợp lệ")
-                }
-            } catch (e: IOException) {
-                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
-            } catch (e: Exception) {
-                showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+            if (response.isSuccessful) {
+                _user.value = response.body()?.userProfileResponse
+                userProfileResponse = response.body()?.userProfileResponse
+                println("UI state value is idle")
+            } else {
+                showError("Response get không hợp lệ")
             }
-
+        } catch (e: IOException) {
+            showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+        } catch (e: Exception) {
+            showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
         }
+        return userProfileResponse
     }
 
     fun ModifierUser(userUpdateRequest: UserUpdateRequest, context: Context) {

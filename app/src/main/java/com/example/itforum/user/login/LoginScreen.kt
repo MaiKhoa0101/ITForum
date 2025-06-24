@@ -31,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.itforum.user.complaint.SuccessDialog
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.effect.UiStateMessage

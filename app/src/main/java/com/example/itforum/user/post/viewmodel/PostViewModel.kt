@@ -83,6 +83,9 @@ class PostViewModel(
     private val _listPost = MutableStateFlow<List<PostResponse>>(emptyList())
     val listPost: StateFlow<List<PostResponse>> = _listPost
 
+    private val _post = MutableStateFlow<PostResponse?>(null)
+    val post: StateFlow<PostResponse?> = _post
+
     private val _listVote = MutableStateFlow<List<Vote>>(emptyList())
     val listVote: StateFlow<List<Vote>> = _listVote
 
@@ -275,8 +278,9 @@ class PostViewModel(
                     MultipartBody.Part.createFormData("isPublished", it)
                 }
                 val tags = createPostRequest.tags?.mapNotNull  {
-                    MultipartBody.Part.createFormData("tags", Gson().toJson(it))
+                    it?.let { it1 -> MultipartBody.Part.createFormData("tags", it1) }
                 }
+                Log.d("PostViewModel tags", "tags: "+ tags)
 
                 val response =
                     videoUrls.let {
@@ -373,7 +377,26 @@ class PostViewModel(
 
         return parts
     }
-
+    fun getPostById(id: String) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.postService.getPostById(id)
+                Log.d("DETAIL", "Code: ${response.code()}, Body: ${response.body()}")
+                if (response.isSuccessful) {
+                    _post.value = response.body()?.post
+                } else {
+                    showError("Response get không hợp lệ, ${response.code()}")
+                Log.e("Post by id", "Lỗi response không thành công: ${response.message()}")
+                }
+            }
+            catch (e: IOException) {
+                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+            }
+            catch (e: Exception) {
+                showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+            }
+        }
+    }
     fun loadMorePosts(getPostRequest: GetPostRequest) {
         if (canLoadMore && !_isLoadingMore.value) {
             val updatedRequest = getPostRequest.copy(page = currentPage)

@@ -23,7 +23,6 @@ import com.example.itforum.admin.components.TableRowConvertible
 import com.example.itforum.user.complaint.SuccessDialog
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.response.Complaint
-import com.example.itforum.user.modelData.response.News
 import com.example.itforum.user.post.icontext
 import java.time.Instant
 

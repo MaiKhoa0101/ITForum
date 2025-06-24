@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,8 +46,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import com.example.itforum.user.modelData.request.GetPostRequest
 
 import com.example.itforum.user.modelData.response.UserProfileResponse
+import com.example.itforum.user.post.PostListScreen
 import com.example.itforum.user.profile.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +67,6 @@ fun OtherUserProfileScreen(
     val tabs = listOf("Thông tin", "Bài viết")
     val user by viewModel.user.collectAsState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-
 
     LaunchedEffect(Unit) { viewModel.getUser(userId) }
 
@@ -86,7 +88,7 @@ fun OtherUserProfileScreen(
                             horizontalArrangement = Arrangement.Center,
 
                             ) {
-                            Text("Hồ sơ của " + user?.name)
+                            Text("Hồ sơ")
                         }
                     }
                 },
@@ -96,7 +98,16 @@ fun OtherUserProfileScreen(
                         contentDescription = "Back",
                         tint = Color.White,
                         modifier = Modifier
-                            .size(50.dp)
+                            .size(40.dp)
+                            .clickable { navHostController.popBackStack() }
+                    )
+                },
+                actions = {
+                    Icon(
+                        imageVector = Icons.Default.MoreHoriz,
+                        contentDescription = "more",
+                        modifier = Modifier
+                            .size(40.dp)
                             .clickable { navHostController.popBackStack() }
                     )
                 },
@@ -113,7 +124,8 @@ fun OtherUserProfileScreen(
             onTabSelected = { selectedTabIndex = it },
             navController = navHostController,
             modifier = Modifier.padding(innerPadding),
-            tabs = tabs
+            tabs = tabs,
+            sharedPreferences = sharedPreferences
         )
     }
 }
@@ -125,27 +137,34 @@ fun OtherProfileContent(
     onTabSelected: (Int) -> Unit,
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    tabs: List<String>
+    tabs: List<String>,
+    sharedPreferences: SharedPreferences
 ) {
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        item { UserHeader(user) }
+    Column(modifier = modifier.fillMaxSize()) {
+        UserHeader(user)
 
-        stickyHeader {
-            UserTabRow(
-                tabs = tabs,
-                selectedTabIndex = selectedTabIndex,
-                onTabSelected = onTabSelected
-            )
-        }
+        UserTabRow(
+            tabs = tabs,
+            selectedTabIndex = selectedTabIndex,
+            onTabSelected = onTabSelected
+        )
 
         when (selectedTabIndex) {
             0 -> {
-                item { OtherInfoOverview() }
-                item { UserInfoDetail(user) }
+                OtherInfoOverview()
+                UserInfoDetail(user)
             }
             1 -> {
-                item {
-                    Text("Bài viết sẽ hiển thị ở đây", modifier = Modifier.padding(16.dp))
+                if (user != null) {
+                    PostListScreen(
+                        sharedPreferences,
+                        navController,
+                        GetPostRequest(
+                            page = 1,
+                            userId = user.id
+                        ),
+                        reloadKey = selectedTabIndex,
+                    )
                 }
             }
         }

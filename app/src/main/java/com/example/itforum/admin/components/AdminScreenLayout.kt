@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.itforum.admin.AdminRoot.HeadBarAdmin
-import com.example.itforum.admin.postManagement.Post
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
@@ -32,7 +31,7 @@ fun AdminScreenLayout(
     title: String,
     itemCount: Int,
     filterOptions: Map<String,List<String>> = mapOf(),
-    onOpenDrawer: () -> Unit = {},
+//    onOpenDrawer: () -> Unit = {},
     modifier: Modifier,
     addComposed: @Composable () -> Unit = {},
     filterField: (String, String, Any) -> Any = { it1, it2, it3-> it3 },

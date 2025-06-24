@@ -138,6 +138,11 @@ fun CreatePostPage(
     var content by remember { mutableStateOf("") }
     var tags by remember { mutableStateOf<List<String?>?>(emptyList()) }
     var isPublished by remember { mutableStateOf("public") }
+
+    var isErrorTitle by remember { mutableStateOf(false) }
+    LaunchedEffect(title, content) {
+        isErrorTitle = false
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -145,7 +150,6 @@ fun CreatePostPage(
         LazyColumn (
             modifier = Modifier.fillMaxSize()
         ) {
-
             stickyHeader {
                 TopPost("Bài viết mới", "Đăng", navHostController) {
                     val combinedText = "$title $content"
@@ -157,19 +161,24 @@ fun CreatePostPage(
                             return@TopPost
                         }
                     }
-                    postViewModel.createPost(
-                        CreatePostRequest(
-                            imageUrls = imageUrls,
-                            videoUrls = videoUrls,
-                            userId = userInfo?.id ?: "",
-                            title = title,
-                            content = content,
-                            tags = tags,
-                            isPublished = isPublished
-                        ),
-                        context
-                    )
-                    navHostController.navigate("home")
+                    if(title.trim().isEmpty() || content.trim().isEmpty()){
+                        isErrorTitle = true
+                    }
+                    else {
+                        postViewModel.createPost(
+                            CreatePostRequest(
+                                imageUrls = imageUrls,
+                                videoUrls = videoUrls,
+                                userId = userInfo?.id ?: "",
+                                title = title,
+                                content = content,
+                                tags = tags,
+                                isPublished = isPublished
+                            ),
+                            context
+                        )
+                        navHostController.navigate("home")
+                    }
                 }
             }
             item{
@@ -191,7 +200,9 @@ fun CreatePostPage(
                         .background(MaterialTheme.colorScheme.secondaryContainer),
                 ) {
                     userInfo?.let { IconWithText(avatar = it.avatar, name = it.name) }
-                    WritePost(){input ->
+                    WritePost(
+                        isError = isErrorTitle,
+                    ){input ->
                         title = input
                         content = input
                     }
@@ -315,7 +326,10 @@ fun IconWithText(
 }
 
 @Composable
-fun WritePost(onChange: (String) -> Unit) {
+fun WritePost(
+    isError: Boolean = false,
+    onChange: (String) -> Unit
+) {
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.secondaryContainer)
@@ -359,6 +373,12 @@ fun WritePost(onChange: (String) -> Unit) {
                 .padding(horizontal = 20.dp)
                 .align(Alignment.End)
         )
+        if (isError) {
+            Text(
+                text = "Không được để trống",
+                color = Color.Red,
+            )
+        }
     }
 }
 
@@ -409,6 +429,7 @@ fun AddTagPost(
                     if(textTag.trim().isNotEmpty()) {
                         items = items + textTag
                         onChange(items)
+                        textTag = ""
                     }
                     else
                         isError = true

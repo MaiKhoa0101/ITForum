@@ -172,14 +172,13 @@ fun ProfileContent(
     onReportClick: (String) -> Unit
 ) {
    Column(modifier = modifier.fillMaxSize()) {
-        UserHeader(user)
-
+       UserHeader(user)
 
        UserTabRow(
-                tabs = tabs,
-                selectedTabIndex = selectedTabIndex,
-                onTabSelected = onTabSelected
-            )
+           tabs = tabs,
+           selectedTabIndex = selectedTabIndex,
+           onTabSelected = onTabSelected
+       )
 
        when (selectedTabIndex) {
            0 -> {
@@ -194,7 +193,6 @@ fun ProfileContent(
                        userId = sharedPreferences.getString("userId", null)
                    ),
                    reloadKey = selectedTabIndex,
-
                )
            }
        }
@@ -296,34 +294,31 @@ fun UserTabRow(
 
 @Composable
 fun UserInfoDetail(user: UserProfileResponse?) {
-    Column(
+    LazyColumn(
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .padding(bottom = 100.dp)
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
+        item { Spacer(modifier = Modifier.height(10.dp))}
 
-        Text("Giới thiệu", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(user?.introduce?:"Chưa có giới thiệu", fontSize = 18.sp)
-        Spacer(modifier = Modifier.height(16.dp))
+        item { Text("Giới thiệu", fontWeight = FontWeight.Bold, fontSize = 20.sp)}
+        item { Spacer(modifier = Modifier.height(16.dp))}
+        item { Text(user?.introduce?:"Chưa có giới thiệu", fontSize = 18.sp)}
+        item { Spacer(modifier = Modifier.height(16.dp))}
 
-        TagCertificateSection(title = "Chứng chỉ bằng cấp đã đạt:", tags = user?.certificate)
+        item { TagCertificateSection(title = "Chứng chỉ bằng cấp đã đạt:", tags = user?.certificate)}
 
-        Spacer(modifier = Modifier.height(16.dp))
+        item { Spacer(modifier = Modifier.height(16.dp))}
 
-        TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)
-        TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)
-        TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)
-        TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)
-        TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)
-        TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)
-        TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)
-        TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)
-        TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)
-
-
-
+        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
+        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
+        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
+        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
+        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
+        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
+        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
+        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
+        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
     }
 }
 
@@ -373,7 +368,6 @@ fun TagCertificateSection(
         }
     }
 }
-
 
 @Composable
 fun TagItem(text: String) {
