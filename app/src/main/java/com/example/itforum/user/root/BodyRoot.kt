@@ -101,8 +101,14 @@ fun SplashScreen(
         } else {
             val remove = sharedPreferences.edit().remove("access_token")
         }
+        Log.d("splash1",destination)
         navController.navigate(destination) {
-            popUpTo("splash") { inclusive = true }
+            if(destination == "login"){
+                Log.d("splash2",destination)
+                popUpTo(0) { inclusive = true }  // xóa hết stack
+                launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
+            }
+            else popUpTo("splash") { inclusive = true }
         }
     }
 
@@ -305,21 +311,24 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        composable ("otherprofile") {
 //            OtherUserProfileScreen(sharedPreferences, navHostController,modifier)
 //        }
-        composable("otherprofile") {
+        composable("otherprofile/{userId}") { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
             val context = LocalContext.current
-
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "other_profile") // Bắt đầu tracking khi vào màn
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "other_profile") // Ghi thời gian khi rời màn
+            if (userId != null) {
+                LaunchedEffect(Unit) {
+                    logScreenEnter(context, "other_profile") // Bắt đầu tracking khi vào màn
                 }
-            }
 
-            OtherUserProfileScreen(sharedPreferences, navHostController, modifier)
+                DisposableEffect(Unit) {
+                    onDispose {
+                        logScreenExit(context, "other_profile") // Ghi thời gian khi rời màn
+                    }
+                }
+
+                OtherUserProfileScreen(sharedPreferences, navHostController, modifier, userId)
+            }
         }
+
 
 
 //        composable ("editprofile") {
@@ -654,7 +663,12 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 onBackClick = { navHostController.popBackStack() },
                 onSubmitClick = { navHostController.navigate("success") },
                 onResendClick = { /* xử lý gửi lại */ },
-                onLoginClick = { navHostController.navigate("login") }
+                onLoginClick = {
+                    navHostController.navigate("login") {
+                        popUpTo(0) { inclusive = true }  // xóa hết stack
+                        launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
+                    }
+                }
             )
         }
 
@@ -677,7 +691,12 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             }
 
             RegistrationSuccessScreen(
-                onLoginClick = { navHostController.navigate("login") }
+                onLoginClick = {
+                    navHostController.navigate("login") {
+                        popUpTo(0) { inclusive = true }  // xóa hết stack
+                        launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
+                    }
+                }
             )
         }
 
@@ -845,7 +864,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //            }
 //        }
         composable("manager_complaint"){
-            ManagementComplaintScreen(navHostController,sharedPreferences)
+            ManagementComplaintScreen(navHostController,sharedPreferences, modifier)
         }
         composable("complaint_detail/{complaintId}"){ backStackEntry ->
             val complaintId = backStackEntry.arguments?.getString("complaintId")

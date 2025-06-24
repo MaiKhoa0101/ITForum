@@ -35,8 +35,8 @@ class ReportedPostDetailViewModel(
                 _error.value = e.message
                 Log.e("DETAIL", "Exception: ${e.message}")
             }
-            }
-                }
-            }
+        }
+    }
+}
 
 

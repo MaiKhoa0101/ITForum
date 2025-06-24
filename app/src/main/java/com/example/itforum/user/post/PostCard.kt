@@ -1,6 +1,7 @@
 package com.example.itforum.user.post
 
 import android.R.bool
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,7 +49,8 @@ fun PostCardWithVote(
     onShareClick: () -> Unit = {},
     onCardClick : () -> Unit = {},
     onReportClick: (String) -> Unit = {},
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    sharedPreferences: SharedPreferences
 )
  {
     var isChange by remember { mutableStateOf(false) }
@@ -83,6 +85,12 @@ fun PostCardWithVote(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(RoundedCornerShape(20.dp))
+                            .clickable {
+                                val myUserId = sharedPreferences.getString("userId", null)
+                                if(post.userId == myUserId)
+                                    navHostController.navigate("personal")
+                                else navHostController.navigate("otherprofile/${post.userId}")
+                            }
                     )
                     Spacer(modifier = Modifier.width(12.dp))
 
@@ -90,7 +98,14 @@ fun PostCardWithVote(
                         Text(
                             text = post.userName ?: "Unknown User",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .clickable {
+                                    val myUserId = sharedPreferences.getString("userId", null)
+                                    if(post.userId == myUserId)
+                                        navHostController.navigate("personal")
+                                    else navHostController.navigate("otherprofile/${post.userId}")
+                                }
                         )
                         Text(
                             text = "${getTimeAgo(post.createdAt ?: "")} • ${""}",

@@ -85,12 +85,15 @@ fun IntroScreen(navController: NavController) {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(28.dp)
                     ) {
-                        Button(onClick = { navController.navigate("login") },
+                        Button(
+                            onClick = {
+                                navController.navigate("login") {
+                                    popUpTo(0) { inclusive = true }  // xóa hết stack
+                                    launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
+                                }                            },
                             modifier = Modifier
                                 .fillMaxWidth(0.8f)
                                 .height(48.dp),
-
-
                             shape = RoundedCornerShape(20.dp),
                             colors=ButtonDefaults.buttonColors(
                                 backgroundColor = Color(0xFF6B9BF6),

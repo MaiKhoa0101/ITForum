@@ -76,7 +76,6 @@ fun PostListScreen(
     reloadKey: Any? = null
 ) {
 
-
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(navHostController, sharedPreferences) }
     })
@@ -92,7 +91,7 @@ fun PostListScreen(
 
     val isLoading by viewModel.isLoading.collectAsState()
     // Fetch posts when screen loads
-    LaunchedEffect(getPostRequest) {
+    LaunchedEffect(Unit) {
         viewModel.fetchPosts(getPostRequest)
     }
 
@@ -188,6 +187,7 @@ fun PostListScreen(
                             showReportDialog =  true
                         },
                         navHostController = navHostController,
+                        sharedPreferences = sharedPreferences
                     )
 
 

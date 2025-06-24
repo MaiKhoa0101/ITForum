@@ -260,7 +260,12 @@ fun RegisterScreen(
                     "Đăng nhập ngay",
                     color = Color(0xFF6FA9FF),
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { navHostController.navigate("login") }
+                    modifier = Modifier.clickable {
+                        navHostController.navigate("login") {
+                            popUpTo(0) { inclusive = true }  // xóa hết stack
+                            launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
+                        }
+                    }
                 )
             }
             UiStateMessage(uiState, canSubmit)
