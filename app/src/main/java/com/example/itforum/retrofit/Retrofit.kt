@@ -18,7 +18,11 @@ import com.example.itforum.service.ReportAccountService
 //import com.example.itforum.service.AuthApi
 
 object RetrofitInstance {
+
+   private const val Second_URL = "http://192.168.1.28:4000"
+
 //   private const val BASE_URL = "http://192.168.1.8:4000"
+
     private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
 //    private const val BASE_URL = "https://beitforum.onrender.com/"
     val okHttpClient = OkHttpClient.Builder()
@@ -29,6 +33,7 @@ object RetrofitInstance {
 
     val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
+        .baseUrl(Second_URL)
         .client(okHttpClient) // ← Đảm bảo dùng client có timeout
         .addConverterFactory(GsonConverterFactory.create())
         .build()
