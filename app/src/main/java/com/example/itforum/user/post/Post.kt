@@ -50,6 +50,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
+import com.example.itforum.user.ReportPost.view.ReportPostDialog
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.effect.model.UiStatePost
 import com.example.itforum.user.modelData.request.GetPostRequest
@@ -71,72 +73,27 @@ fun PostListScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
     getPostRequest: GetPostRequest,
-    reloadKey: Any? = null,
-    onReportClick: (String) -> Unit
+    reloadKey: Any? = null
 ) {
-    fun handleUpVote(viewModel: PostViewModel, postWithVote: PostWithVote, index: Int, scope: CoroutineScope) {
-        scope.launch {
-            val voteResponse = viewModel.votePost(
-                postId = postWithVote.post.id,
-                type = "upvote",
-                index = index
-            )
-            voteResponse?.let { response ->
-                postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
-                postWithVote.vote?.data?.userVote = response.data?.userVote
-            }
-        }
-    }
-    fun handleDownVote(viewModel: PostViewModel, postWithVote: PostWithVote, index: Int, scope: CoroutineScope) {
-        scope.launch {
-            val voteResponse = viewModel.votePost(
-                postId = postWithVote.post.id,
-                type = "downvote",
-                index = index
-            )
-            voteResponse?.let { response ->
-                postWithVote.vote?.data?.upVoteData?.total = response.data?.upvotes
-                postWithVote.vote?.data?.userVote = response.data?.userVote
-            }
-        }
-    }
-
-    fun handleBookmark(viewModel: PostViewModel, postWithVote: PostWithVote, userId: String?, scope: CoroutineScope) {
-        scope.launch {
-            val bookmarkResponse = viewModel.savePost(
-                postId = postWithVote.post.id,
-                userId = userId
-            )
-            postWithVote.isBookMark = !postWithVote.isBookMark
-        }
-    }
 
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(navHostController, sharedPreferences) }
     })
 
-    val postsFromVm by viewModel.postsWithVotes.collectAsState()
-    var postsWithVotes by remember { mutableStateOf(postsFromVm) }
+    val postsWithVotes by viewModel.postsWithVotes.collectAsState()
+   // var postsWithVotes by remember { mutableStateOf(postsFromVm) }
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoadingMore by viewModel.isLoadingMore.collectAsState()
     var showCommentDialog by remember { mutableStateOf(false) }
     var selectedPostId by remember { mutableStateOf<String?>(null) }
     var userId = sharedPreferences.getString("userId", null)
+    var showReportDialog by remember { mutableStateOf(false) }
 
     val isLoading by viewModel.isLoading.collectAsState()
     // Fetch posts when screen loads
-    LaunchedEffect(reloadKey,getPostRequest) {
-        postsWithVotes = emptyList()
+    LaunchedEffect(Unit) {
         viewModel.fetchPosts(getPostRequest)
-        Log.d("PostListScreen", postsFromVm.toString())
-
     }
-    LaunchedEffect(isLoading, postsFromVm) {
-        if (!isLoading && postsFromVm.isNotEmpty()) {
-            postsWithVotes = postsFromVm
-        }
-        Log.d("load page when postfromvm",postsWithVotes.toString())
-    }// keep local data async
 
     // Pull to refresh state
     val pullRefreshState = rememberPullRefreshState(
@@ -149,7 +106,6 @@ fun PostListScreen(
             .fillMaxSize()
             .pullRefresh(pullRefreshState)
     ) {
-        Log.d("post refreshing loading",isRefreshing.toString()+" "+isLoadingMore.toString())
         if (postsWithVotes.isEmpty() && !isRefreshing && !isLoadingMore) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -205,23 +161,33 @@ fun PostListScreen(
                         post = postWithVote.post,
                         vote = postWithVote.vote,
                         isBookMark = postWithVote.isBookMark,
-                        navHostController = navHostController,
                         onUpvoteClick = {
-                            handleUpVote(viewModel, postWithVote, index, scope)
+                            viewModel.handleUpVote("upvote", index, postWithVote.post.id)
                         },
                         onDownvoteClick = {
-                            handleDownVote(viewModel, postWithVote, index, scope)
+                            viewModel.handleDownVote("downvote", index, postWithVote.post.id)
                         },
                         onCommentClick = {
                             selectedPostId = postWithVote.post.id
                             showCommentDialog = true
                         },
                         onBookmarkClick = {
-                            handleBookmark(viewModel, postWithVote, userId, scope)
+                            viewModel.handleBookmark(index, postWithVote.post.id, userId)
+                        },
+                        onShareClick = { },
+                        onCardClick = {
+                            scope.launch {
+                                viewModel.clearSelectedPost()
+                                viewModel.setSelectedPost(postWithVote.post, postWithVote.vote)
+                                navHostController.navigate("detail_post")
+                            }
                         },
                         onReportClick = {
-                            onReportClick(it)
-                        }
+                            selectedPostId = postWithVote.post.id
+                            showReportDialog =  true
+                        },
+                        navHostController = navHostController,
+                        sharedPreferences = sharedPreferences
                     )
 
 
@@ -278,30 +244,27 @@ fun PostListScreen(
         )
 
         if (showCommentDialog && selectedPostId != null) {
-            Dialog(
-                onDismissRequest = {
-                    showCommentDialog = false
+            CommentDialogWrapper(
+                postId = selectedPostId!!,
+                sharedPreferences = sharedPreferences,
+                onDismiss = {
                     selectedPostId = null
-                },
-                properties = DialogProperties(
-                    usePlatformDefaultWidth = false
-                )
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color.White,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.9f)
-                ) {
-                    PostCommentScreen(
-                        navController = navHostController,
-                        postId = selectedPostId!!,
-                        sharedPreferences = sharedPreferences
-                    )
+                    showCommentDialog = false
                 }
-            }
+            )
         }
+        if (showReportDialog && selectedPostId != null) {
+            ReportPostDialog(
+                sharedPreferences = sharedPreferences,
+                reportedPostId = selectedPostId!!,
+                onDismissRequest = {
+                    showReportDialog = false
+                    selectedPostId = null
+                }
+            )
+        }
+
+
     }
 }
 

@@ -37,7 +37,7 @@ class ComplaintViewModel() : ViewModel() {
     val listComplaint: StateFlow<List<Complaint>?>
         get() = _listComplaint
 
-    fun getComplaint() {
+    fun getAllComplaint() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {

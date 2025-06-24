@@ -45,8 +45,9 @@ fun AccountManagementScreen(
         "Trạng thái" to listOf("Hoạt động", "Bị khóa")
     )
     AdminScreenLayout(
-        title = "Quản lý khiếu nại người dùng",
+        title = "Quản lý người dùng",
         itemCount = listUser.size,
+        modifier = modifier,
         searchTable = { searchText ->
             val dataFiltered = listUser.filter { item ->
                 searchText.isBlank() || listOf(
@@ -77,7 +78,7 @@ fun AccountManagementScreen(
             TableData(
                 headers = listOf(
                     "ID",
-                    "Người dùng",
+                    "Tên",
                     "email",
                     "SĐT",
                     "Trạng thái",

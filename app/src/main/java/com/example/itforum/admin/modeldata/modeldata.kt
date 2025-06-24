@@ -67,7 +67,6 @@ val sidebarItems = listOf(
         nameField = "Quản lý báo cáo bài viết",
         iconField = Icons.Default.ReportGmailerrorred,
         navigationField = "ReportPost"
-
     ),
     SidebarItem(
         nameField = "Đăng xuất",

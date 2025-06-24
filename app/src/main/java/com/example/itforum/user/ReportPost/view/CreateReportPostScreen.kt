@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.itforum.repository.ReportPostRepository
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.ui.theme.MainTheme
@@ -97,6 +99,29 @@ fun CreateReportPostScreen(
             errorMessage?.let {
                 Text(it, color = MaterialTheme.colorScheme.error)
             }
+        }
+    }
+}
+@Composable
+fun ReportPostDialog(
+    sharedPreferences: SharedPreferences,
+    reportedPostId: String,
+    onDismissRequest: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            CreateReportPostScreen(
+                sharedPreferences = sharedPreferences,
+                reportedPostId = reportedPostId,
+                onDismiss = onDismissRequest
+            )
         }
     }
 }

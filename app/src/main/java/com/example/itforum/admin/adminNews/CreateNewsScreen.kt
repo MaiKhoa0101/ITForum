@@ -94,19 +94,29 @@ fun CreateNewsScreen(
                 }
             )
         }
+        var isErrorContent by remember { mutableStateOf(false) }
+        var isErrorTitle by remember { mutableStateOf(false) }
+        LaunchedEffect(title, content) {
+            isErrorContent = false
+            isErrorTitle = false
+        }
         LazyColumn (
             modifier = Modifier.fillMaxSize()
         ) {
             stickyHeader { TopPost("Tạo tin tức", "Thêm",navHostController, enable, uiState) {
-                newsViewModel.createNews(
-                    NewsRequest(
-                        adminId = userInfo?.id ?: "",
-                        title = title,
-                        content = content,
-                        img = img
-                    ),
-                    context
-                )
+                isErrorTitle = title.trim().isEmpty()
+                isErrorContent = content.trim().isEmpty()
+                if (!isErrorTitle && !isErrorContent) {
+                    newsViewModel.createNews(
+                        NewsRequest(
+                            adminId = userInfo?.id ?: "",
+                            title = title,
+                            content = content,
+                            img = img
+                        ),
+                        context
+                    )
+                }
             }
             }
             item {
@@ -116,8 +126,8 @@ fun CreateNewsScreen(
                         .background(Color.White),
                 ) {
                     userInfo?.let { IconWithText(avatar = it.avatar, name = it.name) }
-                    TitleChild(){ title=it }
-                    WritePost(){input ->
+                    TitleChild(isErrorTitle){ title=it }
+                    WritePost(isErrorContent){input ->
                         content = input
                     }
                     AddImage(){img=it}

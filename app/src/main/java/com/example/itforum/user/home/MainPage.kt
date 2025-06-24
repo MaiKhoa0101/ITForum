@@ -55,8 +55,6 @@ fun HomePage(
     sharePreferences: SharedPreferences,
     postViewModel: PostViewModel
 ){
-    var showReportDeatil by remember { mutableStateOf(false) }
-    var postId by remember { mutableStateOf("") }
     Column(
         modifier=modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -122,17 +120,7 @@ fun HomePage(
                 sharePreferences,
                 navHostController,
                 GetPostRequest(page = 1),
-                onReportClick = {
-                    postId = it
-                    showReportDeatil = true
-
-                }
             );
-            if (showReportDeatil){
-                CreateReportPostScreen (sharePreferences, postId, onDismiss = {
-                    showReportDeatil = false
-                })
-            }
             Row (
                 modifier = Modifier.padding(bottom = 50.dp)
                     .align(Alignment.BottomEnd)

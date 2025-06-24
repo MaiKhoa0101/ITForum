@@ -62,6 +62,11 @@ class PostViewModel(
     val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
+    private val _selectedPost = MutableStateFlow<PostResponse?>(null)
+    val selectedPost: StateFlow<PostResponse?> = _selectedPost.asStateFlow()
+
+    private val _selectedVote = MutableStateFlow<GetVoteResponse?>(null)
+    val selectedVote: StateFlow<GetVoteResponse?> = _selectedVote.asStateFlow()
 
     private var currentPage = 1
     private var canLoadMore = true
@@ -77,6 +82,9 @@ class PostViewModel(
 
     private val _listPost = MutableStateFlow<List<PostResponse>>(emptyList())
     val listPost: StateFlow<List<PostResponse>> = _listPost
+
+    private val _post = MutableStateFlow<PostResponse?>(null)
+    val post: StateFlow<PostResponse?> = _post
 
     private val _listVote = MutableStateFlow<List<Vote>>(emptyList())
     val listVote: StateFlow<List<Vote>> = _listVote
@@ -118,6 +126,7 @@ class PostViewModel(
             }
         }
     }
+
 
     private suspend fun getVoteDataByPostId(postId: String?, userId: String?): GetVoteResponse? {
         if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) return null
@@ -269,8 +278,9 @@ class PostViewModel(
                     MultipartBody.Part.createFormData("isPublished", it)
                 }
                 val tags = createPostRequest.tags?.mapNotNull  {
-                    MultipartBody.Part.createFormData("tags", Gson().toJson(it))
+                    it?.let { it1 -> MultipartBody.Part.createFormData("tags", it1) }
                 }
+                Log.d("PostViewModel tags", "tags: "+ tags)
 
                 val response =
                     videoUrls.let {
@@ -367,7 +377,26 @@ class PostViewModel(
 
         return parts
     }
-
+    fun getPostById(id: String) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.postService.getPostById(id)
+                Log.d("DETAIL", "Code: ${response.code()}, Body: ${response.body()}")
+                if (response.isSuccessful) {
+                    _post.value = response.body()?.post
+                } else {
+                    showError("Response get không hợp lệ, ${response.code()}")
+                Log.e("Post by id", "Lỗi response không thành công: ${response.message()}")
+                }
+            }
+            catch (e: IOException) {
+                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
+            }
+            catch (e: Exception) {
+                showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
+            }
+        }
+    }
     fun loadMorePosts(getPostRequest: GetPostRequest) {
         if (canLoadMore && !_isLoadingMore.value) {
             val updatedRequest = getPostRequest.copy(page = currentPage)
@@ -463,4 +492,93 @@ class PostViewModel(
     fun fetchComment(postId: String?){
 
     }
+    fun setSelectedPost(post: PostResponse, vote: GetVoteResponse?) {
+        _selectedPost.value = post
+        _selectedVote.value = vote
+    }
+
+    fun clearSelectedPost() {
+        _selectedPost.value = null
+        _selectedVote.value = null
+    }
+    fun handleUpVote(type: String, index: Int, postId: String?) {
+        viewModelScope.launch {
+            try {
+                val res = votePost(postId, type, index)
+                if (res != null) {
+                    val currentList = _postsWithVotes.value.toMutableList()
+                    val currentItem = currentList[index]
+
+                    val updatedVote = currentItem.vote?.copy(
+                        data = currentItem.vote.data?.copy(
+                            upVoteData = currentItem.vote.data!!.upVoteData?.copy(
+                                total = res.data?.upvotes ?: currentItem.vote.data!!.upVoteData!!.total
+                            ),
+                            userVote = res.data?.userVote
+                        )
+                    )
+
+                    val updatedItem = currentItem.copy(vote = updatedVote)
+                    currentList[index] = updatedItem
+                    _postsWithVotes.value = currentList
+                }
+            } catch (e: Exception) {
+                Log.e("handleUpVote", "Error", e)
+            }
+        }
+    }
+    fun handleDownVote(type: String, index: Int, postId: String?) {
+        viewModelScope.launch {
+            try {
+                val res = votePost(postId, type, index)
+                if (res != null) {
+                    val currentList = _postsWithVotes.value.toMutableList()
+                    val currentItem = currentList[index]
+
+                    val updatedVote = currentItem.vote?.copy(
+                        data = currentItem.vote.data?.copy(
+                            upVoteData = currentItem.vote.data!!.upVoteData?.copy(
+                                total = res.data?.upvotes ?: currentItem.vote.data!!.upVoteData!!.total
+                            ),
+                            userVote = res.data?.userVote
+                        )
+                    )
+
+                    val updatedItem = currentItem.copy(vote = updatedVote)
+                    currentList[index] = updatedItem
+
+                    _postsWithVotes.value = currentList
+                } else {
+                    Log.d("Downvote", "Failed to vote")
+                }
+            } catch (e: Exception) {
+                Log.e("handleDownVote", "Exception", e)
+            }
+        }
+    }
+
+    fun handleBookmark(index: Int, postId: String?, userId: String?) {
+        viewModelScope.launch {
+            try {
+                val res = savePost(postId, userId)
+                val currentList = _postsWithVotes.value.toMutableList()
+                val currentItem = currentList[index]
+
+                val updatedItem = currentItem.copy(
+                    isBookMark = !currentItem.isBookMark
+                )
+
+                currentList[index] = updatedItem
+                _postsWithVotes.value = currentList
+
+                Log.d("Bookmark", "Bookmark toggled for post: $postId")
+            } catch (e: Exception) {
+                Log.e("handleBookmark", "Bookmark error", e)
+            }
+        }
+    }
+
+
+
+
 }

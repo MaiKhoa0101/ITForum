@@ -4,7 +4,6 @@ import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -13,8 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.itforum.admin.adminReport.ReportPost.model.request.ReportedPost
-import com.example.itforum.admin.adminReport.ReportPost.model.response.ReportedPostList
 import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostViewModel
 import com.example.itforum.admin.adminReport.ReportPost.viewmodel.ReportedPostViewModelFactory
 import com.example.itforum.admin.components.AdminScreenLayout
@@ -25,8 +22,11 @@ import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.post.icontext
 
 @Composable
-fun ReportedPostScreen(navController: NavHostController,
-                       sharedPreferences: SharedPreferences) {
+fun ReportedPostScreen(
+    navController: NavHostController,
+    sharedPreferences: SharedPreferences,
+    modifier: Modifier
+) {
     val viewModel: ReportedPostViewModel = viewModel(
         factory = ReportedPostViewModelFactory(
             ReportPostRepository(RetrofitInstance.reportPostService)
@@ -48,6 +48,7 @@ fun ReportedPostScreen(navController: NavHostController,
     AdminScreenLayout(
         title = "Quản lý báo cáo bài viết",
         itemCount = posts.size,
+        modifier = modifier,
         searchTable =  { searchText->
             val filteredPosts = posts.filter {
                 it.reportedPostId.contains(searchText, ignoreCase = true) ||

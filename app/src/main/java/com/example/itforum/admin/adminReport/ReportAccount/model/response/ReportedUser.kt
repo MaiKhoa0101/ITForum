@@ -10,7 +10,7 @@ data class ReportedUser(
     val reason: String,
     val createdAt: String
 ) : TableRowConvertible {
-    override fun toTableRow(): List<String> {
+    override fun toTableRow(): List<String?> {
         return listOf(_id, reportedUserId, reporterUserId, reason, createdAt)
     }
 }

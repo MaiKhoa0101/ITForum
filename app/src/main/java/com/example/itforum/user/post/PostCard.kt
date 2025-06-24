@@ -1,7 +1,9 @@
 package com.example.itforum.user.post
 
 import android.R.bool
+import android.content.SharedPreferences
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,7 +39,6 @@ import com.example.itforum.user.modelData.response.PostResponse
 
 @Composable
 fun PostCardWithVote(
-
     post: PostResponse,
     vote: GetVoteResponse?,
     isBookMark: Boolean,
@@ -45,8 +46,11 @@ fun PostCardWithVote(
     onDownvoteClick: () -> Unit = {},
     onCommentClick: () -> Unit = {},
     onBookmarkClick: () -> Unit = {},
+    onShareClick: () -> Unit = {},
+    onCardClick : () -> Unit = {},
     onReportClick: (String) -> Unit = {},
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    sharedPreferences: SharedPreferences
 )
  {
     var isChange by remember { mutableStateOf(false) }
@@ -54,15 +58,16 @@ fun PostCardWithVote(
     var isVote by remember { mutableStateOf(vote?.data?.userVote) }
     var isSavedPost by remember { mutableStateOf(isBookMark) }
     Log.d("bookmark", isSavedPost.toString())
-     var selectedImageIndex by remember { mutableStateOf(0) }
      var showImageDetail by remember { mutableStateOf(false) }
+     var selectedImageIndex by remember { mutableStateOf(0) }
+
 
 
     Card(
         elevation = 4.dp,
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth()
+            .fillMaxWidth().clickable{onCardClick()}
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(
@@ -80,6 +85,12 @@ fun PostCardWithVote(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(RoundedCornerShape(20.dp))
+                            .clickable {
+                                val myUserId = sharedPreferences.getString("userId", null)
+                                if(post.userId == myUserId)
+                                    navHostController.navigate("personal")
+                                else navHostController.navigate("otherprofile/${post.userId}")
+                            }
                     )
                     Spacer(modifier = Modifier.width(12.dp))
 
@@ -87,7 +98,14 @@ fun PostCardWithVote(
                         Text(
                             text = post.userName ?: "Unknown User",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .clickable {
+                                    val myUserId = sharedPreferences.getString("userId", null)
+                                    if(post.userId == myUserId)
+                                        navHostController.navigate("personal")
+                                    else navHostController.navigate("otherprofile/${post.userId}")
+                                }
                         )
                         Text(
                             text = "${getTimeAgo(post.createdAt ?: "")} • ${""}",
