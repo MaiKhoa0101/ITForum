@@ -1,6 +1,7 @@
 package com.example.itforum.admin.modeldata
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Interests
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Logout
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.ReportGmailerrorred
 import androidx.compose.material.icons.filled.ReportProblem
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class SidebarItem(
@@ -55,7 +57,7 @@ val sidebarItems = listOf(
     ),
     SidebarItem(
         nameField = "Quản lý crash hệ thống",
-        iconField = Icons.Default.Message,
+        iconField = Icons.Default.Warning,
         navigationField = "Crashlytics"
 ),
     SidebarItem(
@@ -67,6 +69,11 @@ val sidebarItems = listOf(
         nameField = "Quản lý báo cáo bài viết",
         iconField = Icons.Default.ReportGmailerrorred,
         navigationField = "ReportPost"
+    ),
+    SidebarItem(
+        nameField = "Thống kê số thao tác",
+        iconField = Icons.Default.Dashboard,
+        navigationField = "Analytics"
     ),
     SidebarItem(
         nameField = "Đăng xuất",
