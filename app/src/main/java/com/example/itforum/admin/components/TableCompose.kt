@@ -1,7 +1,6 @@
 package com.example.itforum.admin.components
 
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.border
@@ -27,9 +26,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,13 +48,13 @@ import com.example.itforum.user.post.icontext
 import com.example.itforum.user.profile.viewmodel.UserViewModel
 
 interface TableRowConvertible {
-    fun toTableRow(): List<String>
+    fun toTableRow(): List<String?>
 }
 
 @Composable
 fun TableData(
     headers: List<String>,
-    rows: List<List<String>>,
+    rows: List<List<String?>>,
     menuOptions: List<icontext>,
     sharedPreferences: SharedPreferences,
     onClickOption: (String) -> Unit = {}
@@ -68,10 +65,9 @@ fun TableData(
     var expandedIndex by remember { mutableStateOf(-1) }
     var rowState: Int? = null
     var rowUser: Int? = null
-    var userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
+    val userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
     })
-    val user by userViewModel.user.collectAsState()
     Box(modifier = Modifier
         .fillMaxWidth()
         .border(1.dp, Color.Gray)
@@ -129,25 +125,29 @@ fun TableData(
                                         color = Color(0xFFFF0004)
                                         text = row[i]
                                     }
+                                    else -> {text = row[i]}
                                 }
                             }
                             else if (i == rowUser){
+                                var user by remember { mutableStateOf<UserProfileResponse?>(null) }
                                 LaunchedEffect(row[i]) {
-                                    userViewModel.getUser(row[i])
+                                    user = row[i]?.let { userViewModel.getUser(it) }
                                 }
                                 text = user?.name?: "Đang tải..."
                             }
 
-                            Text(
-                                text = text,
-                                color = color,
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .widthIn(min = 50.dp, max = 100.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                textAlign = TextAlign.Center
-                            )
+                            text?.let {
+                                Text(
+                                    text = it,
+                                    color = color,
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .widthIn(min = 50.dp, max = 100.dp),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
                     }
                     Box(modifier = Modifier
@@ -172,7 +172,7 @@ fun TableData(
                                         onClick = {
                                             expandedIndex = -1
                                             val accountId = row[0]
-                                            item.onClick(accountId)
+                                            accountId?.let { item.onClick(it) }
                                         }
                                     )
                                 }
@@ -186,6 +186,6 @@ fun TableData(
     }
 }
 
-fun convertToTableRows(items: List<TableRowConvertible>): List<List<String>> {
+fun convertToTableRows(items: List<TableRowConvertible>): List<List<String?>> {
     return items.map { it.toTableRow() }
 }

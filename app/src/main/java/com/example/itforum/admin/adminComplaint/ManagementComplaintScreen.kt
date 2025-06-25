@@ -23,7 +23,6 @@ import com.example.itforum.admin.components.TableRowConvertible
 import com.example.itforum.user.complaint.SuccessDialog
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.response.Complaint
-import com.example.itforum.user.modelData.response.News
 import com.example.itforum.user.post.icontext
 import java.time.Instant
 
@@ -31,11 +30,11 @@ import java.time.Instant
 fun ManagementComplaintScreen (
     navController: NavHostController,
     sharedPreferences: SharedPreferences,
-
+    modifier: Modifier
 ) {
     var complaintViewModel: ComplaintViewModel = viewModel()
     LaunchedEffect(Unit) {
-        complaintViewModel.getComplaint()
+        complaintViewModel.getAllComplaint()
     }
     val uiState by complaintViewModel.uiStateCreate.collectAsState()
     var showSuccessDialog by remember { mutableStateOf(false) }
@@ -77,6 +76,7 @@ fun ManagementComplaintScreen (
         AdminScreenLayout(
             title = "Quản lý khiếu nại người dùng",
             itemCount = it.size,
+            modifier = modifier,
             searchTable = { searchText ->
                 val dataFiltered = complaints!!.filter { item ->
                     searchText.isBlank() || listOf(

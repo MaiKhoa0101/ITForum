@@ -11,6 +11,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Subject
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -18,6 +24,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -29,6 +38,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.admin.adminComplaint.viewmodel.ComplaintViewModel
 import com.example.itforum.user.modelData.response.Complaint
+import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.post.IconWithText
 import com.example.itforum.user.post.TopPost
 import com.example.itforum.user.post.getTimeAgo
@@ -72,10 +82,11 @@ fun FormComplaint(
     var userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
     })
+    var user by remember { mutableStateOf<UserProfileResponse?>(null) }
     LaunchedEffect(complaint) {
-         userViewModel.getUser(complaint.userId)
+         user = userViewModel.getUser(complaint.userId)
     }
-    val user by userViewModel.user.collectAsState()
+//    val user by userViewModel.user.collectAsState()
     Card(
         modifier = Modifier.padding(horizontal = 15.dp, vertical = 20.dp),
         shape = RoundedCornerShape(12.dp),
@@ -89,27 +100,27 @@ fun FormComplaint(
         ) {
             item{
                 IconWithText(
-                    avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+                    fallbackIcon = Icons.Default.Info,
                     name = "Trạng thái: ${complaint.status}",
                     sizeIcon = 35.dp
                 )
                 IconWithText(
-                    avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+                    fallbackIcon = Icons.Default.Timer,
                     name = "Ngày: ${ getTimeAgo(complaint.createdAt) } • ${""}",
                     sizeIcon = 35.dp
                 )
                 IconWithText(
-                    avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+                    fallbackIcon = Icons.Default.AccountCircle,
                     name = "Từ: ${user?.name}",
                     sizeIcon = 35.dp
                 )
                 IconWithText(
-                    avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+                    fallbackIcon = Icons.Default.Subject,
                     name = "Tiêu đề: ${complaint.title}",
                     sizeIcon = 35.dp
                 )
                 IconWithText(
-                    avatar = "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+                    fallbackIcon = Icons.Default.Description,
                     name = "Nội dung:",
                     sizeIcon = 35.dp
                 )

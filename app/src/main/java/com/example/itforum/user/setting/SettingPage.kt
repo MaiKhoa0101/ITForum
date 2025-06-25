@@ -135,14 +135,12 @@ fun Setting(
                 )
                 googleSignInClient.signOut().addOnCompleteListener {
                     navHostController.navigate("login") {
-                        popUpTo(0)
+                        popUpTo(0){ inclusive = true }
                         launchSingleTop = true
                     }
                 }
             }
-
         )
-
     }
 }
 

@@ -1,15 +1,25 @@
 package com.example.itforum.user.profile
 
 import android.content.SharedPreferences
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -35,8 +46,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import com.example.itforum.user.modelData.request.GetPostRequest
 
 import com.example.itforum.user.modelData.response.UserProfileResponse
+import com.example.itforum.user.post.PostListScreen
 import com.example.itforum.user.profile.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,17 +58,17 @@ fun OtherUserProfileScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
     modifier: Modifier = Modifier,
-    viewModel: UserViewModel = viewModel(factory = viewModelFactory {
+    userId: String
+) {
+    val viewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
     })
-) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Thông tin", "Bài viết")
     val user by viewModel.user.collectAsState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
-
-    LaunchedEffect(Unit) { viewModel.getUser() }
+    LaunchedEffect(Unit) { viewModel.getUser(userId) }
 
     Scaffold(
         modifier = modifier
@@ -63,7 +76,41 @@ fun OtherUserProfileScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = {},
+                title = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+
+                            ) {
+                            Text("Hồ sơ")
+                        }
+                    }
+                },
+                navigationIcon = {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBackIosNew,
+                        contentDescription = "Back",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clickable { navHostController.popBackStack() }
+                    )
+                },
+                actions = {
+                    Icon(
+                        imageVector = Icons.Default.MoreHoriz,
+                        contentDescription = "more",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clickable { navHostController.popBackStack() }
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 ),
@@ -77,11 +124,11 @@ fun OtherUserProfileScreen(
             onTabSelected = { selectedTabIndex = it },
             navController = navHostController,
             modifier = Modifier.padding(innerPadding),
-            tabs = tabs
+            tabs = tabs,
+            sharedPreferences = sharedPreferences
         )
     }
 }
-
 
 @Composable
 fun OtherProfileContent(
@@ -90,27 +137,34 @@ fun OtherProfileContent(
     onTabSelected: (Int) -> Unit,
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    tabs: List<String>
+    tabs: List<String>,
+    sharedPreferences: SharedPreferences
 ) {
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        item { UserHeader(user) }
+    Column(modifier = modifier.fillMaxSize()) {
+        UserHeader(user)
 
-        stickyHeader {
-            UserTabRow(
-                tabs = tabs,
-                selectedTabIndex = selectedTabIndex,
-                onTabSelected = onTabSelected
-            )
-        }
+        UserTabRow(
+            tabs = tabs,
+            selectedTabIndex = selectedTabIndex,
+            onTabSelected = onTabSelected
+        )
 
         when (selectedTabIndex) {
             0 -> {
-                item { OtherInfoOverview() }
-                item { UserInfoDetail(user) }
+                OtherInfoOverview()
+                UserInfoDetail(user)
             }
             1 -> {
-                item {
-                    Text("Bài viết sẽ hiển thị ở đây", modifier = Modifier.padding(16.dp))
+                if (user != null) {
+                    PostListScreen(
+                        sharedPreferences,
+                        navController,
+                        GetPostRequest(
+                            page = 1,
+                            userId = user.id
+                        ),
+                        reloadKey = selectedTabIndex,
+                    )
                 }
             }
         }
@@ -131,9 +185,4 @@ fun OtherInfoOverview() {
         Spacer(modifier = Modifier.height(10.dp))
         Divider(thickness = 1.dp)
     }
-}
-@Preview(showBackground = true)
-@Composable
-fun OtherInfoOverviewPreview() {
-    OtherUserProfileScreen(sharedPreferences = LocalContext.current.getSharedPreferences("user_info", 0), navHostController = NavHostController(LocalContext.current))
 }

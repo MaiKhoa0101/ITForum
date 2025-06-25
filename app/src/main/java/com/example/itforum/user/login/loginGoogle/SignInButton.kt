@@ -24,7 +24,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 
 @Composable
-fun GoogleSignInButton(sharedPreferences: SharedPreferences,onResult: (FirebaseUser?) -> Unit) {
+fun GoogleSignInButton(onTokenReceived: (FirebaseUser?) -> Unit) {
     val context = LocalContext.current
     val activity = context as? Activity ?: return
 
@@ -42,24 +42,16 @@ fun GoogleSignInButton(sharedPreferences: SharedPreferences,onResult: (FirebaseU
                 .addOnCompleteListener { authTask ->
                     if (authTask.isSuccessful) {
                         val firebaseUser = authTask.result?.user
-                        val email = firebaseUser?.email ?: "unknown@gmail.com" // ✅ lấy email Google
+                        println("firebaseUser: $firebaseUser")
 
-                        // Lưu vào SharedPreferences (nếu bạn muốn)
-                        val prefs = activity.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
-                        prefs.edit().putString("email", email).apply()
-
-                        sharedPreferences.edit()
-                            .putString("loginType", "google")
-                            .apply()
-
-                        onResult(firebaseUser) // Gọi callback tiếp tục xử lý
+                        onTokenReceived(firebaseUser) // Gọi callback tiếp tục xử lý
                     } else {
-                        onResult(null)
+                        onTokenReceived(null)
                     }
                 }
 
         } catch (e: ApiException) {
-            onResult(null)
+            onTokenReceived( null)
         }
     }
 

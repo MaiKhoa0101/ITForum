@@ -11,6 +11,7 @@ import com.example.itforum.user.modelData.response.CommentResponse
 import com.example.itforum.user.modelData.response.CreatePostResponse
 import com.example.itforum.user.modelData.response.GetBookMarkResponse
 import com.example.itforum.user.modelData.response.GetVoteResponse
+import com.example.itforum.user.modelData.response.Post
 import com.example.itforum.user.modelData.response.PostCommentResponse
 import com.example.itforum.user.modelData.response.PostListResponse
 import com.example.itforum.user.modelData.response.PostListWrapper
@@ -40,6 +41,9 @@ interface PostService {
 
     @GET("posts/all")
     suspend fun getAllPost(): Response<PostListWrapper>
+
+    @GET("posts/id/{postId}")
+    suspend fun getPostById(@Path("postId") postId: String): Response<Post>
 
     @POST("posts/search")
     suspend fun getPost(@Body getPostRequest : GetPostRequest) : Response<PostListResponse>
