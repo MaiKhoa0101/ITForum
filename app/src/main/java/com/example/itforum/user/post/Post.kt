@@ -65,6 +65,8 @@ import com.example.itforum.user.modelData.response.VoteResponse
 import com.example.itforum.user.news.viewmodel.NewsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -107,7 +109,7 @@ fun PostListScreen(
             .fillMaxSize()
             .pullRefresh(pullRefreshState)
     ) {
-        if (postsWithVotes.isEmpty() && !isRefreshing && !isLoadingMore) {
+        if (isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -123,8 +125,8 @@ fun PostListScreen(
                     )
                 }
             }
-        } else if (postsWithVotes.isEmpty() && !isRefreshing && !isLoadingMore) {
-            // Empty state
+        } else if ( postsWithVotes.isEmpty() && !isRefreshing && !isLoadingMore) {
+            // emty state
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -177,11 +179,9 @@ fun PostListScreen(
                         },
                         onShareClick = { },
                         onCardClick = {
-                            scope.launch {
-                                viewModel.clearSelectedPost()
-                                viewModel.setSelectedPost(postWithVote.post, postWithVote.vote)
-                                navHostController.navigate("detail_post")
-                            }
+                            navHostController.navigate("detail_post/${postWithVote.post.id}")
+
+
                         },
                         onReportClick = {
                             selectedPostId = postWithVote.post.id

@@ -125,6 +125,26 @@ class PostViewModel(
     }
 
 
+    fun fetchPostById(postId: String?) {
+        viewModelScope.launch {
+            try {
+                val res = RetrofitInstance.postService.getPostById(postId.toString())
+                if (res.isSuccessful) {
+                    if (res.isSuccessful) {
+                        _selectedPost.value = res.body()?.post
+                        Log.e("fetch post by id", _selectedPost.value.toString())
+                    }
+                } else {
+                    Log.e("fetch post by id", "Error: ${res.code()} - ${res.errorBody()?.string()}")
+                }
+            } catch (e: IOException) {
+                Log.e("fetch post by id", "IOException: ${e.message}")
+            } catch (e: Exception) {
+                Log.e("fetch post by id", "Unexpected error: ${e.message}")
+            }
+        }
+    }
+
     private suspend fun getVoteDataByPostId(postId: String?, userId: String?): GetVoteResponse? {
         if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) return null
         return try {

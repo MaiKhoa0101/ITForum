@@ -360,21 +360,24 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //        composable("detail_post"){
 //            DetailPostPage(navHostController)
 //        }
-        composable("detail_post") {
+        composable("detail_post/{postId}") { backStackEntry ->
             val context = LocalContext.current
 
             LaunchedEffect(Unit) {
-                logScreenEnter(context, "detail_post") // Khi vào màn hình
+                logScreenEnter(context, "detail_post")
             }
 
             DisposableEffect(Unit) {
                 onDispose {
-                    logScreenExit(context, "detail_post") // Khi thoát màn hình
+                    logScreenExit(context, "detail_post")
                 }
             }
 
-            DetailPostPage(navHostController,sharedPreferences)
+            val postId = backStackEntry.arguments?.getString("postId") ?: return@composable
+
+            DetailPostPage(navHostController, sharedPreferences, postId)
         }
+
 
 
 //        composable("listlike") {

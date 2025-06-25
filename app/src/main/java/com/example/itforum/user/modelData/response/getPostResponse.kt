@@ -2,6 +2,10 @@ package com.example.itforum.user.modelData.response
 
 import com.google.gson.annotations.SerializedName
 
+data class PostWrapperResponse(
+    val post: PostResponse
+)
+
 data class PostResponse(
     @SerializedName("_id")
     val id: String? = null,
@@ -16,7 +20,8 @@ data class PostResponse(
     var totalDownvotes: Int? = null,
     val __v: Int? = null,
     val createdAt : String? = null,
-    val userName : String? = null
+    val userName : String? = null,
+    val avatar : String? = null
 )
 data class PostListResponse(
     val posts: List<PostResponse>? = null,

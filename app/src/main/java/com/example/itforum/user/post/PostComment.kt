@@ -50,7 +50,7 @@ fun PostCommentScreen(
         }
     }
 
-    // Use fillMaxSize instead of fillMaxHeight(0.9f)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,7 +67,7 @@ fun PostCommentScreen(
         when (uiState) {
             is UiStateComment.Loading -> {
                 Box(
-                    modifier = Modifier.weight(1f), // Use weight instead of fillMaxSize
+                    modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
@@ -75,7 +75,7 @@ fun PostCommentScreen(
             }
             is UiStateComment.Error -> {
                 Box(
-                    modifier = Modifier.weight(1f), // Use weight instead of fillMaxSize
+                    modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -87,7 +87,7 @@ fun PostCommentScreen(
             else -> {
                 // Comments list takes available space
                 LazyColumn(
-                    modifier = Modifier.weight(1f) // This will take all available space
+                    modifier = Modifier.weight(1f)
                 ) {
                     items(comments, key = { it.id }) { comment ->
                         CommentCard(
@@ -104,7 +104,7 @@ fun PostCommentScreen(
                         Divider()
                     }
 
-                    // Add some bottom padding to ensure last item is visible above input
+
                     item {
                         Spacer(modifier = Modifier.height(80.dp))
                     }
@@ -120,7 +120,7 @@ fun PostCommentScreen(
                         }
                     },
                     isLoading = isSubmittingComment,
-                    modifier = Modifier.fillMaxWidth() // Ensure input takes full width
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }

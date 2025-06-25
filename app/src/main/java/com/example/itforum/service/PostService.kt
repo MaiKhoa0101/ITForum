@@ -16,6 +16,7 @@ import com.example.itforum.user.modelData.response.PostListResponse
 import com.example.itforum.user.modelData.response.PostListWrapper
 import com.example.itforum.user.modelData.response.PostReplyResponse
 import com.example.itforum.user.modelData.response.PostResponse
+import com.example.itforum.user.modelData.response.PostWrapperResponse
 import com.example.itforum.user.modelData.response.ReplyResponse
 import com.example.itforum.user.modelData.response.Vote
 import com.example.itforum.user.modelData.response.VoteListWrapper
@@ -87,4 +88,6 @@ interface PostService {
 
     @GET("vote/all")
     suspend fun getAllVote(): Response<VoteListWrapper>
+    @GET("/posts/single/{postId}")
+    suspend fun getPostById(@Path("postId")postId: String): Response<PostWrapperResponse>
 }
