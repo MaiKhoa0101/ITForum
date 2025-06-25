@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -23,7 +25,9 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,19 +39,76 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
+import com.example.itforum.user.modelData.response.MediaItem
+import com.example.itforum.user.modelData.response.MediaType
 import com.example.itforum.user.modelData.response.PostWithVote
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
+// funcion to create media type for images and vid
+fun createMediaItems(imageUrls: List<String>?, videoUrls: List<String>?): List<MediaItem> {
+    val mediaItems = mutableListOf<MediaItem>()
+
+    imageUrls?.forEach { url ->
+        mediaItems.add(MediaItem(url, MediaType.IMAGE))
+    }
+
+    videoUrls?.forEach { url ->
+        mediaItems.add(MediaItem(url, MediaType.VIDEO))
+    }
+
+    return mediaItems
+}
+@androidx.annotation.OptIn(UnstableApi::class)
+@Composable
+fun VideoPlayer(
+    videoUrl: String,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val mediaItem = androidx.media3.common.MediaItem.fromUri(videoUrl)
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(mediaItem)
+            prepare()
+        }
+    }
+
+    DisposableEffect(
+        AndroidView(
+            factory = {
+                PlayerView(context).apply {
+                    player = exoPlayer
+                    useController = true
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                }
+            },
+            modifier = modifier
+        )
+    ) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+}
+
+
+
 
 @Composable
 fun getTimeAgo(isoTimestamp: String): String {
@@ -71,91 +132,80 @@ fun getTimeAgo(isoTimestamp: String): String {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ImageGrid(
-    imageUrls: List<String>,
+fun MediaGrid(
+    mediaItems: List<MediaItem>,
     modifier: Modifier = Modifier,
-    onImageClick: ((String, Int) -> Unit)? = null
+    onMediaClick: ((MediaItem, Int) -> Unit)? = null
 ) {
-    val maxImagesToShow = 5
-    val extraImageCount = imageUrls.size - maxImagesToShow
+    val maxMediaToShow = 5
+    val extraMediaCount = mediaItems.size - maxMediaToShow
 
     when {
-        imageUrls.isEmpty() -> {
+        mediaItems.isEmpty() -> {
             // Handle empty state
         }
 
-        imageUrls.size == 1 -> {
-            // Single image - full width with proper aspect ratio
+        mediaItems.size == 1 -> {
+            // Single media - full width with proper aspect ratio
             Box(
                 modifier = modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .clickable { onImageClick?.invoke(imageUrls[0], 0) }
+                    .clickable { onMediaClick?.invoke(mediaItems[0], 0) }
             ) {
-                AsyncImage(
-                    model = imageUrls[0],
-                    contentDescription = "Post image",
-                    contentScale = ContentScale.Crop,
+                MediaItemContent(
+                    mediaItem = mediaItems[0],
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(4f / 3f) // Instagram-like aspect ratio
-                        .background(Color.Gray.copy(alpha = 0.1f))
+                        .aspectRatio(4f / 3f)
                 )
             }
         }
 
-        imageUrls.size == 2 -> {
-            // Two images side by side
+        mediaItems.size == 2 -> {
+            // Two media items side by side
             Row(
                 modifier = modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                imageUrls.forEachIndexed { index, url ->
+                mediaItems.forEachIndexed { index, mediaItem ->
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(if (index == 0) 12.dp else 0.dp, if (index == 1) 12.dp else 0.dp, if (index == 1) 12.dp else 0.dp, if (index == 0) 12.dp else 0.dp))
-                            .clickable { onImageClick?.invoke(url, index) }
+                            .clickable { onMediaClick?.invoke(mediaItem, index) }
                     ) {
-                        AsyncImage(
-                            model = url,
-                            contentDescription = "Post image ${index + 1}",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Gray.copy(alpha = 0.1f))
+                        MediaItemContent(
+                            mediaItem = mediaItem,
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                 }
             }
         }
 
-        imageUrls.size == 3 -> {
-            // Three images: one large on left, two stacked on right (Instagram style)
+        mediaItems.size == 3 -> {
+            // Three media items: one large on left, two stacked on right
             Row(
                 modifier = modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                // Large image on the left
+                // Large media on the left
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .aspectRatio(1f)
                         .clip(RoundedCornerShape(12.dp, 0.dp, 0.dp, 12.dp))
-                        .clickable { onImageClick?.invoke(imageUrls[0], 0) }
+                        .clickable { onMediaClick?.invoke(mediaItems[0], 0) }
                 ) {
-                    AsyncImage(
-                        model = imageUrls[0],
-                        contentDescription = "Post image 1",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Gray.copy(alpha = 0.1f))
+                    MediaItemContent(
+                        mediaItem = mediaItems[0],
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
-                // Two smaller images stacked on the right
+                // Two smaller media items stacked on the right
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -165,15 +215,11 @@ fun ImageGrid(
                             .fillMaxWidth()
                             .weight(1f)
                             .clip(RoundedCornerShape(0.dp, 12.dp, 0.dp, 0.dp))
-                            .clickable { onImageClick?.invoke(imageUrls[1], 1) }
+                            .clickable { onMediaClick?.invoke(mediaItems[1], 1) }
                     ) {
-                        AsyncImage(
-                            model = imageUrls[1],
-                            contentDescription = "Post image 2",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Gray.copy(alpha = 0.1f))
+                        MediaItemContent(
+                            mediaItem = mediaItems[1],
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
 
@@ -182,23 +228,19 @@ fun ImageGrid(
                             .fillMaxWidth()
                             .weight(1f)
                             .clip(RoundedCornerShape(0.dp, 0.dp, 12.dp, 0.dp))
-                            .clickable { onImageClick?.invoke(imageUrls[2], 2) }
+                            .clickable { onMediaClick?.invoke(mediaItems[2], 2) }
                     ) {
-                        AsyncImage(
-                            model = imageUrls[2],
-                            contentDescription = "Post image 3",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Gray.copy(alpha = 0.1f))
+                        MediaItemContent(
+                            mediaItem = mediaItems[2],
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                 }
             }
         }
 
-        imageUrls.size == 4 -> {
-            // Four images in 2x2 grid
+        mediaItems.size == 4 -> {
+            // Four media items in 2x2 grid
             Column(
                 modifier = modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -217,15 +259,11 @@ fun ImageGrid(
                                         topEnd = if (index == 1) 12.dp else 0.dp
                                     )
                                 )
-                                .clickable { onImageClick?.invoke(imageUrls[index], index) }
+                                .clickable { onMediaClick?.invoke(mediaItems[index], index) }
                         ) {
-                            AsyncImage(
-                                model = imageUrls[index],
-                                contentDescription = "Post image ${index + 1}",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Gray.copy(alpha = 0.1f))
+                            MediaItemContent(
+                                mediaItem = mediaItems[index],
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
@@ -235,7 +273,7 @@ fun ImageGrid(
                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     repeat(2) { index ->
-                        val imageIndex = index + 2
+                        val mediaIndex = index + 2
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -246,15 +284,11 @@ fun ImageGrid(
                                         bottomEnd = if (index == 1) 12.dp else 0.dp
                                     )
                                 )
-                                .clickable { onImageClick?.invoke(imageUrls[imageIndex], imageIndex) }
+                                .clickable { onMediaClick?.invoke(mediaItems[mediaIndex], mediaIndex) }
                         ) {
-                            AsyncImage(
-                                model = imageUrls[imageIndex],
-                                contentDescription = "Post image ${imageIndex + 1}",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Gray.copy(alpha = 0.1f))
+                            MediaItemContent(
+                                mediaItem = mediaItems[mediaIndex],
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
@@ -262,15 +296,15 @@ fun ImageGrid(
             }
         }
 
-        imageUrls.size >= 5 -> {
-            // Five or more images: 2x2 grid with overlay on last image
-            val displayedImages = imageUrls.take(maxImagesToShow)
+        mediaItems.size >= 5 -> {
+            // Five or more media items: 2x2 grid with overlay on last item
+            val displayedMedia = mediaItems.take(maxMediaToShow)
 
             Column(
                 modifier = modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                // First row with 2 images
+                // First row with 2 media items
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
@@ -285,26 +319,22 @@ fun ImageGrid(
                                         topEnd = if (index == 1) 12.dp else 0.dp
                                     )
                                 )
-                                .clickable { onImageClick?.invoke(displayedImages[index], index) }
+                                .clickable { onMediaClick?.invoke(displayedMedia[index], index) }
                         ) {
-                            AsyncImage(
-                                model = displayedImages[index],
-                                contentDescription = "Post image ${index + 1}",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Gray.copy(alpha = 0.1f))
+                            MediaItemContent(
+                                mediaItem = displayedMedia[index],
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
                 }
 
-                // Second row with 3 images (last one with overlay)
+                // Second row with 3 media items (last one with overlay)
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     repeat(3) { index ->
-                        val imageIndex = index + 2
+                        val mediaIndex = index + 2
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -315,19 +345,15 @@ fun ImageGrid(
                                         bottomEnd = if (index == 2) 12.dp else 0.dp
                                     )
                                 )
-                                .clickable { onImageClick?.invoke(displayedImages[imageIndex], imageIndex) }
+                                .clickable { onMediaClick?.invoke(displayedMedia[mediaIndex], mediaIndex) }
                         ) {
-                            AsyncImage(
-                                model = displayedImages[imageIndex],
-                                contentDescription = "Post image ${imageIndex + 1}",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Gray.copy(alpha = 0.1f))
+                            MediaItemContent(
+                                mediaItem = displayedMedia[mediaIndex],
+                                modifier = Modifier.fillMaxSize()
                             )
 
-                            // Overlay for the last image showing extra count
-                            if (index == 2 && extraImageCount > 0) {
+                            // Overlay for the last media showing extra count
+                            if (index == 2 && extraMediaCount > 0) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -345,7 +371,7 @@ fun ImageGrid(
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         Text(
-                                            text = "+$extraImageCount",
+                                            text = "+$extraMediaCount",
                                             color = Color.White,
                                             fontSize = 24.sp,
                                             fontWeight = FontWeight.Bold
@@ -366,17 +392,71 @@ fun ImageGrid(
     }
 }
 
+@Composable
+fun MediaItemContent(
+    mediaItem: MediaItem,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.background(Color.Gray.copy(alpha = 0.1f))) {
+        when (mediaItem.type) {
+            MediaType.IMAGE -> {
+                AsyncImage(
+                    model = mediaItem.url,
+                    contentDescription = "Post image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            MediaType.VIDEO -> {
+                // Video thumbnail or placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // You can load video thumbnail here using Coil or Glide
+                    // For now, showing a play button overlay
+                    AsyncImage(
+                        model = mediaItem.url, // This might be a video thumbnail URL
+                        contentDescription = "Video thumbnail",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+
+                    // Play button overlay
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(
+                                Color.Black.copy(alpha = 0.6f),
+                                CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.PlayArrow,
+                            contentDescription = "Play video",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
-fun ImageDetailDialog(
-    imageUrls: List<String>,
+fun MediaDetailDialog(
+    mediaItems: List<MediaItem>,
     initialIndex: Int = 0,
     onDismiss: () -> Unit
 ) {
     var currentIndex by remember { mutableStateOf(initialIndex) }
     val pagerState = rememberPagerState(
         initialPage = initialIndex,
-        pageCount = { imageUrls.size }
+        pageCount = { mediaItems.size }
     )
 
     LaunchedEffect(pagerState.currentPage) {
@@ -412,9 +492,9 @@ fun ImageDetailDialog(
                 )
             }
 
-            // Image counter
+            // Media counter
             Text(
-                text = "${currentIndex + 1} / ${imageUrls.size}",
+                text = "${currentIndex + 1} / ${mediaItems.size}",
                 color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
@@ -424,7 +504,7 @@ fun ImageDetailDialog(
                     .zIndex(1f)
             )
 
-            // Image pager
+            // Media pager
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize()
@@ -435,29 +515,44 @@ fun ImageDetailDialog(
                         .clickable { onDismiss() },
                     contentAlignment = Alignment.Center
                 ) {
-                    AsyncImage(
-                        model = imageUrls[page],
-                        contentDescription = "Image ${page + 1}",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) { /* Prevent dismiss when clicking image */ }
-                    )
+                    when (mediaItems[page].type) {
+                        MediaType.IMAGE -> {
+                            AsyncImage(
+                                model = mediaItems[page].url,
+                                contentDescription = "Image ${page + 1}",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ) { /* Prevent dismiss when clicking image */ }
+                            )
+                        }
+                        MediaType.VIDEO -> {
+                            VideoPlayer(
+                                videoUrl = mediaItems[page].url,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ) { /* Prevent dismiss when clicking video */ }
+                            )
+                        }
+                    }
                 }
             }
 
-            // Page indicator dots (only show if more than 1 image)
-            if (imageUrls.size > 1) {
+            // Page indicator dots (only show if more than 1 media item)
+            if (mediaItems.size > 1) {
                 Row(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 32.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    repeat(imageUrls.size) { index ->
+                    repeat(mediaItems.size) { index ->
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
@@ -471,5 +566,37 @@ fun ImageDetailDialog(
                 }
             }
         }
+    }
+}
+@Composable
+fun PostMediaSection(
+    imageUrls: List<String>?,
+    videoUrls: List<String>?,
+    modifier: Modifier = Modifier
+) {
+    var showMediaDetail by remember { mutableStateOf(false) }
+    var selectedMediaIndex by remember { mutableStateOf(0) }
+    val mediaItems = createMediaItems(imageUrls, videoUrls)
+
+    // Post media (images and videos)
+    if (mediaItems.isNotEmpty()) {
+        MediaGrid(
+            mediaItems = mediaItems,
+            modifier = modifier,
+            onMediaClick = { _, index ->
+                selectedMediaIndex = index
+                showMediaDetail = true
+            }
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+    }
+
+    // Media detail dialog
+    if (showMediaDetail && mediaItems.isNotEmpty()) {
+        MediaDetailDialog(
+            mediaItems = mediaItems,
+            initialIndex = selectedMediaIndex,
+            onDismiss = { showMediaDetail = false }
+        )
     }
 }

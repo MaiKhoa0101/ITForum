@@ -129,7 +129,7 @@ fun DetailNewsPage(
             }
             item{
                 AvatarNameDetail(
-                    avatar = R.drawable.avatar,
+                    avatar = "",
                     name = "Nguyễn Thành Đạt",
                     time = news?.createdAt?:"2050-06-01T08:14:16.547+00:00"
                 )

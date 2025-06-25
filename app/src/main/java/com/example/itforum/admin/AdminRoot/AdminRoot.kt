@@ -44,6 +44,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.itforum.admin.adminAccount.AccountDetailScreen
 import com.example.itforum.admin.adminAccount.AccountManagementScreen
+import com.example.itforum.admin.adminAnalytics.AnalyticsScreen
 import com.example.itforum.admin.adminComplaint.ManagementComplaintDetailScreen
 import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
 import com.example.itforum.admin.adminController.ControllerManagerScreen
@@ -86,7 +87,8 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
         "NotificationManager",
         "Crashlytics",
         "ReportAccount",
-        "ReportPost"
+        "ReportPost",
+        "Analytics"
     )
 
     ModalNavigationDrawer(
@@ -267,6 +269,9 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                             navHostController = navHostController,
                             sharedPreferences = sharedPreferences
                         )
+                    }
+                    composable ("Analytics"){
+                        AnalyticsScreen(navController = navHostController)
                     }
                 }
             }

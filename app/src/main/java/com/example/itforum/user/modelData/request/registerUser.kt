@@ -9,4 +9,5 @@ data class RegisterUser(
 data class LoginUser(
     val emailOrPhone: String,
     val password: String,
+    val fcmToken: String,
 )

@@ -65,6 +65,8 @@ import com.example.itforum.user.modelData.response.VoteResponse
 import com.example.itforum.user.news.viewmodel.NewsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -92,22 +94,22 @@ fun PostListScreen(
     val filterPosts = postsWithVotes.filter { !bloomFilterManager.isViewed(it.post.id?:"") }
     val isLoading by viewModel.isLoading.collectAsState()
     // Fetch posts when screen loads
+    LaunchedEffect(Unit) {
+        viewModel.fetchPosts(getPostRequest)
+    }
 
     // Pull to refresh state
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
         onRefresh = { viewModel.refreshPosts(getPostRequest) }
     )
-    LaunchedEffect(pullRefreshState) {
-        viewModel.fetchPosts(getPostRequest)
-    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .pullRefresh(pullRefreshState)
     ) {
-        if (postsWithVotes.isEmpty() && !isRefreshing && !isLoadingMore) {
+        if (isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -123,8 +125,8 @@ fun PostListScreen(
                     )
                 }
             }
-        } else if (postsWithVotes.isEmpty() && !isRefreshing && !isLoadingMore) {
-            // Empty state
+        } else if ( postsWithVotes.isEmpty() && !isRefreshing && !isLoadingMore) {
+            // emty state
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -162,11 +164,11 @@ fun PostListScreen(
                         post = postWithVote.post,
                         vote = postWithVote.vote,
                         isBookMark = postWithVote.isBookMark,
-                        onUpvoteClick = {
-                            viewModel.handleUpVote("upvote", index, postWithVote.post.id)
+                        onUpvoteClick = { vote ->
+                            viewModel.handleUpVote(vote!!, index, postWithVote.post.id)
                         },
-                        onDownvoteClick = {
-                            viewModel.handleDownVote("downvote", index, postWithVote.post.id)
+                        onDownvoteClick = { vote ->
+                            viewModel.handleDownVote(vote!!, index, postWithVote.post.id)
                         },
                         onCommentClick = {
                             selectedPostId = postWithVote.post.id
@@ -183,6 +185,9 @@ fun PostListScreen(
                                 viewModel.setSelectedPost(postWithVote.post, postWithVote.vote)
                                 navHostController.navigate("detail_post")
                             }
+                            navHostController.navigate("detail_post/${postWithVote.post.id}")
+
+
                         },
                         onReportClick = {
                             selectedPostId = postWithVote.post.id
