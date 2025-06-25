@@ -15,6 +15,7 @@ import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.request.LoginUser
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.messaging.FirebaseMessaging
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,9 +40,9 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
     fun userLogin(emailOrPhone: String, password: String) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-
+            val fcmToken = FirebaseMessaging.getInstance().token.await()
             try {
-                val loginUser = LoginUser(emailOrPhone, password)
+                val loginUser = LoginUser(emailOrPhone, password, fcmToken )
                 val response = RetrofitInstance.userService.login(loginUser)
                 Log.d("LoginViewModel", "Response: $response")
                 Log.d("LoginViewModel", "Response: ${response.body()}")
@@ -75,6 +76,7 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                 showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
                 delay(500) // Cho phép UI xử lý trạng thái Success
             }
+            delay(500)
             _uiState.value = UiState.Idle
 
         }

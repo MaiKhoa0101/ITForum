@@ -1,6 +1,9 @@
 package com.example.itforum.user.home
 
 import android.content.SharedPreferences
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,6 +47,8 @@ import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.news.NewsDatabase
 import com.example.itforum.user.news.viewmodel.NewsViewModel
 import com.example.itforum.user.news.viewmodel.NewsViewModelFactory
+import com.example.itforum.user.permission.RequestPermissionUI
+import com.example.itforum.user.permission.checkPermission
 import com.example.itforum.user.post.AdvancedMarqueeTextList
 import com.example.itforum.user.post.PostListScreen
 import com.example.itforum.user.post.viewmodel.PostViewModel
@@ -55,37 +60,38 @@ fun HomePage(
     sharePreferences: SharedPreferences,
     postViewModel: PostViewModel
 ){
+    val context = LocalContext.current
+    val db = Room.databaseBuilder(
+        context,
+        NewsDatabase::class.java,
+        "news-db"
+    )
+        .fallbackToDestructiveMigration()
+        .build()
+
+    val newsDao = db.newsDao()
+    val newsViewModel: NewsViewModel = viewModel(
+        factory = NewsViewModelFactory(newsDao, sharePreferences)
+    )
+    val progress by postViewModel.uploadProgress.collectAsState()
+    val uiStateCreate by postViewModel.uiStateCreate.collectAsState()
+
+    LaunchedEffect(Unit) {
+        newsViewModel.getNews()
+    }
+    val listNews by newsViewModel.listNews.collectAsState()
+    LaunchedEffect(uiStateCreate) {
+        println("UI State duoc thay doi")
+        if (uiStateCreate is UiState.Success) {
+            println("uiState là success")
+        }
+    }
     Column(
         modifier=modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        val context = LocalContext.current
-        val db = Room.databaseBuilder(
-            context,
-            NewsDatabase::class.java,
-            "news-db"
-        )
-        .fallbackToDestructiveMigration()
-        .build()
 
-        val newsDao = db.newsDao()
-        val newsViewModel: NewsViewModel = viewModel(
-            factory = NewsViewModelFactory(newsDao, sharePreferences)
-        )
-        val progress by postViewModel.uploadProgress.collectAsState()
-        val uiStateCreate by postViewModel.uiStateCreate.collectAsState()
-
-        LaunchedEffect(Unit) {
-            newsViewModel.getNews()
-        }
-        val listNews by newsViewModel.listNews.collectAsState()
-        LaunchedEffect(uiStateCreate) {
-            println("UI State duoc thay doi")
-            if (uiStateCreate is UiState.Success) {
-                println("uiState là success")
-            }
-        }
         Column(
             modifier = Modifier
                 .shadow(10.dp, shape = MaterialTheme.shapes.medium)
@@ -163,4 +169,5 @@ fun HomePage(
             }
         }
     }
+    RequestPermissionUI()
 }

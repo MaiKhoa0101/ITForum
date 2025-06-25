@@ -38,11 +38,13 @@ import com.example.itforum.user.effect.UiStateMessage
 import com.example.itforum.user.login.loginGoogle.GoogleSignInButton
 import com.example.itforum.user.login.loginGoogle.saveUserToFirestore
 import com.example.itforum.user.login.viewmodel.LoginViewModel
-import com.google.android.gms.auth.api.signin.GoogleSignIn
+//import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.tasks.await
 
 
 @Composable
@@ -90,19 +92,6 @@ fun LoginScreen(
         }
     }
 
-    // UI hiển thị
-    if (showSuccessDialog) {
-        SuccessDialog(
-            title = "Thông báo!!!",
-            color = Color.Red,
-            message = error,
-            nameButton = "Đóng",
-            onDismiss = {
-                showSuccessDialog = false
-            }
-        )
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -130,7 +119,6 @@ fun LoginScreen(
                 isPhoneOrEmailValid = phoneNumberOrEmail.all { it.isDigit() } || phoneNumberOrEmail.contains("@")
                 isPasswordValid = password.length >= 6
                 canSubmit = isPhoneOrEmailValid && isPasswordValid
-
                 if (canSubmit) {
                     loginViewModel.userLogin(phoneNumberOrEmail, password)
                 } else {
@@ -165,8 +153,6 @@ fun LoginScreen(
                 Toast.makeText(context, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show()
             }
         }
-
-
 
         Spacer(modifier = Modifier.height(16.dp))
         RegisterText(onRegisterClick)
