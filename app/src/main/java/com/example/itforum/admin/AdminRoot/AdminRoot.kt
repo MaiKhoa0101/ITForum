@@ -193,7 +193,7 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                         )
                     }
                     composable("Crashlytics") {
-                        CrashLogScreen(navHostController = navHostController)
+                        CrashLogScreen(navHostController = navHostController, modifier = Modifier.padding(innerPadding))
                     }
                     composable("ComplaintManager") {
                         ManagementComplaintScreen(

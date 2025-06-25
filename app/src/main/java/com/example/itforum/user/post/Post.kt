@@ -88,18 +88,19 @@ fun PostListScreen(
     var selectedPostId by remember { mutableStateOf<String?>(null) }
     var userId = sharedPreferences.getString("userId", null)
     var showReportDialog by remember { mutableStateOf(false) }
-
+    val bloomFilterManager = remember {BloomFilterManager(sharedPreferences)}
+    val filterPosts = postsWithVotes.filter { !bloomFilterManager.isViewed(it.post.id?:"") }
     val isLoading by viewModel.isLoading.collectAsState()
     // Fetch posts when screen loads
-    LaunchedEffect(Unit) {
-        viewModel.fetchPosts(getPostRequest)
-    }
 
     // Pull to refresh state
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
         onRefresh = { viewModel.refreshPosts(getPostRequest) }
     )
+    LaunchedEffect(pullRefreshState) {
+        viewModel.fetchPosts(getPostRequest)
+    }
 
     Box(
         modifier = Modifier
@@ -153,7 +154,7 @@ fun PostListScreen(
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 itemsIndexed(
-                    items = postsWithVotes,
+                    items = filterPosts,
                     key = { _, postWithVote -> postWithVote.post.id ?: postWithVote.post.hashCode() }
                 ) { index, postWithVote ->
                     val scope = rememberCoroutineScope()
@@ -176,6 +177,7 @@ fun PostListScreen(
                         },
                         onShareClick = { },
                         onCardClick = {
+                            bloomFilterManager.markAsViewed(postWithVote.post.id?:"")
                             scope.launch {
                                 viewModel.clearSelectedPost()
                                 viewModel.setSelectedPost(postWithVote.post, postWithVote.vote)
