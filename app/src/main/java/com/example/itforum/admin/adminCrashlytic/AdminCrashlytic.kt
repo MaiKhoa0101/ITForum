@@ -27,35 +27,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.navigation.NavHostController
 
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun CrashTopBar(
-//    modifier: Modifier = Modifier,
-//    navHostController: NavHostController
-//) {
-//    CenterAlignedTopAppBar(
-//        modifier = modifier,
-//        title = {
-//            Text(
-//                text = "Crash Logs",
-//                style = MaterialTheme.typography.titleLarge
-//            )
-//        },
-//        navigationIcon = {
-//            IconButton(onClick = {
-//                navHostController.popBackStack()
-//            }) {
-//                Icon(
-//                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                    contentDescription = "Quay lại"
-//                )
-//            }
-//        },
-//        colors = TopAppBarDefaults.topAppBarColors(
-//            containerColor = MaterialTheme.colorScheme.primaryContainer
-//        )
-//    )
-//}
+
 
 
 

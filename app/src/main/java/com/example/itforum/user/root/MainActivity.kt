@@ -45,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.itforum.admin.adminAnalytics.AnalyticsScreen
 
 import com.example.itforum.admin.adminCrashlytic.CrashLogScreen
 
@@ -81,6 +82,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ITForumTheme {
                 Root(sharedPreferences)
+
 //                CrashLogScreen()
             }
         }
@@ -102,14 +104,14 @@ fun Root(sharedPreferences:SharedPreferences) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        try {
-            val token = FirebaseMessaging.getInstance().token.await()
-            Log.d("FCM", "Token from Composable: $token")
-        } catch (e: Exception) {
-            Log.e("FCM", "Token fetch failed", e)
-        }
-    }
+//    LaunchedEffect(Unit) {
+//        try {
+//            val token = FirebaseMessaging.getInstance().token.await()
+//            Log.d("FCM", "Token from Composable: $token")
+//        } catch (e: Exception) {
+//            Log.e("FCM", "Token fetch failed", e)
+//        }
+//    }
     ITForumTheme(darkTheme = darkTheme)
     {
         ModalNavigationDrawer(

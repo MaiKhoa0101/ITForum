@@ -4,6 +4,11 @@ import com.example.itforum.admin.components.TableRowConvertible
 import com.example.itforum.user.post.getTimeAgo
 import com.google.gson.annotations.SerializedName
 
+
+data class Post(
+    @SerializedName("post")
+    val post: PostResponse,
+)
 data class PostResponse(
     @SerializedName("_id")
     val id: String? = null,
@@ -47,7 +52,3 @@ data class PostListWrapper(
     val listPost: List<PostResponse>
 )
 
-data class Post(
-    @SerializedName("post")
-    val post: PostResponse,
-)

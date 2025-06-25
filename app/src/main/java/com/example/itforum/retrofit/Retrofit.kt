@@ -1,6 +1,7 @@
 package com.example.itforum.retrofit
 
 
+import com.example.itforum.service.AnalyticsApi
 import com.example.itforum.service.ComplaintService
 import com.example.itforum.service.FollowService
 import com.example.itforum.service.UserService
@@ -23,14 +24,14 @@ object RetrofitInstance {
     //    private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
     private const val SECOND_URL = "https://192.168.1.216:4000"
     val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(5, TimeUnit.SECONDS)
-        .writeTimeout(5, TimeUnit.SECONDS)
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
         .build()
 
     val retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .baseUrl(URL_Phone)
+//        .baseUrl(BASE_URL)
+//        .baseUrl(URL_Phone)
         .baseUrl(SECOND_URL)
         .client(okHttpClient) // ← Đảm bảo dùng client có timeout
         .addConverterFactory(GsonConverterFactory.create())
@@ -43,14 +44,14 @@ object RetrofitInstance {
     val postService: PostService by lazy {retrofit.create(PostService::class.java) }
     val complaintService: ComplaintService by lazy {retrofit.create(ComplaintService::class.java) }
 
+    val api: AnalyticsApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(AnalyticsApi::class.java)
+    }
 
-//    val api: AuthApi by lazy {
-//        Retrofit.Builder()
-//            .baseUrl(BASE_URL)
-//            .addConverterFactory(GsonConverterFactory.create())
-//            .build()
-//            .create(AuthApi::class.java)
-//    }
 val followService: FollowService by lazy { retrofit.create(FollowService::class.java) }
 
 }

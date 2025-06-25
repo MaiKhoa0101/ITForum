@@ -38,7 +38,7 @@ import com.example.itforum.user.effect.UiStateMessage
 import com.example.itforum.user.login.loginGoogle.GoogleSignInButton
 import com.example.itforum.user.login.loginGoogle.saveUserToFirestore
 import com.example.itforum.user.login.viewmodel.LoginViewModel
-//import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
@@ -51,6 +51,7 @@ import kotlinx.coroutines.tasks.await
 fun LoginScreen(
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences,
+
     onRegisterClick: () -> Unit = {},
     onForgotPasswordClick: () -> Unit = {},
 ) {
@@ -77,6 +78,7 @@ fun LoginScreen(
     LaunchedEffect(uiState) {
         println("uiState da bi thay doi: $uiState")
         if (uiState is UiState.Success) {
+            println("Vao dc day")
             val role = sharedPreferences.getString("role", null)
             if (role != null) {
                 val destination = if (role == "admin") "admin_root" else "home"
@@ -139,20 +141,17 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // ✅ Nút Google đã đóng gói xử lý bên trong
-        GoogleSignInButton(sharedPreferences) { user ->
-            if (user != null) {
-                loginViewModel.handleGoogleLogin(user.uid)
-
-                // Nếu muốn điều hướng sau khi login:
-                navHostController.navigate("home") {
-                    popUpTo("login") { inclusive = true }
+        GoogleSignInButton(
+            onTokenReceived = { firebaseUser ->
+                println("Firebase User: "+firebaseUser)
+                if (firebaseUser != null) {
+                    loginViewModel.handleGoogleLoginWithToken(firebaseUser)
                 }
-
-
-            } else {
-                Toast.makeText(context, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show()
+                else{
+                    Toast.makeText(context, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
         RegisterText(onRegisterClick)

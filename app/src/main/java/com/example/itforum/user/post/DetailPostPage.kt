@@ -1,6 +1,7 @@
 package com.example.itforum.user.post
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -71,77 +73,66 @@ import com.example.itforum.user.post.viewmodel.PostViewModel
 @Composable
 fun DetailPostPage(
     navHostController: NavHostController,
-    sharedPreferences : SharedPreferences
+    sharedPreferences: SharedPreferences,
+    postId: String
 ) {
 
-    var showImageDetail by remember { mutableStateOf(false) }
-    var selectedImageIndex by remember { mutableStateOf(0) }
+
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(navHostController, sharedPreferences) }
     })
+
     val post by viewModel.selectedPost.collectAsState()
     val vote by viewModel.selectedVote.collectAsState()
-    LaunchedEffect(post) {
+
+    LaunchedEffect(postId) {
+        viewModel.fetchPostById(postId)
 
     }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF00AEFF))
-    ) {
-        Column (
-            modifier = Modifier.fillMaxSize()
-        ) {
-            TopDetailPost(
-                navHostController
-            )
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-            ) {
-                item{
-                    AvatarNameDetail(
-                        avatar = R.drawable.avatar,
-                        name = post?.userName?:"unknown",
-                        time = post?.createdAt.toString()
-                    )
-                    ContentPost(post?.title?:"",post?.content?:"",  post?.tags ?: emptyList())
-                    // Post image
-                    Spacer(modifier = Modifier.height(12.dp))
-                    if (!post?.imageUrls.isNullOrEmpty()) {
-                        ImageGrid(
-                            imageUrls = post?.imageUrls!!,
-                            onImageClick = { _, index ->
-                                selectedImageIndex = index
-                                showImageDetail = true
-                            }
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
 
-                    // Image detail dialog
-                    if (showImageDetail && !post?.imageUrls.isNullOrEmpty()) {
-                        ImageDetailDialog(
-                            imageUrls = post?.imageUrls!!,
-                            initialIndex = selectedImageIndex,
-                            onDismiss = { showImageDetail = false }
+
+    post?.let {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF00AEFF))
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                TopDetailPost(navHostController)
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White)
+                ) {
+                    item {
+                        AvatarNameDetail(
+                            avatar = post!!.avatar.toString(),
+                            name = post!!.userName ?: "unknown",
+                            time = post!!.createdAt ?: ""
                         )
+
+                        ContentPost(
+                            post!!.title ?: "",
+                            post!!.content ?: "",
+                            post!!.tags ?: emptyList()
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Log.d("imgs",post!!.imageUrls.toString())
+                        PostMediaSection(post!!.imageUrls,post!!.videoUrls)
+
+
+
+                        //ActionsPost(navHostController)
+                        ContentCommentPost(navHostController)
                     }
-                    ActionsPost(navHostController)
-                    ContentCommentPost(navHostController)
                 }
             }
-
         }
-//        var startPos = Offset(x = 50f,y = 1812f+100)
-//        var endPos = Offset(x = 50f,y = 1922f+10)
-//        CommentConnector(
-//            startOffset = startPos,
-//            endOffset = endPos
-//        )
     }
 }
+
 
 @Composable
 fun TopDetailPost(
@@ -184,7 +175,7 @@ fun TopDetailPost(
 }
 
 @Composable
-fun AvatarNameDetail(avatar: Int, name: String, time: String) {
+fun AvatarNameDetail(avatar: String, name: String, time: String) {
     Row(
         modifier = Modifier
             .padding(horizontal = 13.dp, vertical = 6.dp)
@@ -262,34 +253,90 @@ fun MediaPost() {
     }
 }
 
-@Composable
-fun ActionsPost(
-    navHostController: NavHostController
-) {
-    Row(
-        modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        SectionLikePost(27,7, 101, navHostController)
-        Icon(
-            imageVector = Icons.Outlined.InsertComment,
-            contentDescription = "Comment",
-            modifier = Modifier.size(25.dp)
-        )
-        Icon(
-            imageVector = Icons.Outlined.BookmarkAdd,
-            contentDescription = "Lưu bài viết",
-            modifier = Modifier.size(27.dp)
-        )
-        Icon(
-            imageVector = Icons.Outlined.Share,
-            contentDescription = "Chia sẻ",
-            modifier = Modifier.size(27.dp)
-        )
-    }
-}
+//@Composable
+//fun ActionsPost(
+//    navHostController: NavHostController
+//) {
+//    Row(
+//        horizontalArrangement = Arrangement.SpaceEvenly,
+//        modifier = Modifier.fillMaxWidth()
+//    ) {
+//        // Upvote/Downvote section
+//        Row(verticalAlignment = Alignment.CenterVertically) {
+//            IconButton(onClick = {
+//                onUpvoteClick()
+//                if(isVote == "upvote"){
+//                    upvotes --
+//                    isVote = "none"
+//                }else if(isVote == "downvote" || isVote == "none"){
+//                    upvotes++
+//                    isVote = "upvote"
+//                }
+//                isChange = true
+//            } ) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.upvote),
+//                    contentDescription = "Upvote",
+//                    modifier = Modifier.size(30.dp),
+//                    tint = if (isVote == "upvote") Color.Green else Color.Unspecified
+//                )
+//            }
+//            Text(
+//                text = "${upvotes}",
+//                fontSize = 16.sp,
+//                fontWeight = FontWeight.SemiBold
+//            )
+//            IconButton(onClick = {
+//                onDownvoteClick()
+//                if(isVote == "downvote"){
+//                    isVote = "none"
+//                }else if(isVote == "upvote" ){
+//                    upvotes--
+//                    isVote = "downvote"
+//                }else if(isVote=="none"){
+//                    isVote = "downvote"
+//                }
+//
+//            }) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.downvote),
+//                    contentDescription = "Downvote",
+//                    modifier = Modifier.size(30.dp),
+//                    tint = if (isVote == "downvote") Color.Red else Color.Unspecified
+//                )
+//            }
+//        }
+//
+//        // Other actions
+//        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+//            IconButton(onClick = onCommentClick) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.comment),
+//                    contentDescription = "Comment",
+//                    modifier = Modifier.size(30.dp),
+//                    tint = Color.Unspecified
+//                )
+//            }
+//            IconButton(onClick = {onBookmarkClick()
+//                //neu save post r doi icon qua chua save va nguoc lai
+//                if(isSavedPost){
+//                    isSavedPost = false
+//                }else{
+//                    isSavedPost = true
+//                }}
+//            )
+//            {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.bookmark),
+//                    contentDescription = "Bookmark",
+//                    modifier = Modifier.size(30.dp),
+//                    tint = if (isSavedPost) Color.Green else Color.Unspecified
+//                )
+//            }
+//
+//        }
+//    }
+//}
 
 @Composable
 fun SectionLikePost(
