@@ -48,7 +48,7 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
             val fcmToken = FirebaseMessaging.getInstance().token.await()
             try {
                 val loginUser = LoginUser(emailOrPhone, password, fcmToken )
-                println("Login ne")
+                println("Login ne" + loginUser)
                 val response = userService.login(loginUser)
                 Log.d("LoginViewModel", "Response: $response")
                 Log.d("LoginViewModel", "Response: ${response.body()}")

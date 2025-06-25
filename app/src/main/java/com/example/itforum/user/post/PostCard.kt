@@ -42,8 +42,8 @@ fun PostCardWithVote(
     post: PostResponse,
     vote: GetVoteResponse?,
     isBookMark: Boolean,
-    onUpvoteClick: () -> Unit = {},
-    onDownvoteClick: () -> Unit = {},
+    onUpvoteClick: (String?) -> Unit = {},
+    onDownvoteClick: (String?) -> Unit = {},
     onCommentClick: () -> Unit = {},
     onBookmarkClick: () -> Unit = {},
     onShareClick: () -> Unit = {},
@@ -160,7 +160,6 @@ fun PostCardWithVote(
                 // Upvote/Downvote section
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = {
-                        onUpvoteClick()
                         if(isVote == "upvote"){
                             upvotes --
                             isVote = "none"
@@ -168,6 +167,7 @@ fun PostCardWithVote(
                             upvotes++
                             isVote = "upvote"
                         }
+                        onUpvoteClick(isVote)
                         isChange = true
                     } ) {
                         Icon(
@@ -183,7 +183,6 @@ fun PostCardWithVote(
                         fontWeight = FontWeight.SemiBold
                     )
                     IconButton(onClick = {
-                        onDownvoteClick()
                         if(isVote == "downvote"){
                             isVote = "none"
                         }else if(isVote == "upvote" ){
@@ -192,7 +191,7 @@ fun PostCardWithVote(
                         }else if(isVote=="none"){
                             isVote = "downvote"
                         }
-
+                        onDownvoteClick(isVote)
                     }) {
                         Icon(
                             painter = painterResource(id = R.drawable.downvote),

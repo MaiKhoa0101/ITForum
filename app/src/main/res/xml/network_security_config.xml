@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config xmlns:android="http://schemas.android.com/apk/res/android">
     <domain-config cleartextTrafficPermitted="true">
-    <domain includeSubdomains="true">192.168.56.1</domain>
-    <domain includeSubdomains="true">192.168.0.103</domain>
+<!--    <domain includeSubdomains="true">192.168.56.1</domain>-->
+<!--    <domain includeSubdomains="true">192.168.0.103</domain>-->
     <domain includeSubdomains="true">192.168.1.216</domain>
 <!--    <domain includeSubdomains="true">beitforum-b0ng.onrender.com</domain>-->
-    <domain includeSubdomains="true">192.168.1.8</domain>
+    <domain includeSubdomains="true">10.44.254.132</domain>
+            <domain includeSubdomains="true">192.168.4.22</domain>
+        <!--    <domain includeSubdomains="true">10.44.254.132</domain>-->
+        <!--    <domain includeSubdomains="true">10.44.254.132</domain>-->
+        <!--    <domain includeSubdomains="true">10.44.254.132</domain>-->
+
     </domain-config>
 </network-security-config>
