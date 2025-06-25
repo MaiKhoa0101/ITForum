@@ -22,10 +22,10 @@ object RetrofitInstance {
 
 //   private const val Second_URL = "http://192.168.1.28:4000"
 
-//   private const val BASE_URL = "http://192.168.1.8:4000"
+  private const val BASE_URL = "http://192.168.1.6:4000"
 
 //    private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
-    private const val BASE_URL = "https://beitforum.onrender.com/"
+   // private const val BASE_URL = "https://beitforum.onrender.com/"
     val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(60, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)

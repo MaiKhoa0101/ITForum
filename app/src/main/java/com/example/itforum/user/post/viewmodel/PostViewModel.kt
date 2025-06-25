@@ -131,7 +131,7 @@ class PostViewModel(
     fun fetchPostById(postId: String?) {
         viewModelScope.launch {
             try {
-                val res = RetrofitInstance.postService.getPostById(postId.toString())
+                val res = RetrofitInstance.postService.getDetailPostById(postId.toString())
                 if (res.isSuccessful) {
                     if (res.isSuccessful) {
                         _selectedPost.value = res.body()?.post
@@ -400,7 +400,7 @@ class PostViewModel(
     fun getPostById(id: String) {
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.postService.getPostById(id)
+                val response = RetrofitInstance.postService.getDetailPostById(id)
                 Log.d("DETAIL", "Code: ${response.code()}, Body: ${response.body()}")
                 if (response.isSuccessful) {
                     _post.value = response.body()?.post

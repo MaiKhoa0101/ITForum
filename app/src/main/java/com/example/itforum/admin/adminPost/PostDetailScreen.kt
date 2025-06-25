@@ -34,7 +34,7 @@ fun PostDetailScreen(
     })
 
     LaunchedEffect(postId) {
-        postViewModel.getPostById(postId)
+        postViewModel.fetchPostById(postId)
     }
 
     val post by postViewModel.post.collectAsState()
