@@ -10,8 +10,6 @@ import com.auth0.android.jwt.JWT
 import com.example.itforum.admin.adminCrashlytic.CrashLogger
 import com.example.itforum.admin.adminCrashlytic.UserSession
 import com.example.itforum.retrofit.RetrofitInstance
-
-
 import com.example.itforum.retrofit.RetrofitInstance.userService
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.request.LoginUser
@@ -117,7 +115,6 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                         delay(500) // Cho phép UI xử lý trạng thái Success
                     }
                 }
-
 
             } catch (e: Exception) {
                 e.printStackTrace()

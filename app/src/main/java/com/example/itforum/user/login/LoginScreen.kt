@@ -51,7 +51,6 @@ import kotlinx.coroutines.tasks.await
 fun LoginScreen(
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences,
-
     onRegisterClick: () -> Unit = {},
     onForgotPasswordClick: () -> Unit = {},
 ) {
@@ -78,7 +77,6 @@ fun LoginScreen(
     LaunchedEffect(uiState) {
         println("uiState da bi thay doi: $uiState")
         if (uiState is UiState.Success) {
-            println("Vao dc day")
             val role = sharedPreferences.getString("role", null)
             if (role != null) {
                 val destination = if (role == "admin") "admin_root" else "home"
@@ -92,6 +90,19 @@ fun LoginScreen(
             showSuccessDialog = true
             error = (uiState as UiState.Error).message
         }
+    }
+
+    // UI hiển thị
+    if (showSuccessDialog) {
+        SuccessDialog(
+            title = "Thông báo!!!",
+            color = Color.Red,
+            message = error,
+            nameButton = "Đóng",
+            onDismiss = {
+                showSuccessDialog = false
+            }
+        )
     }
 
     Column(
@@ -121,6 +132,7 @@ fun LoginScreen(
                 isPhoneOrEmailValid = phoneNumberOrEmail.all { it.isDigit() } || phoneNumberOrEmail.contains("@")
                 isPasswordValid = password.length >= 6
                 canSubmit = isPhoneOrEmailValid && isPasswordValid
+
                 if (canSubmit) {
                     loginViewModel.userLogin(phoneNumberOrEmail, password)
                 } else {
