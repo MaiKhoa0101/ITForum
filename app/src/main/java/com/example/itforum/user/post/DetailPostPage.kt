@@ -79,7 +79,7 @@ fun DetailPostPage(
 
 
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(navHostController, sharedPreferences) }
+        initializer { PostViewModel(sharedPreferences) }
     })
 
     val post by viewModel.selectedPost.collectAsState()

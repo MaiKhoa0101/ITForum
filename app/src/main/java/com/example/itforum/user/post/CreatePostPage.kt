@@ -3,7 +3,6 @@ package com.example.itforum.user.post
 import android.content.SharedPreferences
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -102,8 +101,7 @@ import com.example.itforum.user.effect.UiStateMessage
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.modelData.request.CreatePostRequest
 import com.example.itforum.user.post.viewmodel.PostViewModel
-import com.example.itforum.user.profile.viewmodel.UserViewModel
-import kotlinx.coroutines.delay
+import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 
 data class icontext(
     val icon: ImageVector = Icons.Default.Visibility,

@@ -42,8 +42,6 @@ interface PostService {
     @GET("posts/all")
     suspend fun getAllPost(): Response<PostListWrapper>
 
-
-
     @POST("posts/search")
     suspend fun getPost(@Body getPostRequest : GetPostRequest) : Response<PostListResponse>
 
@@ -92,5 +90,5 @@ interface PostService {
     @GET("vote/all")
     suspend fun getAllVote(): Response<VoteListWrapper>
     @GET("/posts/single/{postId}")
-    suspend fun getDetailPostById(@Path("postId")postId: String): Response<PostWrapperResponse>
+    suspend fun getPostById(@Path("postId") postId: String): Response<Post>
 }

@@ -104,14 +104,14 @@ fun Root(sharedPreferences:SharedPreferences) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        try {
-            val token = FirebaseMessaging.getInstance().token.await()
-            Log.d("FCM", "Token from Composable: $token")
-        } catch (e: Exception) {
-            Log.e("FCM", "Token fetch failed", e)
-        }
-    }
+//    LaunchedEffect(Unit) {
+//        try {
+//            val token = FirebaseMessaging.getInstance().token.await()
+//            Log.d("FCM", "Token from Composable: $token")
+//        } catch (e: Exception) {
+//            Log.e("FCM", "Token fetch failed", e)
+//        }
+//    }
     ITForumTheme(darkTheme = darkTheme)
     {
         ModalNavigationDrawer(

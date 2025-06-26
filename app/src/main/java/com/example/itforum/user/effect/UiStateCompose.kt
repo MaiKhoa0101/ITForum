@@ -34,6 +34,6 @@ fun UiStateMessage(uiState: UiState, canSubmit: Boolean) {
             )
         }
 
-        else -> Unit
+        else -> return
     }
 }

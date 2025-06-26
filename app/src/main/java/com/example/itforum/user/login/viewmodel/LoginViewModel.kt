@@ -9,8 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.auth0.android.jwt.JWT
 import com.example.itforum.admin.adminCrashlytic.CrashLogger
 import com.example.itforum.admin.adminCrashlytic.UserSession
-
-
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.retrofit.RetrofitInstance.userService
 import com.example.itforum.user.effect.model.UiState
@@ -19,6 +17,7 @@ import com.example.itforum.user.modelData.request.RegisterUser
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.messaging.FirebaseMessaging
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,10 +43,11 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
     fun userLogin(emailOrPhone: String, password: String) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-
+            val fcmToken = FirebaseMessaging.getInstance().token.await()
             try {
-                val loginUser = LoginUser(emailOrPhone, password)
-                val response = RetrofitInstance.userService.login(loginUser)
+                val loginUser = LoginUser(emailOrPhone, password, fcmToken )
+                println("Login ne" + loginUser)
+                val response = userService.login(loginUser)
                 Log.d("LoginViewModel", "Response: $response")
                 Log.d("LoginViewModel", "Response: ${response.body()}")
                 if (response.isSuccessful) {
@@ -80,6 +80,7 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                 showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
                 delay(500) // Cho phép UI xử lý trạng thái Success
             }
+            delay(500)
             _uiState.value = UiState.Idle
 
         }
@@ -92,10 +93,11 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                 val email = firebaseUser.email ?: "unknown@gmail.com"
                 val password = "12345678"
                 val phone = firebaseUser.phoneNumber
+                val fcmToken = FirebaseMessaging.getInstance().token.await()
 
                 val registerRequest = RegisterUser(name = name, email = email,phone = phone,password= password)
                 println("RegisterRequest: "+registerRequest)
-                val loginRequest = LoginUser(email, password)
+                val loginRequest = LoginUser(email, password, fcmToken)
                 println("LoginRequest: "+loginRequest)
 
                 val registerResponse = userService.register(registerRequest)
@@ -113,7 +115,6 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                         delay(500) // Cho phép UI xử lý trạng thái Success
                     }
                 }
-
 
             } catch (e: Exception) {
                 e.printStackTrace()

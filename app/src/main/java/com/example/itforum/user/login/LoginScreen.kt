@@ -43,13 +43,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.tasks.await
 
 
 @Composable
 fun LoginScreen(
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences,
-
     onRegisterClick: () -> Unit = {},
     onForgotPasswordClick: () -> Unit = {},
 ) {
@@ -76,7 +77,6 @@ fun LoginScreen(
     LaunchedEffect(uiState) {
         println("uiState da bi thay doi: $uiState")
         if (uiState is UiState.Success) {
-            println("Vao dc day")
             val role = sharedPreferences.getString("role", null)
             if (role != null) {
                 val destination = if (role == "admin") "admin_root" else "home"
@@ -164,8 +164,6 @@ fun LoginScreen(
                 }
             }
         )
-
-
 
         Spacer(modifier = Modifier.height(16.dp))
         RegisterText(onRegisterClick)

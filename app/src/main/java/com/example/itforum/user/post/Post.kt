@@ -75,11 +75,10 @@ fun PostListScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
     getPostRequest: GetPostRequest,
-    reloadKey: Any? = null
 ) {
 
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(navHostController, sharedPreferences) }
+        initializer { PostViewModel(sharedPreferences) }
     })
 
     val postsWithVotes by viewModel.postsWithVotes.collectAsState()
@@ -163,11 +162,11 @@ fun PostListScreen(
                         post = postWithVote.post,
                         vote = postWithVote.vote,
                         isBookMark = postWithVote.isBookMark,
-                        onUpvoteClick = {
-                            viewModel.handleUpVote("upvote", index, postWithVote.post.id)
+                        onUpvoteClick = { vote ->
+                            viewModel.handleUpVote(vote!!, index, postWithVote.post.id)
                         },
-                        onDownvoteClick = {
-                            viewModel.handleDownVote("downvote", index, postWithVote.post.id)
+                        onDownvoteClick = { vote ->
+                            viewModel.handleDownVote(vote!!, index, postWithVote.post.id)
                         },
                         onCommentClick = {
                             selectedPostId = postWithVote.post.id

@@ -20,7 +20,7 @@ import com.example.itforum.admin.components.TableRowConvertible
 import com.example.itforum.admin.components.convertToTableRows
 import com.example.itforum.user.modelData.response.UserResponse
 import com.example.itforum.user.post.icontext
-import com.example.itforum.user.profile.viewmodel.UserViewModel
+import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 
 @Composable
 fun AccountManagementScreen(
