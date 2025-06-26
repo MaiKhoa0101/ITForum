@@ -42,7 +42,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 
 class PostViewModel(
-    navHostController: NavHostController,
     private val sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
@@ -73,9 +72,6 @@ class PostViewModel(
 
     private val allPostsWithVotes = mutableListOf<PostWithVote>()
     private var userId = sharedPreferences.getString("userId", null)
-    init {
-        userId = sharedPreferences.getString("userId", null)
-    }
 
     private val _postsWithVotes = MutableStateFlow<List<PostWithVote>>(emptyList())
     val postsWithVotes: StateFlow<List<PostWithVote>> = _postsWithVotes
@@ -88,25 +84,6 @@ class PostViewModel(
 
     private val _listVote = MutableStateFlow<List<Vote>>(emptyList())
     val listVote: StateFlow<List<Vote>> = _listVote
-
-    fun getAllVote() {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitInstance.postService.getAllVote()
-                if (response.isSuccessful) {
-                    _listVote.value = response.body()?.listVote ?: emptyList()
-                }
-                else {
-                    showError("Response get không hợp lệ")            }
-            }
-            catch (e: IOException) {
-                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
-            }
-            catch (e: Exception) {
-                showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
-            }
-        }
-    }
 
     fun getAllPost() {
         viewModelScope.launch {
@@ -135,7 +112,7 @@ class PostViewModel(
                 if (res.isSuccessful) {
                     if (res.isSuccessful) {
                         _selectedPost.value = res.body()?.post
-                        Log.e("fetch post by id", _selectedPost.value.toString())
+                        println("fetch post by id" + _selectedPost.value.toString())
                     }
                 } else {
                     Log.e("fetch post by id", "Error: ${res.code()} - ${res.errorBody()?.string()}")

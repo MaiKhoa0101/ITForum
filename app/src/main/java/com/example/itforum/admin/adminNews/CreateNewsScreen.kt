@@ -2,13 +2,11 @@ package com.example.itforum.admin.adminNews
 
 import android.content.SharedPreferences
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,12 +22,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import androidx.room.Room
-import com.example.itforum.admin.adminComplaint.viewmodel.ComplaintViewModel
 import com.example.itforum.user.complaint.AddImage
 import com.example.itforum.user.complaint.SuccessDialog
 import com.example.itforum.user.complaint.TitleChild
 import com.example.itforum.user.effect.model.UiState
-import com.example.itforum.user.modelData.request.ComplaintRequest
 import com.example.itforum.user.modelData.request.NewsRequest
 import com.example.itforum.user.news.NewsDatabase
 import com.example.itforum.user.news.viewmodel.NewsViewModel
@@ -37,7 +33,7 @@ import com.example.itforum.user.news.viewmodel.NewsViewModelFactory
 import com.example.itforum.user.post.IconWithText
 import com.example.itforum.user.post.TopPost
 import com.example.itforum.user.post.WritePost
-import com.example.itforum.user.profile.viewmodel.UserViewModel
+import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 
 @Composable
 fun CreateNewsScreen(

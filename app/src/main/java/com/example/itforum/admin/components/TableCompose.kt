@@ -45,7 +45,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.post.IconWithText
 import com.example.itforum.user.post.icontext
-import com.example.itforum.user.profile.viewmodel.UserViewModel
+import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 
 interface TableRowConvertible {
     fun toTableRow(): List<String?>

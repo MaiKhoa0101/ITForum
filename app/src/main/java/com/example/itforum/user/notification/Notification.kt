@@ -1,5 +1,6 @@
 package com.example.itforum.user.notification
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +23,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,44 +35,30 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import com.example.itforum.user.notification.viewmodel.NotificationViewModel
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.example.itforum.user.modelData.response.Notification
 
-
-data class Notify(
-    val icon: ImageVector,
-    val title: String,
-    val content: String = "",
-    val time: String,
-)
 
 @Composable
-fun NotificationPage(modifier: Modifier, navHostController: NavHostController){
-    var ListNotiNew: List<Notify> = listOf(
-        Notify(Icons.Default.AccountCircle,"Zepenllin đã bình luận vào bài viết của bạn", "code sai chính tả ní ơi", "2 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Zepenllin đã bình luận vào bài viết của bạn", "cái này bạn phải code là a+b+c+c+cfddfdfdfdfdffdf...", "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
-        Notify(Icons.Default.AccountCircle,"Khoa đã thích bài viết của bạn", time = "5 phút"),
+fun NotificationPage(modifier: Modifier, sharedPreferences: SharedPreferences, navHostController: NavHostController ){
 
-        )
-    var ListNotiOld: List<Notify> = listOf(
-        Notify(Icons.Default.AccountCircle,"Thông báo hệ thống", "Cập nhật: Hệ thống sẽ bảo trì lúc 2AM", "Hôm qua"),
-        Notify(Icons.Default.AccountCircle,"Nhu vừa nhắc đến bạn", "bài này đáng lẽ phải làm như này", "1 ngày"),
-    )
+    val notificationViewModel: NotificationViewModel = viewModel(factory = viewModelFactory {
+        initializer { NotificationViewModel(sharedPreferences) }
+    })
+    val notifications by notificationViewModel.notificationList.collectAsState()
 
+    val userId = sharedPreferences.getString("userId", null)
+    LaunchedEffect(Unit) {
+        if (userId != null) {
+            notificationViewModel.getNotification(userId = userId)
+        }
+    }
 
     Column (
         modifier = Modifier
@@ -107,8 +96,12 @@ fun NotificationPage(modifier: Modifier, navHostController: NavHostController){
                     Spacer(modifier = Modifier.height(10.dp))
                 }
 
-                items(ListNotiNew) { notify ->
-                    NotifyChild(notify, navHostController)
+                items(notifications) { notify ->
+                    NotifyChild(notify, onClick = {
+                        notificationViewModel.readNotification(id = notify.id)
+                        println("notify id: ${notify.id}" + "notify postId: ${notify.postId}")
+                        navHostController.navigate("detail_post/${notify.postId}")
+                    })
                 }
 
                 item {
@@ -122,9 +115,9 @@ fun NotificationPage(modifier: Modifier, navHostController: NavHostController){
                     Spacer(modifier = Modifier.height(10.dp))
                 }
 
-                items(ListNotiOld) { notify ->
-                    NotifyChild(notify, navHostController)
-                }
+//                items(ListNotiOld) { notify ->
+//                    NotifyChild(notify, navHostController)
+//                }
             }
         }
     }
@@ -132,25 +125,34 @@ fun NotificationPage(modifier: Modifier, navHostController: NavHostController){
 
 @Composable
 fun NotifyChild(
-    notify: Notify,
-    navHostController: NavHostController
+    notify: Notification,
+    onClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
-            .clickable { navHostController.navigate("detail_notify") },
     ) {
         Divider(thickness = 2.dp)
         Row(
             modifier = Modifier
-                .background( MaterialTheme.colorScheme.tertiaryContainer)
+                .background(
+                    if (!notify.isRead) {
+                        MaterialTheme.colorScheme.tertiaryContainer
+                    }
+                    else{
+                        MaterialTheme.colorScheme.background
+                    }
+                )
                 .padding(vertical = 15.dp, horizontal = 12.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clickable(){
+                    onClick()
+                },
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             Icon(
-                imageVector = notify.icon,
+                imageVector = Icons.Default.AccountCircle,
                 contentDescription = "Avatar tài khoản",
                 modifier = Modifier.size(45.dp)
             )
@@ -183,7 +185,7 @@ fun NotifyChild(
                         tint =  MaterialTheme.colorScheme.onBackground
                     )
                     Text(
-                        text = notify.time,
+                        text = notify.createdAt,
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )

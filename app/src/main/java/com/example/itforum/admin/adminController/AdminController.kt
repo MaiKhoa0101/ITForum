@@ -68,7 +68,7 @@ import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.modelData.response.Complaint
 import com.example.itforum.user.modelData.response.PostResponse
 import com.example.itforum.user.post.viewmodel.PostViewModel
-import com.example.itforum.user.profile.viewmodel.UserViewModel
+import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -83,7 +83,7 @@ fun ControllerManagerScreen(
         initializer { UserViewModel(sharedPreferences) }
     })
     val postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(navHostController, sharedPreferences) }
+        initializer { PostViewModel(sharedPreferences) }
     })
     val complaintViewModel: ComplaintViewModel = viewModel()
     val rpPostViewModel: ReportedPostViewModel = viewModel(
