@@ -75,7 +75,6 @@ fun PostListScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
     getPostRequest: GetPostRequest,
-    reloadKey: Any? = null
 ) {
 
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {

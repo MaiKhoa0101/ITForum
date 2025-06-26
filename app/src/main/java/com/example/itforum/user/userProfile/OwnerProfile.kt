@@ -67,14 +67,15 @@ import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 fun UserProfileScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
-    viewModel: UserViewModel = viewModel(factory = viewModelFactory {
+
+) {
+    val viewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
     })
-) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Thông tin", "Bài viết")
     val user by viewModel.user.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     var showReportDeatil by remember { mutableStateOf(false) }
     var postId by remember { mutableStateOf("") }
@@ -180,15 +181,16 @@ fun ProfileContent(
                UserInfoDetail(user)
            }
            1 -> {
-               PostListScreen(
-                   sharedPreferences,
-                   navController,
-                   GetPostRequest(
-                       page = 1,
-                       userId = sharedPreferences.getString("userId", null)
-                   ),
-                   reloadKey = selectedTabIndex,
-               )
+               if (user != null) {
+                   PostListScreen(
+                       sharedPreferences,
+                       navController,
+                       GetPostRequest(
+                           page = 1,
+                           userId = user.id
+                       )
+                   )
+               }
            }
        }
     }

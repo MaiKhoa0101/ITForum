@@ -158,8 +158,7 @@ fun OtherProfileContent(
                         GetPostRequest(
                             page = 1,
                             userId = user.id
-                        ),
-                        reloadKey = selectedTabIndex,
+                        )
                     )
                 }
             }
