@@ -323,7 +323,7 @@ fun UserInfoDetail(user: UserProfileResponse?) {
 @Composable
 fun TagSkillSection(
     title: String,
-    tags: List<Skill>?
+    tags: List<String>?
 ) {
     Column () {
         Text(
@@ -337,7 +337,7 @@ fun TagSkillSection(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             tags?.forEach { tag ->
-                TagItem(text = tag.name)
+                TagItem(text = tag)
             }
         }
     }

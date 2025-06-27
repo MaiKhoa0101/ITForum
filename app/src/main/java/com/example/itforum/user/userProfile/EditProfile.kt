@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,6 +33,8 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -52,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
@@ -61,6 +65,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -75,6 +80,7 @@ import com.example.itforum.user.modelData.request.UserUpdateRequest
 import com.example.itforum.user.modelData.response.Certificate
 import com.example.itforum.user.modelData.response.Skill
 import com.example.itforum.user.modelData.response.UserProfileResponse
+import com.example.itforum.user.userProfile.viewmodel.SkillViewModel
 import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 
 var paddingHorizontal = 26.dp
@@ -90,7 +96,7 @@ class EditProfileViewModel : ViewModel() {
     var passInput by mutableStateOf("")
     var repassInput by mutableStateOf("")
     var introduce by mutableStateOf("")
-    var skillsInput by mutableStateOf<List<Skill>?>(null)
+    var skillsInput by mutableStateOf<List<String>?>(null)
     var certificateInput by mutableStateOf<List<Certificate>?>(null)
 
     // Lưu trữ dữ liệu gốc để so sánh
@@ -103,7 +109,7 @@ class EditProfileViewModel : ViewModel() {
 
 
 
-    var originalSkills: List<Skill>? = null
+    var originalSkills: List<String>? = null
     var originalCertificate: List<Certificate>? = null
 
 
@@ -152,8 +158,18 @@ class EditProfileViewModel : ViewModel() {
 }
 @Composable
 fun EditProfileBody(modifier: Modifier, user: UserProfileResponse?, viewModel: EditProfileViewModel) {
+    val skillViewModel: SkillViewModel = viewModel()
+    LaunchedEffect(Unit) {
+        skillViewModel.getAllSkill()
+    }
     var tempSkills by remember { mutableStateOf("") }
     var tempCertificate by remember { mutableStateOf("") }
+
+    var expandedFilterField by remember { mutableStateOf(false) }
+    var hasFocus by remember { mutableStateOf(false) }
+
+    val listSkill by skillViewModel.listSkill.collectAsState()
+    val filterOptions = listSkill.filter { it.name!!.contains(tempSkills, ignoreCase = true) }
     Column {
         ChangeAvatar(
             user?.avatar,
@@ -175,12 +191,45 @@ fun EditProfileBody(modifier: Modifier, user: UserProfileResponse?, viewModel: E
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FieldTagText("C++", tempSkills) { tempSkills = it }
+            FieldTagText(
+                placeHolder = "C++",
+                text = tempSkills,
+                expanded = expandedFilterField,
+                hasFocus = hasFocus,
+                onFocusChange = { focus ->
+                    hasFocus = focus
+                    expandedFilterField = focus
+                },
+                onDismiss = { expandedFilterField = false },
+                onFilterChange = {
+                    if(filterOptions.isNotEmpty()) {
+                        filterOptions.forEach { skill ->
+                            DropdownMenuItem(
+                                text = { skill.name?.let { Text(it) } },
+                                onClick = {
+                                    tempSkills = skill.name!!
+                                    expandedFilterField = false
+                                }
+                            )
+                        }
+                    } else{
+                        DropdownMenuItem(
+                            text = { Text("Không có dữ liệu") },
+                            onClick = {}
+                        )
+                    }
+                },
+                onTextChange = { newText ->
+                    tempSkills = newText
+                    expandedFilterField = true // Mỗi lần gõ thì mở dropdown nếu đang focus
+                }
+            )
             AddButton(
                 tempSkills,
                 onAdd = {
-                    if (it.isNotBlank() && !viewModel.skillsInput?.contains(Skill(name = it))!!) {
-                        viewModel.skillsInput = viewModel.skillsInput?.plus(Skill(name = it))
+                    if (it.isNotBlank() && !viewModel.skillsInput?.contains(it)!! && listSkill.any {skill -> skill.name.equals(it, ignoreCase = true) }) {
+                        viewModel.skillsInput = viewModel.skillsInput?.plus(it)
+                        tempSkills = ""
                     }
                     println("Viewmodel: " + viewModel.skillsInput)
 
@@ -192,9 +241,9 @@ fun EditProfileBody(modifier: Modifier, user: UserProfileResponse?, viewModel: E
             title = "Kĩ năng đã thêm:",
             tempSkills= viewModel.skillsInput,
             onDelete = {
-                if (it.isNotBlank() && viewModel.skillsInput?.contains(Skill(name = it))!!) {
+                if (it.isNotBlank() && viewModel.skillsInput?.contains(it)!!) {
                     viewModel.skillsInput =
-                        viewModel.skillsInput?.minus(Skill(name = it))
+                        viewModel.skillsInput?.minus(it)
                 }
             }
         )
@@ -205,7 +254,7 @@ fun EditProfileBody(modifier: Modifier, user: UserProfileResponse?, viewModel: E
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ){
-            FieldTagText("Đại học...", tempCertificate) { tempCertificate = it }
+//            FieldTagText("Đại học...", tempCertificate) { tempCertificate = it }
             AddButton(
                 tempCertificate,
                 onAdd = {
@@ -264,7 +313,7 @@ fun AddButton(tempSkills: String, onAdd: (String) -> Unit){
 
 
 @Composable
-fun TagSkill(title: String, tempSkills: List<Skill>?, onDelete: (String) -> Unit){
+fun TagSkill(title: String, tempSkills: List<String>?, onDelete: (String) -> Unit){
     Column (
         modifier = Modifier.padding(16.dp)
     ) {
@@ -279,7 +328,7 @@ fun TagSkill(title: String, tempSkills: List<Skill>?, onDelete: (String) -> Unit
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             tempSkills?.forEach { tag ->
-                TagEditableItem(text = tag.name, onDelete = onDelete)
+                TagEditableItem(text = tag, onDelete = onDelete)
             }
         }
     }
@@ -447,17 +496,35 @@ fun FieldText(
 fun FieldTagText(
     placeHolder: String,
     text: String,
+    expanded: Boolean,
+    hasFocus: Boolean,
+    onFilterChange: @Composable () -> Unit,
+    onFocusChange: (Boolean) -> Unit,
+    onDismiss: () -> Unit,
     onTextChange: (String) -> Unit
 ) {
 
-    TextField(
-        value = text,
-        placeholder = { Text(text = placeHolder) },
-        onValueChange = onTextChange,
-        modifier = Modifier.fillMaxWidth(0.8f)
-    )
+    Box {
+        TextField(
+            value = text,
+            placeholder = { Text(text = placeHolder) },
+            onValueChange = onTextChange,
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .onFocusChanged { focusState ->
+                    onFocusChange(focusState.isFocused)
+                }
+        )
 
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = onDismiss,
+            properties = PopupProperties(focusable = !hasFocus),
+            modifier = Modifier.heightIn(max = 230.dp)
+        ) {onFilterChange()}
+    }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -15,7 +15,7 @@ data class UserProfileResponse(
     val numberComment: Int = 0,
     val isBanned: Boolean = false,
     val certificate: List<Certificate> = emptyList(),
-    val skill: List<Skill> = emptyList()
+    val skill: List<String> = emptyList()
 )
 
 
@@ -26,14 +26,4 @@ data class fetchUserState(
 
 data class userUpdateResponse(
     val message: String
-)
-
-data class Certificate(
-    @SerializedName("_id") val id: String? = null,
-    val name: String,
-)
-
-data class Skill(
-    @SerializedName("_id") val id: String? = null,
-    val name: String,
 )
