@@ -61,6 +61,7 @@ import com.example.itforum.user.userProfile.OtherUserProfileScreen
 import com.example.itforum.user.userProfile.UserProfileScreen
 import com.example.itforum.user.setting.Setting
 import com.example.itforum.user.utilities.chat.ChatAIApp
+import com.example.itforum.user.utilities.search.SearchViewModel
 import org.json.JSONObject
 
 fun isTokenExpired(token: String): Boolean {
@@ -761,16 +762,22 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             val context = LocalContext.current
 
             LaunchedEffect(Unit) {
-                logScreenEnter(context, "search_screen") // Gửi screen_view
+                logScreenEnter(context, "search_screen")
             }
 
             DisposableEffect(Unit) {
                 onDispose {
-                    logScreenExit(context, "search_screen") // Gửi thời gian ở lại khi rời màn
+                    logScreenExit(context, "search_screen")
                 }
             }
 
-            SearchScreen(modifier)
+            val viewModel: SearchViewModel = viewModel(factory = viewModelFactory {
+                initializer { SearchViewModel(sharedPreferences) }
+            })
+            SearchScreen(
+                modifier = modifier,
+                viewModel = viewModel
+            )
         }
 
 
