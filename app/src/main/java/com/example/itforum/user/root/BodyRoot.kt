@@ -611,6 +611,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         ) { backStackEntry ->
             val email = backStackEntry.arguments?.getString("email") ?: ""
             val context = LocalContext.current
+            val scope = rememberCoroutineScope()
 
             LaunchedEffect(Unit) {
                 logScreenEnter(context, "enter_otp")
@@ -621,16 +622,32 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                     logScreenExit(context, "enter_otp")
                 }
             }
+
             EnterOtpScreen(
-
                 onBackClick = { navHostController.popBackStack() },
-
                 email = email,
                 onOtpSubmitted = { otp ->
                     navHostController.navigate("reset_password_screen?email=$email&otp=$otp")
+                },
+                onResendClick = {
+                    scope.launch {
+                        try {
+                            val result = AuthRepository.sendOtp(email)
+                            if (result.isSuccess) {
+                                Toast.makeText(context, "Mã OTP đã được gửi lại", Toast.LENGTH_SHORT).show()
+                            } else {
+                                val errorMsg = result.exceptionOrNull()?.message ?: "Không thể gửi lại OTP"
+                                Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Lỗi khi gửi lại OTP: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
+
             )
         }
+
 
 
 
@@ -645,28 +662,29 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             val email = backStackEntry.arguments?.getString("email") ?: ""
             val otp = backStackEntry.arguments?.getString("otp") ?: ""
 
+            val coroutineScope = rememberCoroutineScope()
+
             ResetPasswordScreen(
                 onBack = { navHostController.popBackStack() },
                 email = email,
                 otp = otp,
                 onReset = { newPassword ->
-                    // Gọi API reset mật khẩu
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val result = AuthRepository.resetPassword(email, otp, newPassword)
-                        withContext(Dispatchers.Main) {
-                            result.onSuccess {
-                                Toast.makeText(context, "Đặt lại mật khẩu thành công", Toast.LENGTH_SHORT).show()
-                                // Điều hướng về màn login
-                                navHostController.navigate("login") {
-                                    popUpTo("reset_password_screen") { inclusive = true }
-                                }
-                            }.onFailure {
-                                Toast.makeText(context, "Thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
+                    coroutineScope.launch {
+                        val result = withContext(Dispatchers.IO) {
+                            AuthRepository.resetPassword(email, otp, newPassword)
+                        }
+                        result.onSuccess {
+                            Toast.makeText(context, "Đặt lại mật khẩu thành công", Toast.LENGTH_SHORT).show()
+                            navHostController.navigate("login") {
+                                popUpTo("reset_password_screen") { inclusive = true }
                             }
+                        }.onFailure {
+                            Toast.makeText(context, "Thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
             )
+
         }
 
 

@@ -39,6 +39,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.example.itforum.service.AuthRepository
+import com.google.firebase.annotations.concurrent.Background
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 
 //@Composable
@@ -124,15 +129,20 @@ fun EnterOtpScreen(
     onOtpSubmitted: (String) -> Unit,
     onBackClick: () -> Unit = {},
     onResendClick: () -> Unit = {}
+
 ) {
     var otp by remember { mutableStateOf("") }
     val context = LocalContext.current
 
-    var remainingTime by remember { mutableStateOf(90) }  // 90 giây đếm ngược
+    var remainingTime by remember { mutableStateOf(90) }
     var isTimeout by remember { mutableStateOf(false) }
+    var resendTrigger by remember { mutableStateOf(0) } // trigger để reset timer
 
-    // Đếm ngược thời gian
-    LaunchedEffect(Unit) {
+    // Timer sẽ chạy lại mỗi lần resendTrigger tăng
+    LaunchedEffect(resendTrigger) {
+        remainingTime = 90
+        isTimeout = false
+
         while (remainingTime > 0) {
             kotlinx.coroutines.delay(1000)
             remainingTime--
@@ -192,28 +202,50 @@ fun EnterOtpScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        val coroutineScope = rememberCoroutineScope()
+
         Button(
             onClick = {
                 if (otp.length == 6) {
-                    onOtpSubmitted(otp)
+                    coroutineScope.launch {
+                        try {
+                            val result = AuthRepository.verifyOtp(email, otp)
+                            if (result.isSuccess) {
+                                onOtpSubmitted(otp)
+                            } else {
+                                Toast.makeText(context, "Mã OTP không hợp lệ", Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Lỗi khi xác minh OTP: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                    }
                 } else {
                     Toast.makeText(context, "Mã OTP không hợp lệ", Toast.LENGTH_SHORT).show()
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF6FA9FF)),
-            enabled = !isTimeout
+            enabled = !isTimeout,
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF6FA9FF))
         ) {
             Text("Xác minh OTP", color = Color.White)
+
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(onClick = onResendClick) {
-            Text("Gửi lại mã OTP", color = Color(0xFF6FA9FF))
+        TextButton(onClick = {
+            // Gọi API gửi lại mã OTP ở đây nếu cần
+            onResendClick()
+
+            // Reset lại timer
+            resendTrigger++
+        }) {
+            Text("Gửi lại mã OTP", color = Color.Black)
         }
     }
 }
+
+
 
 
 
