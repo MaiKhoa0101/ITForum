@@ -1,5 +1,6 @@
 package com.example.itforum.utilities
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -35,9 +37,15 @@ import com.example.itforum.user.home.tag.AllTagsWidget
 import com.example.itforum.user.home.tag.TagRepository
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.filled.Search
+import com.example.itforum.user.modelData.response.PostWithVote
+import com.example.itforum.user.utilities.search.SearchViewModel
 
 @Composable
-fun SearchScreen(modifier: Modifier = Modifier) {
+fun SearchScreen(
+    modifier: Modifier = Modifier,
+    viewModel: SearchViewModel
+) {
     val context = LocalContext.current
     var searchQuery by remember { mutableStateOf("") }
     var historyItems by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -45,13 +53,34 @@ fun SearchScreen(modifier: Modifier = Modifier) {
     val tagList = TagRepository.tagList
     var showMenu by remember { mutableStateOf(false) }
 
+    // Observe search results for logging
+    val postsByTitle = viewModel.postsByTitle.collectAsState()
+    val postsByTags = viewModel.postsByTags.collectAsState()
+
     // Load history when screen loads
     LaunchedEffect(true) {
         historyItems = SearchHistoryManager.getSearchHistory(context)
+        viewModel.resultByTitle("P")
+    }
+
+    // When searchQuery changes, trigger both searches and log results
+    LaunchedEffect(searchQuery) {
+        if (searchQuery.isNotBlank()) {
+            viewModel.resultByTitle(searchQuery)
+            viewModel.resultByTags(searchQuery)
+        }
+    }
+
+    // Log results every time they update
+    LaunchedEffect(postsByTitle.value) {
+        Log.d("SearchScreen", "Posts By Title: ${postsByTitle.value}")
+    }
+    LaunchedEffect(postsByTags.value) {
+        Log.d("SearchScreen", "Posts By Tags: ${postsByTags.value}")
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(Color.White)
             .width(300.dp)
@@ -67,6 +96,8 @@ fun SearchScreen(modifier: Modifier = Modifier) {
                     onSearch = { query ->
                         SearchHistoryManager.addSearchQuery(context, query)
                         historyItems = SearchHistoryManager.getSearchHistory(context)
+                        // Set searchQuery to trigger search (optional: you could just call viewModel search here too)
+                        searchQuery = query
                     }
                 )
             }
@@ -119,9 +150,11 @@ fun SearchScreen(modifier: Modifier = Modifier) {
                     Text(
                         text = keyword,
                         fontSize = 20.sp,
-                        modifier = Modifier.weight(1f).clickable {
-                            searchQuery = keyword
-                        }
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable {
+                                searchQuery = keyword
+                            }
                     )
                     IconButton(onClick = {
                         coroutineScope.launch {
@@ -161,12 +194,23 @@ fun SearchScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun ResultSearchWidget(postWithVote: PostWithVote,title: String){
+    val listState = rememberLazyListState()
+    LazyColumn (
+        state = listState,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 16.dp)
+    ){
+
+    }
+
+}
+@Composable
 fun Headbar(
     searchQuery: String,
     onChange: (String) -> Unit,
     onSearch: suspend (String) -> Unit
 ) {
-    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -175,17 +219,13 @@ fun Headbar(
             .padding(horizontal = 20.dp)
             .fillMaxWidth(),
         value = searchQuery,
-
         onValueChange = onChange,
         placeholder = {
             Text("Tìm kiếm", fontSize = 20.sp)
         },
         leadingIcon = {
-            Image(
-                painter = painterResource(id = R.drawable.searchicon),
-                contentDescription = "Icon tìm kiếm",
-                modifier = Modifier.size(20.dp)
-            )
+            // Replace with your icon
+            Icon(Icons.Default.Search, contentDescription = "Tìm kiếm", modifier = Modifier.size(20.dp))
         },
         singleLine = true,
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
@@ -193,9 +233,7 @@ fun Headbar(
             onSearch = {
                 keyboardController?.hide()
                 if (searchQuery.isNotBlank()) {
-                    coroutineScope.launch {
-                        onSearch(searchQuery)
-                    }
+                    coroutineScope.launch { onSearch(searchQuery) }
                 }
             }
         ),

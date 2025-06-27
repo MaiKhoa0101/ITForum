@@ -78,7 +78,7 @@ interface PostService {
         @Part videoUrls: List<MultipartBody.Part?>
     ): Response<CreatePostResponse>
 
-    @POST("posts/reply")
+    @POST("comments/reply")
     suspend fun postReply(@Body postReply : PostReply): Response<PostReplyResponse>
     @PATCH("posts/hide/{id}")
     suspend fun hidePost(@Path("id") postId: String): Response<Unit>
