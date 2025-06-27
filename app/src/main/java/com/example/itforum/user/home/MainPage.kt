@@ -44,12 +44,12 @@ import com.example.itforum.R
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
 import com.example.itforum.user.modelData.request.GetPostRequest
+import com.example.itforum.user.news.AdvancedMarqueeTextList
 import com.example.itforum.user.news.NewsDatabase
 import com.example.itforum.user.news.viewmodel.NewsViewModel
 import com.example.itforum.user.news.viewmodel.NewsViewModelFactory
 import com.example.itforum.user.permission.RequestPermissionUI
 import com.example.itforum.user.permission.checkPermission
-import com.example.itforum.user.post.AdvancedMarqueeTextList
 import com.example.itforum.user.post.PostListScreen
 import com.example.itforum.user.post.viewmodel.PostViewModel
 
@@ -107,7 +107,7 @@ fun HomePage(
                     text = "Tin tức",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 AdvancedMarqueeTextList(
                     listNews!!, navHostController,

@@ -3,6 +3,7 @@ package com.example.itforum.user.post
 import android.R.bool
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,7 +18,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowCircleDown
+import androidx.compose.material.icons.filled.ArrowCircleUp
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,16 +67,18 @@ fun PostCardWithVote(
     var isSavedPost by remember { mutableStateOf(isBookMark) }
     Log.d("bookmark", isSavedPost.toString())
 
-
-
-
     Card(
         elevation = 4.dp,
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth().clickable{onCardClick()}
+            .fillMaxWidth()
+            .clickable{onCardClick()},
+        backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(20.dp)
+        ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -98,6 +108,7 @@ fun PostCardWithVote(
                             text = post.userName ?: "Unknown User",
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier
                                 .clickable {
                                     val myUserId = sharedPreferences.getString("userId", null)
@@ -108,7 +119,7 @@ fun PostCardWithVote(
                         )
                         Text(
                             text = "${getTimeAgo(post.createdAt ?: "")} • ${""}",
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
                             fontSize = 11.sp
                         )
                     }
@@ -117,21 +128,16 @@ fun PostCardWithVote(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { /* Handle resource click */ }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.resource),
-                            contentDescription = "resource",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
                     IconButton(onClick = {
                         post.id?.let { onReportClick(it) }
                     }
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.more),
+                            imageVector = Icons.Default.MoreHoriz,
                             contentDescription = "more",
-                            modifier = Modifier.size(21.dp)
+                            modifier = Modifier
+                                .size(21.dp),
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     }
                 }
@@ -143,7 +149,16 @@ fun PostCardWithVote(
             Text(
                 text = post.title ?: "",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            // Post content
+            Text(
+                text = post.content ?: "",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -159,7 +174,8 @@ fun PostCardWithVote(
             ) {
                 // Upvote/Downvote section
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = {
+                    IconButton(
+                        onClick = {
                         if(isVote == "upvote"){
                             upvotes --
                             isVote = "none"
@@ -169,18 +185,20 @@ fun PostCardWithVote(
                         }
                         onUpvoteClick(isVote)
                         isChange = true
-                    } ) {
+                        } )
+                    {
                         Icon(
-                            painter = painterResource(id = R.drawable.upvote),
+                            imageVector = Icons.Default.ArrowCircleUp,
                             contentDescription = "Upvote",
                             modifier = Modifier.size(30.dp),
-                            tint = if (isVote == "upvote") Color.Green else Color.Unspecified
-                        )
+                            tint = if (isVote == "upvote") Color.Green else MaterialTheme.colorScheme.onBackground
+                            )
                     }
                     Text(
                         text = "${upvotes}",
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     IconButton(onClick = {
                         if(isVote == "downvote"){
@@ -194,10 +212,10 @@ fun PostCardWithVote(
                         onDownvoteClick(isVote)
                     }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.downvote),
+                            imageVector = Icons.Default.ArrowCircleDown,
                             contentDescription = "Downvote",
                             modifier = Modifier.size(30.dp),
-                            tint = if (isVote == "downvote") Color.Red else Color.Unspecified
+                            tint = if (isVote == "downvote") Color.Red else MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -206,10 +224,10 @@ fun PostCardWithVote(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     IconButton(onClick = onCommentClick) {
                         Icon(
-                            painter = painterResource(id = R.drawable.comment),
+                            imageVector = Icons.Default.Comment,
                             contentDescription = "Comment",
                             modifier = Modifier.size(30.dp),
-                            tint = Color.Unspecified
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                     IconButton(onClick = {onBookmarkClick()
@@ -222,10 +240,10 @@ fun PostCardWithVote(
                     )
                     {
                         Icon(
-                            painter = painterResource(id = R.drawable.bookmark),
+                            imageVector = Icons.Default.Bookmark,
                             contentDescription = "Bookmark",
                             modifier = Modifier.size(30.dp),
-                            tint = if (isSavedPost) Color.Green else Color.Unspecified
+                            tint = if (isSavedPost) Color.Green else MaterialTheme.colorScheme.onBackground
                         )
                     }
 

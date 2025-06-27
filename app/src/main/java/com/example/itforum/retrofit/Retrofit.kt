@@ -2,6 +2,7 @@ package com.example.itforum.retrofit
 
 
 import com.example.itforum.service.AnalyticsApi
+import com.example.itforum.user.login.otp.AuthService
 import com.example.itforum.service.ComplaintService
 import com.example.itforum.service.FollowService
 import com.example.itforum.service.UserService
@@ -19,9 +20,15 @@ import com.example.itforum.service.PostService
 import com.example.itforum.service.ReportAccountService
 import com.example.itforum.service.SkillService
 
+import retrofit2.converter.scalars.ScalarsConverterFactory
+
+//import com.example.itforum.service.AuthApi
+
+
 object RetrofitInstance {
     private const val THIRD_URL  = "http://192.168.1.216:4000"
     private const val URL_Phone = "http://192.168.36.105:4000"
+
     //    private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
     private const val SECOND_URL = "http://192.168.1.171:4000"
     val okHttpClient = OkHttpClient.Builder()
@@ -36,6 +43,7 @@ object RetrofitInstance {
 //        .baseUrl(URL_Phone)
 //        .baseUrl(THIRD_URL)
         .client(okHttpClient) // ← Đảm bảo dùng client có timeout
+        .addConverterFactory(ScalarsConverterFactory.create())
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -57,6 +65,8 @@ object RetrofitInstance {
             .create(AnalyticsApi::class.java)
     }
 
-val followService: FollowService by lazy { retrofit.create(FollowService::class.java) }
+    val followService: FollowService by lazy { retrofit.create(FollowService::class.java) }
+    val authService: AuthService by lazy { retrofit.create(AuthService::class.java) }
+
 
 }
