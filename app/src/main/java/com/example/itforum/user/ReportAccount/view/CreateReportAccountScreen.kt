@@ -1,26 +1,11 @@
 package com.example.itforum.user.ReportAccount.view
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,6 +14,7 @@ import com.example.itforum.repository.ReportRepository
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.ui.theme.MainTheme
 import kotlinx.coroutines.launch
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateReportAccountScreen(
@@ -43,10 +29,33 @@ fun CreateReportAccountScreen(
     var successMessage by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    val suggestionReasons = listOf(
+        "Spam hoặc quảng cáo",
+        "Tài khoản giả mạo",
+        "Quấy rối hoặc bắt nạt",
+        "Đăng nội dung nhạy cảm",
+        "Tuyên truyền thù ghét",
+        "Lừa đảo hoặc gian lận",
+        "Tài khoản vi phạm điều khoản sử dụng",
+        "Tài khoản đăng bài không liên quan",
+        "Lợi dụng nền tảng để bán hàng trái phép"
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Tố cáo tài khoản", color = MaterialTheme.colorScheme.onPrimaryContainer) },
+                title = {
+                    Text("Tố cáo tài khoản", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                },
+                navigationIcon = {
+                    IconButton(onClick = { onBack() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBackIosNew,
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MainTheme)
             )
         }
@@ -62,6 +71,18 @@ fun CreateReportAccountScreen(
                 "Lý do tố cáo:",
                 style = MaterialTheme.typography.titleLarge
             )
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Chọn lý do có sẵn:")
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    suggestionReasons.forEach { item ->
+                        AssistChip(
+                            onClick = { reason = item },
+                            label = { Text(item) }
+                        )
+                    }
+                }
+            }
 
             OutlinedTextField(
                 value = reason,

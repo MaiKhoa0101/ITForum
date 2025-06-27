@@ -9,6 +9,7 @@ import android.webkit.MimeTypeMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
+import com.example.itforum.repository.PostRepository
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.service.toEntity
 import com.example.itforum.service.toModel
@@ -42,7 +43,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 
 class PostViewModel(
-    navHostController: NavHostController,
     private val sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
@@ -73,9 +73,6 @@ class PostViewModel(
 
     private val allPostsWithVotes = mutableListOf<PostWithVote>()
     private var userId = sharedPreferences.getString("userId", null)
-    init {
-        userId = sharedPreferences.getString("userId", null)
-    }
 
     private val _postsWithVotes = MutableStateFlow<List<PostWithVote>>(emptyList())
     val postsWithVotes: StateFlow<List<PostWithVote>> = _postsWithVotes
@@ -88,25 +85,7 @@ class PostViewModel(
 
     private val _listVote = MutableStateFlow<List<Vote>>(emptyList())
     val listVote: StateFlow<List<Vote>> = _listVote
-
-    fun getAllVote() {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitInstance.postService.getAllVote()
-                if (response.isSuccessful) {
-                    _listVote.value = response.body()?.listVote ?: emptyList()
-                }
-                else {
-                    showError("Response get không hợp lệ")            }
-            }
-            catch (e: IOException) {
-                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
-            }
-            catch (e: Exception) {
-                showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
-            }
-        }
-    }
+    private val postRepository = PostRepository()
 
     fun getAllPost() {
         viewModelScope.launch {
@@ -135,7 +114,7 @@ class PostViewModel(
                 if (res.isSuccessful) {
                     if (res.isSuccessful) {
                         _selectedPost.value = res.body()?.post
-                        Log.e("fetch post by id", _selectedPost.value.toString())
+                        println("fetch post by id" + _selectedPost.value.toString())
                     }
                 } else {
                     Log.e("fetch post by id", "Error: ${res.code()} - ${res.errorBody()?.string()}")
@@ -145,18 +124,6 @@ class PostViewModel(
             } catch (e: Exception) {
                 Log.e("fetch post by id", "Unexpected error: ${e.message}")
             }
-        }
-    }
-
-    private suspend fun getVoteDataByPostId(postId: String?, userId: String?): GetVoteResponse? {
-        if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) return null
-        return try {
-            val response = RetrofitInstance.postService.getVoteData(postId, userId)
-            Log.d("vote data", response.body().toString())
-            if (response.isSuccessful) response.body() else null
-        } catch (e: Exception) {
-            Log.d("Error", "Vote fetch error: ${e.message}")
-            null
         }
     }
 
@@ -181,19 +148,19 @@ class PostViewModel(
         viewModelScope.launch {
             try {
                 // fetch bookmarked post IDs
-                val bookmarkResponse = getSavePost(userId)
+                val bookmarkResponse = postRepository.getSavePost(userId)
                 val bookmarkedIds = bookmarkResponse?.postsId?.toSet() ?: emptySet()
-                Log.d("bookmarkId",bookmarkedIds.toString())
+
                 // fetch post
                 val response = RetrofitInstance.postService.getPost(getPostRequest)
                 if (response.isSuccessful && response.body() != null) {
                     val newPosts = response.body()?.posts ?: emptyList()
-                    Log.d("post", newPosts.toString())
+
                     val postsWithVotes = newPosts.map { post ->
                         async {
                             PostWithVote(
                                 post = post,
-                                vote = getVoteDataByPostId(post.id, userId),
+                                vote = postRepository.getVoteDataByPostId(post.id, userId),
                                 isBookMark = bookmarkedIds.contains(post.id)
 
                             )
@@ -253,7 +220,17 @@ class PostViewModel(
             }
         }
     }
-
+    private suspend fun getVoteDataByPostId(postId: String?, userId: String?): GetVoteResponse? {
+        if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) return null
+        return try {
+            val response = RetrofitInstance.postService.getVoteData(postId, userId)
+            Log.d("vote data", response.body().toString())
+            if (response.isSuccessful) response.body() else null
+        } catch (e: Exception) {
+            Log.d("Error", "Vote fetch error: ${e.message}")
+            null
+        }
+    }
     fun createPost(createPostRequest: CreatePostRequest, context: Context) {
         viewModelScope.launch {
             _uiStateCreate.value = UiState.Loading

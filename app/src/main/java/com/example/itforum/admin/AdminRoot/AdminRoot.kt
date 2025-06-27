@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -67,7 +66,7 @@ import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostDetailS
 import com.example.itforum.admin.adminReport.ReportPost.view.ReportedPostScreen
 import com.example.itforum.admin.components.LocalDrawerOpener
 import com.example.itforum.user.news.DetailNewsPage
-import com.example.itforum.user.profile.viewmodel.UserViewModel
+import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 import com.example.itforum.user.root.Root
 
 @Composable

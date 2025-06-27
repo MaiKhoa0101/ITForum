@@ -11,6 +11,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -79,7 +80,6 @@ fun FootBarRoot(currentRoute:String?,navHostController: NavHostController) {
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(y = -30.dp), // Elevate the button
-            backgroundColor = MaterialTheme.colorScheme.primaryContainer
         )
     }
 }
@@ -87,16 +87,29 @@ fun FootBarRoot(currentRoute:String?,navHostController: NavHostController) {
 @Composable
 fun CircleButton(
     onClick: () -> Unit,
-    backgroundColor: Color = Color(0xFF00C5CB),
     iconColor: Color = Color.White,
     size: Dp = 64.dp,
     modifier: Modifier = Modifier
 ) {
+    val darkTheme: Boolean = isSystemInDarkTheme()
     Box(
         modifier = modifier
             .size(size)
-            .shadow(elevation = 5.dp, shape = CircleShape)
-            .background(backgroundColor, shape = CircleShape)
+            .shadow(
+                elevation = 5.dp,
+                shape = CircleShape,
+                ambientColor = if (!darkTheme) {
+                    Color.Black
+                } else {
+                    Color.Transparent
+                },
+                spotColor = if (!darkTheme) {
+                    Color.Black
+                } else {
+                    Color.Transparent
+                }
+            )
+            .background(MaterialTheme.colorScheme.secondary, shape = CircleShape)
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
@@ -150,7 +163,12 @@ fun BoxItem(
                 painter = painterResource(icon),
                 contentDescription = "",
                 modifier = Modifier.height(20.dp),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
+                colorFilter = ColorFilter.tint(
+                    if (currentRoute == nameDirection)
+                        MaterialTheme.colorScheme.secondary
+                    else
+                        MaterialTheme.colorScheme.onBackground,
+                )
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(

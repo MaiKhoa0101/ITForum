@@ -30,11 +30,11 @@ fun PostDetailScreen(
     postId: String,
 ) {
     val postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(navHostController, sharedPreferences) }
+        initializer { PostViewModel(sharedPreferences) }
     })
 
     LaunchedEffect(postId) {
-        postViewModel.getPostById(postId)
+        postViewModel.fetchPostById(postId)
     }
 
     val post by postViewModel.post.collectAsState()

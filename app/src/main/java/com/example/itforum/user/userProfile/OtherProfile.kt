@@ -42,11 +42,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import com.example.itforum.admin.adminCrashlytic.UserSession.userId
 import com.example.itforum.user.modelData.request.GetPostRequest
 
 import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.post.PostListScreen
 import com.example.itforum.user.userProfile.viewmodel.UserViewModel
+import com.google.android.play.integrity.internal.u
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +56,7 @@ fun OtherUserProfileScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
     modifier: Modifier = Modifier,
-    userId: String
+    otherUserId: String
 ) {
     val viewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
@@ -65,7 +67,7 @@ fun OtherUserProfileScreen(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     LaunchedEffect(Unit) {
-        viewModel.getUser(userId)
+        viewModel.getUser(otherUserId)
     }
 
     Scaffold(
@@ -97,7 +99,7 @@ fun OtherUserProfileScreen(
                         tint = Color.White,
                         modifier = Modifier
                             .size(40.dp)
-                            .clickable { navHostController.popBackStack() }
+                            .clickable { navHostController.popBackStack()}
                     )
                 },
                 actions = {
@@ -106,7 +108,7 @@ fun OtherUserProfileScreen(
                         contentDescription = "more",
                         modifier = Modifier
                             .size(40.dp)
-                            .clickable { navHostController.popBackStack() }
+                            .clickable { navHostController.navigate("report_account/${otherUserId}") }
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

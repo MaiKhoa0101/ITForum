@@ -42,7 +42,7 @@ import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.post.IconWithText
 import com.example.itforum.user.post.TopPost
 import com.example.itforum.user.post.getTimeAgo
-import com.example.itforum.user.profile.viewmodel.UserViewModel
+import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 
 @Composable
 fun ManagementComplaintDetailScreen(

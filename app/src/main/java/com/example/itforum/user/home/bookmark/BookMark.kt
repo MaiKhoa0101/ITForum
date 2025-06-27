@@ -43,7 +43,7 @@ fun BookMarkScreen(
     sharedPreferences: SharedPreferences
 ) {
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(navHostController, sharedPreferences) }
+        initializer { PostViewModel(sharedPreferences) }
     })
     val bookmarkedPostIds = remember { mutableStateListOf<String>("") }
     val userId = sharedPreferences.getString("userId", null)
