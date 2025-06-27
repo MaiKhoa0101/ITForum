@@ -1,10 +1,10 @@
 package com.example.itforum.user.root
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
@@ -12,6 +12,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -19,19 +24,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.itforum.admin.AdminRoot.AdminScreen
 import com.example.itforum.user.home.HomePage
 import com.example.itforum.user.home.bookmark.BookMarkScreen
 import com.example.itforum.user.home.follow.FollowScreen
 import com.example.itforum.user.intro.IntroScreen
-import com.example.itforum.user.login.EnterEmailScreen
-import com.example.itforum.user.login.EnterOtpScreen
+
+import com.example.itforum.user.login.otp.EnterOtpScreen
 import com.example.itforum.user.login.EnterPhoneNumberScreen
-import com.example.itforum.user.login.ForgotPasswordScreen
+import com.example.itforum.user.login.otp.ForgotPasswordScreen
 import com.example.itforum.user.login.LoginScreen
-import com.example.itforum.user.login.ResetPasswordScreen
+import com.example.itforum.user.login.otp.ResetPasswordScreen
 import com.example.itforum.user.notification.DetailNotify
 import com.example.itforum.user.home.myfeed.MyFeedScreen
 import com.example.itforum.user.notification.NotificationPage
@@ -51,13 +58,12 @@ import com.example.itforum.utilities.note.NotesApp
 
 import com.example.itforum.admin.adminComplaint.ManagementComplaintDetailScreen
 import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
+import com.example.itforum.admin.adminCrashlytic.UserSession.email
+import com.example.itforum.service.AuthRepository
 import com.example.itforum.user.Analytics.logScreenEnter
 import com.example.itforum.user.Analytics.logScreenExit
-import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
 
 import com.example.itforum.user.complaint.ComplaintPage
-import com.example.itforum.user.modelData.response.GetVoteResponse
-import com.example.itforum.user.modelData.response.PostResponse
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.post.viewmodel.PostViewModel
@@ -65,6 +71,11 @@ import com.example.itforum.user.profile.OtherUserProfileScreen
 import com.example.itforum.user.profile.UserProfileScreen
 import com.example.itforum.user.setting.Setting
 import com.example.itforum.user.utilities.chat.ChatAIApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 fun isTokenExpired(token: String): Boolean {
@@ -495,25 +506,52 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 //                onEmailOptionClick = { navHostController.navigate("email_otp") }
 //            )
 //        }
+//        composable("forgot_password") {
+//            val context = LocalContext.current
+//
+//            LaunchedEffect(Unit) {
+//                logScreenEnter(context, "forgot_password") // Gửi sự kiện screen_view
+//            }
+//
+//            DisposableEffect(Unit) {
+//                onDispose {
+//                    logScreenExit(context, "forgot_password") // Gửi thời gian ở lại
+//                }
+//            }
+//
+//            ForgotPasswordScreen(
+//                onBackClick = {
+//                    navHostController.popBackStack()
+//                },
+//                onEmailSubmitted = { email ->
+//                    navHostController.navigate("enter_otp_screen?email=$email")
+//                }
+//            )
+//        }
         composable("forgot_password") {
             val context = LocalContext.current
+            val coroutineScope = rememberCoroutineScope()
 
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "forgot_password") // Gửi sự kiện screen_view
-            }
 
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "forgot_password") // Gửi thời gian ở lại
-                }
-            }
 
             ForgotPasswordScreen(
                 onBackClick = { navHostController.popBackStack() },
-                onPhoneOptionClick = { navHostController.navigate("phone_otp") },
-                onEmailOptionClick = { navHostController.navigate("email_otp") }
+                onEmailSubmitted = { email ->
+                    coroutineScope.launch {
+                        val result = AuthRepository.sendOtp(email)
+                        if (result.isSuccess) {
+                            navHostController.navigate("enter_otp?email=$email")
+                        } else {
+                            Toast.makeText(context, "Gửi OTP thất bại", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             )
+
+
         }
+
+
 
 
 
@@ -540,77 +578,98 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
-
-//        composable("email_otp") {
-//            EnterEmailScreen(onBackClick = { navHostController.popBackStack() },
-//                onContinueClick = {navHostController.navigate("enter_otp")})
-//        }
-        composable("email_otp") {
-            val context = LocalContext.current
-
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "email_otp") // Gửi screen_view
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "email_otp") // Gửi screen_exit kèm thời gian ở lại
-                }
-            }
-
-            EnterEmailScreen(
-                onBackClick = { navHostController.popBackStack() },
-                onContinueClick = { navHostController.navigate("enter_otp") }
-            )
-        }
-
-
-//        composable("enter_otp"){
-//            EnterOtpScreen(onBackClick = { navHostController.popBackStack() },
-//                onSubmitClick = {navHostController.navigate("sumit_otp")})
+//        composable("enter_otp?email={email}") { backStackEntry ->
+//            val email = backStackEntry.arguments?.getString("email") ?: ""
+//            val context = LocalContext.current
 //
-//        }
-        composable("enter_otp") {
+//            LaunchedEffect(Unit) {
+//                logScreenEnter(context, "enter_otp")
+//            }
+//
+//            DisposableEffect(Unit) {
+//                onDispose {
+//                    logScreenExit(context, "enter_otp")
+//                }
+//            }
+//
+//
+//
+//                EnterOtpScreen(
+//                    email = email,
+//                    onBackClick = { navHostController.popBackStack() },
+//                    onOtpSubmitted = { otp ->
+//                        navHostController.navigate("reset_password_screen?email=$email&otp=$otp")
+//                    },
+//                    onResendClick = {
+//                        // Gọi lại AuthRepository.sendOtp(email)
+//                    }
+//                )
+//            }
+        composable(
+            "enter_otp?email={email}",
+            arguments = listOf(navArgument("email") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
             val context = LocalContext.current
 
             LaunchedEffect(Unit) {
-                logScreenEnter(context, "enter_otp") // Gửi screen_view
+                logScreenEnter(context, "enter_otp")
             }
 
             DisposableEffect(Unit) {
                 onDispose {
-                    logScreenExit(context, "enter_otp") // Gửi thời gian ở lại (screen_exit)
+                    logScreenExit(context, "enter_otp")
                 }
             }
-
             EnterOtpScreen(
+
                 onBackClick = { navHostController.popBackStack() },
-                onSubmitClick = { navHostController.navigate("sumit_otp") }
+
+                email = email,
+                onOtpSubmitted = { otp ->
+                    navHostController.navigate("reset_password_screen?email=$email&otp=$otp")
+                }
             )
         }
 
 
-//        composable("sumit_otp"){
-//            ResetPasswordScreen(onBackClick= {navHostController.popBackStack()},)
-//            // thêm điều hướng cho nút
-//        }
-        composable("sumit_otp") {
+
+        composable(
+            "reset_password_screen?email={email}&otp={otp}",
+            arguments = listOf(
+                navArgument("email") { type = NavType.StringType },
+                navArgument("otp") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
             val context = LocalContext.current
-
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "reset_password") // Gửi sự kiện screen_view
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "reset_password") // Gửi thời gian ở lại
-                }
-            }
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            val otp = backStackEntry.arguments?.getString("otp") ?: ""
 
             ResetPasswordScreen(
-                onBackClick = { navHostController.popBackStack() }
+                onBack = { navHostController.popBackStack() },
+                email = email,
+                otp = otp,
+                onReset = { newPassword ->
+                    // Gọi API reset mật khẩu
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val result = AuthRepository.resetPassword(email, otp, newPassword)
+                        withContext(Dispatchers.Main) {
+                            result.onSuccess {
+                                Toast.makeText(context, "Đặt lại mật khẩu thành công", Toast.LENGTH_SHORT).show()
+                                // Điều hướng về màn login
+                                navHostController.navigate("login") {
+                                    popUpTo("reset_password_screen") { inclusive = true }
+                                }
+                            }.onFailure {
+                                Toast.makeText(context, "Thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
             )
         }
+
+
 
 
 
@@ -639,16 +698,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
-
-
-//        composable("otp") {
-//            OtpVerificationScreen(
-//                onBackClick = { navHostController.popBackStack() },
-//                onSubmitClick = { navHostController.navigate("success") }, //  Điều hướng sau khi xác thực thành công
-//                onResendClick = { /* xử lý gửi lại */ },
-//                onLoginClick = { navHostController.navigate("login") }
-//            )
-//        }
         composable("otp") {
             val context = LocalContext.current
 
@@ -675,11 +724,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
-//        composable("success") {
-//            RegistrationSuccessScreen(
-//                onLoginClick = { navHostController.navigate("login") }
-//            )
-//        }
+
         composable("success") {
             val context = LocalContext.current
 
