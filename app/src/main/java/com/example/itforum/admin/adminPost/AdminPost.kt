@@ -28,7 +28,7 @@ fun PostManagementScreen(
     sharedPreferences: SharedPreferences
 ) {
     val postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(navHostController, sharedPreferences) }
+        initializer { PostViewModel(sharedPreferences) }
     })
     LaunchedEffect(Unit) {
         postViewModel.getAllPost()

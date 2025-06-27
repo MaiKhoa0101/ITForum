@@ -15,17 +15,21 @@ import kotlin.jvm.java
 
 import com.example.itforum.service.ReportPostService
 import com.example.itforum.service.NewsService
+import com.example.itforum.service.NotificationService
 import com.example.itforum.service.PostService
 import com.example.itforum.service.ReportAccountService
+
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
 //import com.example.itforum.service.AuthApi
 
+
 object RetrofitInstance {
-    private const val SECOND_URL  = "http://192.168.1.216:4000"
-    private const val URL_Phone = "http://192.168.0.100:4000"
+    private const val THIRD_URL  = "http://192.168.1.216:4000"
+    private const val URL_Phone = "http://192.168.36.105:4000"
+
     //    private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
-//    private const val SECOND_URL = "https://192.168.1.216:4000"
+    private const val SECOND_URL = "http://192.168.1.6:4000"
     val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
@@ -34,8 +38,9 @@ object RetrofitInstance {
 
     val retrofit = Retrofit.Builder()
 //        .baseUrl(BASE_URL)
-        .baseUrl(URL_Phone)
-//        .baseUrl(SECOND_URL)
+        .baseUrl(SECOND_URL)
+//        .baseUrl(URL_Phone)
+//        .baseUrl(THIRD_URL)
         .client(okHttpClient) // ← Đảm bảo dùng client có timeout
         .addConverterFactory(ScalarsConverterFactory.create())
         .addConverterFactory(GsonConverterFactory.create())
@@ -47,11 +52,12 @@ object RetrofitInstance {
     val newsService: NewsService by lazy { retrofit.create(NewsService::class.java) }
     val postService: PostService by lazy {retrofit.create(PostService::class.java) }
     val complaintService: ComplaintService by lazy {retrofit.create(ComplaintService::class.java) }
-
+    val notificationService: NotificationService by lazy {retrofit.create(NotificationService::class.java) }
     val api: AnalyticsApi by lazy {
         Retrofit.Builder()
-//            .baseUrl(SECOND_URL)
-            .baseUrl(URL_Phone)
+            .baseUrl(SECOND_URL)
+//            .baseUrl(URL_Phone)
+//            .baseUrl(THIRD_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(AnalyticsApi::class.java)

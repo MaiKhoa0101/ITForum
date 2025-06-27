@@ -75,11 +75,10 @@ fun PostListScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
     getPostRequest: GetPostRequest,
-    reloadKey: Any? = null
 ) {
 
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(navHostController, sharedPreferences) }
+        initializer { PostViewModel(sharedPreferences) }
     })
 
     val postsWithVotes by viewModel.postsWithVotes.collectAsState()

@@ -45,7 +45,7 @@ import com.example.itforum.user.notification.NotificationPage
 import com.example.itforum.user.post.CreatePostPage
 import com.example.itforum.user.post.DetailPostPage
 import com.example.itforum.user.post.ListLikePage
-import com.example.itforum.user.profile.EditProfile
+import com.example.itforum.user.userProfile.EditProfile
 
 import com.example.itforum.user.register.OtpVerificationScreen
 import com.example.itforum.user.register.RegisterScreen
@@ -67,8 +67,8 @@ import com.example.itforum.user.complaint.ComplaintPage
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.post.viewmodel.PostViewModel
-import com.example.itforum.user.profile.OtherUserProfileScreen
-import com.example.itforum.user.profile.UserProfileScreen
+import com.example.itforum.user.userProfile.OtherUserProfileScreen
+import com.example.itforum.user.userProfile.UserProfileScreen
 import com.example.itforum.user.setting.Setting
 import com.example.itforum.user.utilities.chat.ChatAIApp
 import kotlinx.coroutines.CoroutineScope
@@ -131,7 +131,7 @@ fun SplashScreen(
 @Composable
 fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier, onToggleTheme: () -> Unit, darkTheme: Boolean = false){
     var postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(navHostController,sharedPreferences) }
+        initializer { PostViewModel(sharedPreferences) }
     })
     NavHost(navHostController, startDestination = "splash") {
         composable ("home") {
@@ -186,7 +186,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 }
             }
 
-            NotificationPage(modifier, navHostController)
+            NotificationPage(modifier, sharedPreferences,navHostController)
         }
 
         composable("chat") {

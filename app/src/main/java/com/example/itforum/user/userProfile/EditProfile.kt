@@ -1,4 +1,4 @@
-package com.example.itforum.user.profile
+package com.example.itforum.user.userProfile
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -53,7 +53,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -76,7 +75,7 @@ import com.example.itforum.user.modelData.request.UserUpdateRequest
 import com.example.itforum.user.modelData.response.Certificate
 import com.example.itforum.user.modelData.response.Skill
 import com.example.itforum.user.modelData.response.UserProfileResponse
-import com.example.itforum.user.profile.viewmodel.UserViewModel
+import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 
 var paddingHorizontal = 26.dp
 

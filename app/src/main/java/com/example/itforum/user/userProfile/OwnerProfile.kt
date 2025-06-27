@@ -1,8 +1,7 @@
-package com.example.itforum.user.profile
+package com.example.itforum.user.userProfile
 
 import android.content.SharedPreferences
 import android.util.Log
-import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,9 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Blind
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,10 +44,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -65,21 +60,22 @@ import com.example.itforum.user.modelData.response.Certificate
 import com.example.itforum.user.modelData.response.Skill
 import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.post.PostListScreen
-import com.example.itforum.user.profile.viewmodel.UserViewModel
+import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
-    viewModel: UserViewModel = viewModel(factory = viewModelFactory {
+
+) {
+    val viewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
     })
-) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Thông tin", "Bài viết")
     val user by viewModel.user.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     var showReportDeatil by remember { mutableStateOf(false) }
     var postId by remember { mutableStateOf("") }
@@ -185,15 +181,16 @@ fun ProfileContent(
                UserInfoDetail(user)
            }
            1 -> {
-               PostListScreen(
-                   sharedPreferences,
-                   navController,
-                   GetPostRequest(
-                       page = 1,
-                       userId = sharedPreferences.getString("userId", null)
-                   ),
-                   reloadKey = selectedTabIndex,
-               )
+               if (user != null) {
+                   PostListScreen(
+                       sharedPreferences,
+                       navController,
+                       GetPostRequest(
+                           page = 1,
+                           userId = user.id
+                       )
+                   )
+               }
            }
        }
     }

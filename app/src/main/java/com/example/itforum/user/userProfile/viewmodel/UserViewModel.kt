@@ -1,6 +1,5 @@
-package com.example.itforum.user.profile.viewmodel
+package com.example.itforum.user.userProfile.viewmodel
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
