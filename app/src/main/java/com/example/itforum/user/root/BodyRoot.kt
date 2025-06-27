@@ -155,11 +155,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             SplashScreen(navHostController, sharedPreferences)
         }
 
-        // NavGraphBuilder
-//        composable("comment/{postId}") { backStackEntry ->
-//            val postId = backStackEntry.arguments?.getString("postId") ?: ""
-//            PostCommentScreen(navHostController, postId,sharedPreferences)
-//        }
         composable("comment/{postId}") { backStackEntry ->
             val postId = backStackEntry.arguments?.getString("postId") ?: ""
 
@@ -194,14 +189,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             NotificationPage(modifier, navHostController)
         }
 
-//        composable("chat") {
-//            ChatAIApp(onExitToHome = {
-//                navHostController.navigate("home") {
-//                    popUpTo("home") { inclusive = false }
-//                    launchSingleTop = true
-//                }
-//            })
-//        }
         composable("chat") {
             val context = LocalContext.current
 
@@ -225,17 +212,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
-
-//        composable("note") {
-//            NotesApp(
-//                onBackToHome = {
-//                    navHostController.navigate("home") {
-//                        popUpTo("home") { inclusive = false }
-//                        launchSingleTop = true
-//                    }
-//                }
-//            )
-//        }
         composable("note") {
             val context = LocalContext.current
 
@@ -259,10 +235,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
-
-//        composable ("detail_notify") {
-//            DetailNotify(modifier, navHostController)
-//        }
         composable("detail_notify") {
             val context = LocalContext.current
 
@@ -279,9 +251,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             DetailNotify(modifier, navHostController)
         }
 
-//        composable ("tool") {
-//            ToolPage(modifier)
-//        }
         composable("tool") {
             val context = LocalContext.current
 
@@ -298,10 +267,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             ToolPage(modifier)
         }
 
-
-//        composable ("personal") {
-//            UserProfileScreen(sharedPreferences, navHostController)
-//        }
         composable("personal") {
             val context = LocalContext.current
 
@@ -318,10 +283,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             UserProfileScreen(sharedPreferences, navHostController)
         }
 
-
-//        composable ("otherprofile") {
-//            OtherUserProfileScreen(sharedPreferences, navHostController,modifier)
-//        }
         composable("otherprofile/{userId}") { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")
             val context = LocalContext.current
@@ -340,11 +301,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             }
         }
 
-
-
-//        composable ("editprofile") {
-//            EditProfile(modifier,sharedPreferences,navHostController)
-//        }
         composable("editprofile") {
             val context = LocalContext.current
 
@@ -377,9 +333,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             CreatePostPage(modifier, navHostController, sharedPreferences, postViewModel)
         }
 
-//        composable("detail_post"){
-//            DetailPostPage(navHostController)
-//        }
         composable("detail_post/{postId}") { backStackEntry ->
             val context = LocalContext.current
 
@@ -398,11 +351,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             DetailPostPage(navHostController, sharedPreferences, postId)
         }
 
-
-
-//        composable("listlike") {
-//            ListLikePage(navHostController)
-//        }
         composable("listlike") {
             val context = LocalContext.current
 
@@ -419,10 +367,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             ListLikePage(navHostController)
         }
 
-
-//        composable("intro") {
-//            IntroScreen(navHostController)
-//        }
         composable("intro") {
             val context = LocalContext.current
 
@@ -440,14 +384,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         }
 
 
-//        composable("login") {
-//            LoginScreen(
-//                navHostController = navHostController,
-//                sharedPreferences = sharedPreferences,
-//                onRegisterClick = { navHostController.navigate("register") },
-//                onForgotPasswordClick = { navHostController.navigate("forgot_password") },
-//            )
-//        }
         composable("login") {
             val context = LocalContext.current
 
@@ -470,14 +406,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
-
-//        composable ("settings"){
-//            val context = LocalContext.current
-//            LaunchedEffect(Unit) {
-//                logScreenView(context, "Settings")
-//            }
-//            Setting(navHostController, onToggleTheme = onToggleTheme, darkTheme = darkTheme)
-//        }
         composable("settings") {
             val context = LocalContext.current
 
@@ -498,40 +426,19 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 
         }
 
-
-//        composable("forgot_password") {
-//            ForgotPasswordScreen(
-//                onBackClick = { navHostController.popBackStack() },
-//                onPhoneOptionClick = { navHostController.navigate("phone_otp") },
-//                onEmailOptionClick = { navHostController.navigate("email_otp") }
-//            )
-//        }
-//        composable("forgot_password") {
-//            val context = LocalContext.current
-//
-//            LaunchedEffect(Unit) {
-//                logScreenEnter(context, "forgot_password") // Gửi sự kiện screen_view
-//            }
-//
-//            DisposableEffect(Unit) {
-//                onDispose {
-//                    logScreenExit(context, "forgot_password") // Gửi thời gian ở lại
-//                }
-//            }
-//
-//            ForgotPasswordScreen(
-//                onBackClick = {
-//                    navHostController.popBackStack()
-//                },
-//                onEmailSubmitted = { email ->
-//                    navHostController.navigate("enter_otp_screen?email=$email")
-//                }
-//            )
-//        }
         composable("forgot_password") {
-            val context = LocalContext.current
-            val coroutineScope = rememberCoroutineScope()
 
+            val coroutineScope = rememberCoroutineScope()
+            val context = LocalContext.current
+            LaunchedEffect(Unit) {
+                logScreenEnter(context, "enter_otp")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "enter_otp")
+                }
+            }
 
 
             ForgotPasswordScreen(
@@ -548,17 +455,8 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 }
             )
 
-
         }
 
-
-
-
-
-//        composable("phone_otp") {
-//            EnterPhoneNumberScreen(onBackClick = { navHostController.popBackStack() },
-//                onContinueClick = {navHostController.navigate("enter_otp")})
-//        }
         composable("phone_otp") {
             val context = LocalContext.current
 
@@ -578,41 +476,16 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
-//        composable("enter_otp?email={email}") { backStackEntry ->
-//            val email = backStackEntry.arguments?.getString("email") ?: ""
-//            val context = LocalContext.current
-//
-//            LaunchedEffect(Unit) {
-//                logScreenEnter(context, "enter_otp")
-//            }
-//
-//            DisposableEffect(Unit) {
-//                onDispose {
-//                    logScreenExit(context, "enter_otp")
-//                }
-//            }
-//
-//
-//
-//                EnterOtpScreen(
-//                    email = email,
-//                    onBackClick = { navHostController.popBackStack() },
-//                    onOtpSubmitted = { otp ->
-//                        navHostController.navigate("reset_password_screen?email=$email&otp=$otp")
-//                    },
-//                    onResendClick = {
-//                        // Gọi lại AuthRepository.sendOtp(email)
-//                    }
-//                )
-//            }
+
         composable(
             "enter_otp?email={email}",
             arguments = listOf(navArgument("email") { type = NavType.StringType })
         ) { backStackEntry ->
             val email = backStackEntry.arguments?.getString("email") ?: ""
-            val context = LocalContext.current
+
             val scope = rememberCoroutineScope()
 
+            val context = LocalContext.current
             LaunchedEffect(Unit) {
                 logScreenEnter(context, "enter_otp")
             }
@@ -664,6 +537,15 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 
             val coroutineScope = rememberCoroutineScope()
 
+            LaunchedEffect(Unit) {
+                logScreenEnter(context, "enter_otp")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "enter_otp")
+                }
+            }
             ResetPasswordScreen(
                 onBack = { navHostController.popBackStack() },
                 email = email,
@@ -687,16 +569,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 
         }
 
-
-
-
-
-//        composable("register") {
-//            RegisterScreen(
-//                navHostController,
-//                sharedPreferences=sharedPreferences,
-//            ) // Màn hình đăng ký mới thêm
-//        }
         composable("register") {
             val context = LocalContext.current
 
@@ -767,9 +639,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         }
 
 
-//        composable("myfeed"){
-//            MyFeedScreen(modifier)
-//        }
         composable("myfeed") {
             val context = LocalContext.current
 
@@ -786,9 +655,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             MyFeedScreen(modifier)
         }
 
-//        composable("bookmark"){
-//            BookMarkScreen(navHostController,sharedPreferences)
-//        }
         composable("bookmark") {
             val context = LocalContext.current
 
@@ -821,9 +687,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         }
 
 
-//        composable ("searchscreen"){
-//            SearchScreen(modifier)
-//        }
+
         composable("searchscreen") {
             val context = LocalContext.current
 
@@ -841,18 +705,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         }
 
 
-//        composable("detail_news/{newsId}") { backStackEntry ->
-//            val newsId = backStackEntry.arguments?.getString("newsId")
-//            if (newsId != null) {
-//                DetailNewsPage(newsId,modifier,navHostController, sharedPreferences)
-//            }
-//        }
-//        composable("detail_news/{newsId}") { backStackEntry ->
-//            val newsId = backStackEntry.arguments?.getString("newsId")
-//            if (newsId != null) {
-//                DetailNewsPage(newsId, modifier, navHostController, sharedPreferences)
-//            }
-//        }
         composable("detail_news/{newsId}") { backStackEntry ->
             val newsId = backStackEntry.arguments?.getString("newsId")
             val context = LocalContext.current
@@ -872,10 +724,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             }
         }
 
-
-//        composable("complaint") {
-//                ComplaintPage(navHostController, sharedPreferences)
-//        }
         composable("complaint") {
             val context = LocalContext.current
 
@@ -892,15 +740,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             ComplaintPage(navHostController, sharedPreferences)
         }
 
-
-//        composable("account_detail/{accountId}") { backStackEntry ->
-//            val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
-//            if (accountId != null) {
-//                AccountDetailScreen(accountId)
-//            } else {
-//                Text("Không tìm thấy tài khoản.")
-//            }
-//        }
         composable("account_detail/{accountId}") { backStackEntry ->
             val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull()
             val context = LocalContext.current
@@ -922,13 +761,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         }
 
 
-
-//        composable("detail_news/{newsId}") { backStackEntry ->
-//            val newsId = backStackEntry.arguments?.getString("newsId")
-//            if (newsId != null) {
-//                DetailNewsPage(newsId, modifier, navHostController, sharedPreferences)
-//            }
-//        }
         composable("manager_complaint"){
             ManagementComplaintScreen(navHostController,sharedPreferences, modifier)
         }
