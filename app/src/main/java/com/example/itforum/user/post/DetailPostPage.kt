@@ -121,11 +121,7 @@ fun DetailPostPage(
                         Spacer(modifier = Modifier.height(12.dp))
                         Log.d("imgs",post!!.imageUrls.toString())
                         PostMediaSection(post!!.imageUrls,post!!.videoUrls)
-
-
-
-                        //ActionsPost(navHostController)
-                        ContentCommentPost(navHostController)
+                        PostCommentScreen(postId,sharedPreferences)
                     }
                 }
             }

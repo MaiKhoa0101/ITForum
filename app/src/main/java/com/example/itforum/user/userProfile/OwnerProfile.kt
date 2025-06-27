@@ -67,7 +67,6 @@ import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 fun UserProfileScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
-
 ) {
     val viewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
@@ -75,7 +74,7 @@ fun UserProfileScreen(
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Thông tin", "Bài viết")
     val user by viewModel.user.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     var showReportDeatil by remember { mutableStateOf(false) }
     var postId by remember { mutableStateOf("") }
@@ -175,10 +174,9 @@ fun ProfileContent(
            selectedTabIndex = selectedTabIndex,
            onTabSelected = onTabSelected
        )
-
        when (selectedTabIndex) {
            0 -> {
-               UserInfoDetail(user)
+               UserInfoDetail(user, modifier)
            }
            1 -> {
                if (user != null) {
@@ -290,14 +288,11 @@ fun UserTabRow(
 
 
 @Composable
-fun UserInfoDetail(user: UserProfileResponse?) {
+fun UserInfoDetail(user: UserProfileResponse?, modifier: Modifier) {
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 16.dp)
-            .padding(bottom = 100.dp)
     ) {
-        item { Spacer(modifier = Modifier.height(10.dp))}
-
         item { Text("Giới thiệu", fontWeight = FontWeight.Bold, fontSize = 20.sp)}
         item { Spacer(modifier = Modifier.height(16.dp))}
         item { Text(user?.introduce?:"Chưa có giới thiệu", fontSize = 18.sp)}

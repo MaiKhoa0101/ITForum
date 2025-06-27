@@ -125,17 +125,7 @@ class PostViewModel(
         }
     }
 
-    private suspend fun getVoteDataByPostId(postId: String?, userId: String?): GetVoteResponse? {
-        if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) return null
-        return try {
-            val response = RetrofitInstance.postService.getVoteData(postId, userId)
-            Log.d("vote data", response.body().toString())
-            if (response.isSuccessful) response.body() else null
-        } catch (e: Exception) {
-            Log.d("Error", "Vote fetch error: ${e.message}")
-            null
-        }
-    }
+
 
     @SuppressLint("SuspiciousIndentation")
     fun fetchPosts(getPostRequest: GetPostRequest, isRefresh: Boolean = false, isLoadMore: Boolean = false) {
@@ -230,7 +220,17 @@ class PostViewModel(
             }
         }
     }
-
+    private suspend fun getVoteDataByPostId(postId: String?, userId: String?): GetVoteResponse? {
+        if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) return null
+        return try {
+            val response = RetrofitInstance.postService.getVoteData(postId, userId)
+            Log.d("vote data", response.body().toString())
+            if (response.isSuccessful) response.body() else null
+        } catch (e: Exception) {
+            Log.d("Error", "Vote fetch error: ${e.message}")
+            null
+        }
+    }
     fun createPost(createPostRequest: CreatePostRequest, context: Context) {
         viewModelScope.launch {
             _uiStateCreate.value = UiState.Loading

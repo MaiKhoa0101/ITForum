@@ -179,14 +179,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             NotificationPage(modifier, sharedPreferences,navHostController)
         }
 
-//        composable("chat") {
-//            ChatAIApp(onExitToHome = {
-//                navHostController.navigate("home") {
-//                    popUpTo("home") { inclusive = false }
-//                    launchSingleTop = true
-//                }
-//            })
-//        }
         composable("chat") {
             val context = LocalContext.current
 
@@ -210,17 +202,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
-
-//        composable("note") {
-//            NotesApp(
-//                onBackToHome = {
-//                    navHostController.navigate("home") {
-//                        popUpTo("home") { inclusive = false }
-//                        launchSingleTop = true
-//                    }
-//                }
-//            )
-//        }
         composable("note") {
             val context = LocalContext.current
 
@@ -244,10 +225,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             )
         }
 
-
-//        composable ("detail_notify") {
-//            DetailNotify(modifier, navHostController)
-//        }
         composable("detail_notify") {
             val context = LocalContext.current
 
@@ -264,9 +241,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             DetailNotify(modifier, navHostController)
         }
 
-//        composable ("tool") {
-//            ToolPage(modifier)
-//        }
         composable("tool") {
             val context = LocalContext.current
 
@@ -283,10 +257,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             ToolPage(modifier)
         }
 
-
-//        composable ("personal") {
-//            UserProfileScreen(sharedPreferences, navHostController)
-//        }
         composable("personal") {
             val context = LocalContext.current
 
@@ -303,10 +273,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             UserProfileScreen(sharedPreferences, navHostController)
         }
 
-
-//        composable ("otherprofile") {
-//            OtherUserProfileScreen(sharedPreferences, navHostController,modifier)
-//        }
         composable("otherprofile/{userId}") { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")
             val context = LocalContext.current
@@ -325,11 +291,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             }
         }
 
-
-
-//        composable ("editprofile") {
-//            EditProfile(modifier,sharedPreferences,navHostController)
-//        }
         composable("editprofile") {
             val context = LocalContext.current
 
