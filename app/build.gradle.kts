@@ -61,6 +61,9 @@ android {
 }
 
 dependencies {
+    //gửi otp
+    implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
+
     //login by google
 
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4")
