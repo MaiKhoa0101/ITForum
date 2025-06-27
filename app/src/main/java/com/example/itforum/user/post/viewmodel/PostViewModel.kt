@@ -127,11 +127,6 @@ class PostViewModel(
         }
     }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 972fb5e8fb7caba83038d0db2c5c7292b969e3a5
-
     @SuppressLint("SuspiciousIndentation")
     fun fetchPosts(getPostRequest: GetPostRequest, isRefresh: Boolean = false, isLoadMore: Boolean = false) {
         if (isRefresh) {
