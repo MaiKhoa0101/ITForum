@@ -399,13 +399,30 @@ fun StartRoot(navHostController: NavHostController, sharedPreferences: SharedPre
 }
 
 @Composable
-fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier, onToggleTheme: () -> Unit, darkTheme: Boolean = false){
+fun BodyRoot(sharedPreferences: SharedPreferences,
+             navHostController: NavHostController,
+             modifier: Modifier, onToggleTheme: () -> Unit,
+             darkTheme: Boolean = false,
+             role:String?
+){
     var postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(sharedPreferences) }
     })
     var commentViewModel : CommentViewModel =  viewModel(factory = viewModelFactory {
         initializer { CommentViewModel(sharedPreferences) }})
-    NavHost(navHostController, startDestination = "home") {
+    val startDestination = if (role == "admin") {
+        "admin_root"
+    } else {
+        "home"
+    }
+    println("role "+ role)
+    NavHost(navHostController,
+        startDestination = startDestination,
+    ) {
+
+        composable ("admin_root"){
+            AdminScreen(sharedPreferences)
+        }
         composable ("home") {
 
             val context = LocalContext.current
@@ -423,6 +440,9 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             HomePage(navHostController, modifier, sharedPreferences, postViewModel,commentViewModel)
         }
 
+        composable("login"){
+            return@composable
+        }
         composable("comment/{postId}") { backStackEntry ->
             val postId = backStackEntry.arguments?.getString("postId") ?: ""
 
@@ -840,9 +860,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         }
 
 
-        composable ("admin_root"){
-            AdminScreen(sharedPreferences)
-        }
 
         composable("report_account/{reportedUserId}") { backStackEntry ->
             val reportedUserId = backStackEntry.arguments?.getString("reportedUserId") ?: ""

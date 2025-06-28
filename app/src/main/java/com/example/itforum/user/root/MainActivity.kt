@@ -110,6 +110,7 @@ fun Root(sharedPreferences:SharedPreferences) {
     val scope = rememberCoroutineScope()
 
     val token = sharedPreferences.getString("access_token", null)
+    val role = sharedPreferences.getString("role", null)
 
     ITForumTheme(darkTheme = darkTheme)
     {
@@ -169,7 +170,8 @@ fun Root(sharedPreferences:SharedPreferences) {
                         onToggleTheme = {
                             darkTheme = !darkTheme
                         },
-                        darkTheme = darkTheme
+                        darkTheme = darkTheme,
+                        role = role
                     )
                 }
             }
