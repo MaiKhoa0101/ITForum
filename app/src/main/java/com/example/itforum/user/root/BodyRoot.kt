@@ -71,6 +71,9 @@ import com.example.itforum.user.complaint.ComplaintPage
 import com.example.itforum.user.home.tag.TagScreen
 import com.example.itforum.user.home.tag.ViewModel.TagViewModel
 import com.example.itforum.user.news.DetailNewsPage
+import com.example.itforum.user.post.CommentDialogWrapper
+import com.example.itforum.user.post.ConfirmDeleteDialog
+import com.example.itforum.user.post.OptionDialog
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.post.viewmodel.CommentViewModel
 import com.example.itforum.user.post.viewmodel.PostViewModel
@@ -612,6 +615,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         composable("detail_post/{postId}") { backStackEntry ->
             val context = LocalContext.current
 
+
             LaunchedEffect(Unit) {
                 logScreenEnter(context, "detail_post")
             }
@@ -626,6 +630,10 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             var userId = sharedPreferences.getString("userId", null)
             var selectedPostId by remember { mutableStateOf<String?>(null) }
             var showReportDialog by remember { mutableStateOf(false) }
+
+            var showOptionDialog by remember { mutableStateOf(false) }
+            var showDeleteDialog by remember { mutableStateOf(false) }
+            var selectedUserId by remember { mutableStateOf<String?>(null) }
 
             DetailPostPage(
                 navHostController,
@@ -653,11 +661,28 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                         userId
                     )
                 },
-                onReportClick = {
+                onReportClick = {it ->
+                    selectedUserId = it
                     selectedPostId = postId
-                    showReportDialog = true
+                    showOptionDialog =  true
                 },
             )
+            if (showOptionDialog && selectedUserId!= null){
+                OptionDialog(showOptionDialog,
+                    onDismiss = {
+                        showOptionDialog = false
+                    },
+                    onShowReport = {
+                        showReportDialog = true
+                        showOptionDialog = false
+                    },
+                    onDeletePost = {
+                        showDeleteDialog = true
+                        showOptionDialog =  false
+                    },
+                    isMyPost = (selectedUserId == userId ))
+            }
+
             if (showReportDialog && selectedPostId != null) {
                 ReportPostDialog(
                     sharedPreferences = sharedPreferences,
@@ -666,6 +691,16 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                         showReportDialog = false
                         selectedPostId = null
                     }
+                )
+            }
+            if (showDeleteDialog && selectedPostId!= null){
+                ConfirmDeleteDialog(
+                    showDialog = showDeleteDialog,
+                    onDismiss = {
+                        showDeleteDialog = false
+                    },
+                    onConfirm = {postViewModel.handleHidePost(postId = selectedPostId)
+                        showDeleteDialog =  false}
                 )
             }
         }
