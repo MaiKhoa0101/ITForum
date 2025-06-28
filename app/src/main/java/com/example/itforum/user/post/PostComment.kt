@@ -29,7 +29,8 @@ import com.example.itforum.user.effect.model.UiStateComment
 import com.example.itforum.user.modelData.response.Comment
 import com.example.itforum.user.modelData.response.Reply
 import com.example.itforum.user.post.viewmodel.CommentViewModel
-
+import com.example.itforum.user.skeleton.SkeletonBox
+import com.example.itforum.user.skeleton.SkeletonPost
 
 
 @Composable
@@ -73,7 +74,7 @@ fun PostCommentScreen(
                     modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    SkeletonBox()
                 }
             }
             is UiStateComment.Error -> {
@@ -310,7 +311,7 @@ fun CommentCard(
                 if (showReplies) {
                     if (isLoadingReplies) {
                         Row(Modifier.padding(start = 40.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                            SkeletonBox(Modifier.size(16.dp))
                             Spacer(Modifier.width(8.dp))
                             Text("Loading replies...", style = MaterialTheme.typography.body2)
                         }
@@ -454,11 +455,7 @@ fun CommentInputSection(
                         modifier = Modifier.height(36.dp)
                     ) {
                         if (isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp,
-                                color = Color.White
-                            )
+                            SkeletonBox()
                         } else {
                             Text("Post", style = MaterialTheme.typography.button)
                         }
@@ -563,11 +560,7 @@ fun ReplyInputSection(
                     modifier = Modifier.height(32.dp)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(14.dp),
-                            strokeWidth = 2.dp,
-                            color = Color.White
-                        )
+                        SkeletonBox()
                     } else {
                         Text("Reply", style = MaterialTheme.typography.button.copy(fontSize = 12.sp))
                     }

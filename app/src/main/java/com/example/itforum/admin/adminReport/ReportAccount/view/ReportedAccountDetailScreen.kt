@@ -12,6 +12,7 @@ import com.example.itforum.admin.components.DetailItem
 import com.example.itforum.admin.components.DetailScreenLayout
 import com.example.itforum.repository.ReportRepository
 import com.example.itforum.retrofit.RetrofitInstance
+import com.example.itforum.user.skeleton.SkeletonBox
 import kotlinx.coroutines.launch
 
 @Composable
@@ -98,7 +99,14 @@ fun ReportedAccountDetailScreen(
                 }
             } else {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    CircularProgressIndicator()
+                    repeat(6) { // giả lập 6 dòng loading (ID, Tên, Email, ...)
+                        SkeletonBox(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(24.dp)
+                                .padding(vertical = 6.dp)
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Đang tải dữ liệu người dùng...")
                 }

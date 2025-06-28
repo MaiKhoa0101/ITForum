@@ -1,9 +1,11 @@
 package com.example.itforum.user.root
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,7 +44,7 @@ import com.example.itforum.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBarRoot(
-    navHostController : NavHostController,
+    navHostController: NavHostController,
     onMenuClick: () -> Unit
 ) {
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -55,7 +58,7 @@ fun TopBarRoot(
     ) {
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Top Bar: App name and icons
+        // Top Bar: Logo and Menu
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -63,6 +66,7 @@ fun TopBarRoot(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // 🔽 Bên trái: Menu + Logo
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(R.drawable.utilities),
@@ -71,19 +75,27 @@ fun TopBarRoot(
                         .size(30.dp)
                         .clickable { onMenuClick() }
                 )
-
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .padding(top = 0.dp, bottom = 0.dp), // nền xanh dương của bạn
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo12), // ảnh bạn đã xóa nền
+                        contentDescription = "Logo",
+                        modifier = Modifier
+                            .height(80.dp) // cho to ra
+                            .widthIn(max = 500.dp)
+                    )
+                }
 
             }
-
-            Text(
-                text = "Appname",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-
-
         }
-        Spacer(modifier = Modifier.height(8.dp))
+
+
+
         // Tab Bar
         TabRow(
             selectedTabIndex = selectedTabIndex,
@@ -100,8 +112,7 @@ fun TopBarRoot(
                                 MaterialTheme.colorScheme.background
                             else
                                 MaterialTheme.colorScheme.primaryContainer
-                        )
-                        ,
+                        ),
                     selected = selectedTabIndex == index,
                     onClick = {
                         selectedTabIndex = index
@@ -110,8 +121,7 @@ fun TopBarRoot(
                             2 -> navHostController.navigate("follow")
                             3 -> navHostController.navigate("bookmark")
                         }
-
-                              },
+                    },
                     text = {
                         Text(
                             text = title,

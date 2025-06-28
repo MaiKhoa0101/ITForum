@@ -21,6 +21,7 @@ import com.example.itforum.admin.components.DetailScreenLayout
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.user.post.VideoPlayer
 import com.example.itforum.user.post.viewmodel.PostViewModel
+import com.example.itforum.user.skeleton.SkeletonPost
 import kotlinx.coroutines.launch
 
 @Composable
@@ -140,7 +141,7 @@ fun PostDetailScreen(
     } else {
         Box(modifier = Modifier.padding(16.dp)) {
             Column {
-                CircularProgressIndicator()
+                SkeletonPost()
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("Đang tải dữ liệu bài viết...")
             }

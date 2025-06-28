@@ -57,6 +57,7 @@ import com.example.itforum.user.modelData.response.PostWithVote
 import com.example.itforum.user.modelData.response.VoteResponse
 import com.example.itforum.user.news.viewmodel.NewsViewModel
 import com.example.itforum.user.post.viewmodel.CommentViewModel
+import com.example.itforum.user.skeleton.SkeletonPost
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 
@@ -108,7 +109,7 @@ fun PostListScreen(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    CircularProgressIndicator()
+                    SkeletonPost()
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Đang tải bài viết...",
@@ -228,10 +229,9 @@ fun PostListScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
                             ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    strokeWidth = 2.dp
-                                )
+                                SkeletonPost()
+
+
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "Đang tải thêm...",

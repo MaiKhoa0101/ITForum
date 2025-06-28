@@ -15,9 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
-import androidx.compose.material3.CircularProgressIndicator
+
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -53,6 +54,7 @@ import com.example.itforum.user.permission.checkPermission
 import com.example.itforum.user.post.PostListScreen
 import com.example.itforum.user.post.viewmodel.CommentViewModel
 import com.example.itforum.user.post.viewmodel.PostViewModel
+import com.example.itforum.user.skeleton.SkeletonPost
 
 @Composable
 fun HomePage(
@@ -144,32 +146,36 @@ fun HomePage(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (progress in 0f..1f && progress != 0f) {
-                    Text(
-                        text = "Đang đăng bài: ${(progress * 100).toInt()}%",
-                        modifier = Modifier.padding(start = 8.dp),
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    CircularProgressIndicator(
-                        progress = progress,
-                        color = Color.Green,
-                        modifier = Modifier.padding(7.dp)
-                    )
-                }else if (uiStateCreate is UiState.Success) {
-                    Text(
-                        text = "Đăng bài thành công",
-                        modifier = Modifier.padding(start = 8.dp),
-                        color = Color.Green,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Icon(
-                        painter = painterResource(id = R.drawable.icon_success),
-                        contentDescription = "Success",
-                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 11.dp)
-                            .size(20.dp),
-                        tint = Color.Unspecified
-                    )
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(
+                            text = "Đang đăng bài: ${(progress * 100).toInt()}%",
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SkeletonPost()
+                    }
+                } else if (uiStateCreate is UiState.Success) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.icon_success),
+                            contentDescription = "Success",
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Đăng bài thành công",
+                            color = Color.Green,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
+
+
             }
         }
     }

@@ -73,6 +73,7 @@ import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.userProfile.OtherUserProfileScreen
 import com.example.itforum.user.userProfile.UserProfileScreen
 import com.example.itforum.user.setting.Setting
+import com.example.itforum.user.skeleton.SkeletonBox
 import com.example.itforum.user.utilities.chat.ChatAIApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -129,7 +130,7 @@ fun SplashScreen(
 
     // Giao diện loading đơn giản
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
+        SkeletonBox()
     }
 }
 
