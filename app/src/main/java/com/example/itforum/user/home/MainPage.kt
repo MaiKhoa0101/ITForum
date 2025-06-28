@@ -51,6 +51,7 @@ import com.example.itforum.user.news.viewmodel.NewsViewModelFactory
 import com.example.itforum.user.permission.RequestPermissionUI
 import com.example.itforum.user.permission.checkPermission
 import com.example.itforum.user.post.PostListScreen
+import com.example.itforum.user.post.viewmodel.CommentViewModel
 import com.example.itforum.user.post.viewmodel.PostViewModel
 
 @Composable
@@ -58,7 +59,8 @@ fun HomePage(
     navHostController: NavHostController,
     modifier: Modifier,
     sharePreferences: SharedPreferences,
-    postViewModel: PostViewModel
+    postViewModel: PostViewModel,
+    commentViewModel: CommentViewModel
 ){
     val context = LocalContext.current
     val db = Room.databaseBuilder(
@@ -126,6 +128,8 @@ fun HomePage(
                 sharePreferences,
                 navHostController,
                 GetPostRequest(page = 1),
+                postViewModel = postViewModel,
+                commentViewModel = commentViewModel
             );
             Row (
                 modifier = Modifier.padding(bottom = 50.dp)

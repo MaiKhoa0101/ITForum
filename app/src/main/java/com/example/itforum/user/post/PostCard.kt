@@ -71,7 +71,7 @@ fun PostCardWithVote(
     var upvotes by remember { mutableStateOf(vote?.data?.upVoteData?.total?: 0) }
     var isVote by remember { mutableStateOf(vote?.data?.userVote) }
     var isSavedPost by remember { mutableStateOf(isBookMark) }
-    Log.d("bookmark", isSavedPost.toString())
+
 
     var isChangeUp by remember { mutableStateOf(false) }
     var isChangeDown by remember { mutableStateOf(false) }

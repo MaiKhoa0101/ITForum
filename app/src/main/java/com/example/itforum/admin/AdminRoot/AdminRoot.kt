@@ -243,7 +243,7 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                                 complaintId
                             )
                         } else {
-                            androidx.compose.material.Text("Không tìm thấy khiếu nại.")
+                            Text("Không tìm thấy khiếu nại.")
                         }
                     }
                     composable("ReportPost") {
@@ -263,11 +263,15 @@ fun AdminScreen(sharedPreferences: SharedPreferences) {
                     composable("root"){
                         Root(sharedPreferences)
                     }
-                    composable("detail_notify") {
-                        NotificationDetailScreen(
-                            navHostController = navHostController,
-                            sharedPreferences = sharedPreferences
-                        )
+                    composable("detail_notify/{notificationId}") {backStackEntry ->
+                        val notificationId = backStackEntry.arguments?.getString("notificationId")
+                        if (notificationId != null) {
+                            NotificationDetailScreen(
+                                navHostController = navHostController,
+                                sharedPreferences = sharedPreferences,
+                                notificationId = notificationId
+                            )
+                        }
                     }
                     composable ("Analytics"){
                         AnalyticsScreen(navController = navHostController)

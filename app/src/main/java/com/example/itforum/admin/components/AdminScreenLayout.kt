@@ -7,31 +7,29 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.itforum.admin.AdminRoot.HeadBarAdmin
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun AdminScreenLayout(
     title: String,
     itemCount: Int,
     filterOptions: Map<String,List<String>> = mapOf(),
-//    onOpenDrawer: () -> Unit = {},
     modifier: Modifier,
     addComposed: @Composable () -> Unit = {},
     filterField: (String, String, Any) -> Any = { it1, it2, it3-> it3 },
@@ -240,4 +238,12 @@ fun AdminScreenLayout(
             endDate = it
         }
     }
+}
+
+fun convertDateTime(input: String): String {
+    val inputFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+    val outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a", Locale.ENGLISH)
+
+    val dateTime = OffsetDateTime.parse(input, inputFormatter)
+    return dateTime.format(outputFormatter)
 }
