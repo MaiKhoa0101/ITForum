@@ -84,10 +84,11 @@ fun UserProfileScreen(
         val loginType = sharedPreferences.getString("loginType", "") ?: ""
         Log.d("UserProfileScreen", "Login type: $loginType")
         if (loginType == "google") {
+            println("Dang nhap bang gg")
 
             viewModel.getUserFromFirestore()
         } else {
-
+            println("Dang nhap binh thuong")
             viewModel.getUser()
         }
     }
