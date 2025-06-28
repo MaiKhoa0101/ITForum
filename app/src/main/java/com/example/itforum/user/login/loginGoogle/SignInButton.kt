@@ -71,8 +71,6 @@ fun GoogleSignInButton(onTokenReceived: (FirebaseUser?) -> Unit) {
         }
         try {
             val account = task.getResult(ApiException::class.java)
-            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-
 
             val credential = GoogleAuthProvider.getCredential(account.idToken, null)
             Log.d("Google Login credential",credential.toString())

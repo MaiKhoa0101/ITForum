@@ -120,7 +120,7 @@ class PostViewModel(
 
                 if (postResponse.isSuccessful && postResponse.body()?.post != null) {
                     val post = postResponse.body()!!.post
-
+                    _post.value = postResponse.body()!!.post
                     // Check if post is bookmarked
                     val bookmarkedIds = bookmarkData?.postsId?.toSet() ?: emptySet()
                     val isBookmarked = bookmarkedIds.contains(postId)
@@ -563,8 +563,4 @@ class PostViewModel(
             }
         }
     }
-
-
-
-
 }

@@ -83,13 +83,12 @@ fun DetailPostPage(
 
     var userId = sharedPreferences.getString("userId", null)
     val postWithVote by viewModel.selectedPostWithVote.collectAsState()
-
+    val post by viewModel.post.collectAsState()
     LaunchedEffect(postId) {
         viewModel.fetchPostById(postId)
     }
 
     if (post != null && post!!.isHidden == false) {
-        post?.let {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -99,61 +98,81 @@ fun DetailPostPage(
                     TopDetailPost(navHostController)
 
 
-    postWithVote?.post?.let { post ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFF00AEFF))
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                TopDetailPost(navHostController)
+                    postWithVote?.post?.let { post ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFF00AEFF))
+                        ) {
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                TopDetailPost(navHostController)
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.White)
-                ) {
-                    AvatarNameDetail(
-                        avatar = post.avatar.orEmpty(),
-                        name = post.userName ?: "unknown",
-                        time = post.createdAt ?: ""
-                    )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.White)
+                                ) {
+                                    AvatarNameDetail(
+                                        avatar = post.avatar.orEmpty(),
+                                        name = post.userName ?: "unknown",
+                                        time = post.createdAt ?: ""
+                                    )
 
-                    ContentPost(
-                        title = post.title.orEmpty(),
-                        content = post.content.orEmpty(),
-                        tags = post.tags ?: emptyList()
-                    )
+                                    ContentPost(
+                                        title = post.title.orEmpty(),
+                                        content = post.content.orEmpty(),
+                                        tags = post.tags ?: emptyList()
+                                    )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                                    Spacer(modifier = Modifier.height(12.dp))
 
-                    Log.d("imgs", post.imageUrls.toString())
+                                    Log.d("imgs", post.imageUrls.toString())
 
-                    PostMediaSection(
-                        imageUrls = post.imageUrls ?: emptyList(),
-                        videoUrls = post.videoUrls ?: emptyList()
-                    )
+                                    PostMediaSection(
+                                        imageUrls = post.imageUrls ?: emptyList(),
+                                        videoUrls = post.videoUrls ?: emptyList()
+                                    )
 
-                    VoteSection(
-                        vote = postWithVote?.vote,
-                        isBookMark = postWithVote?.isBookMark ?: false,
-                        onUpvoteClick = {viewModel.handleUpVote("upvote",-1,postId)},
-                        onCommentClick = {},
-                        onBookmarkClick = {viewModel.handleBookmark(-1,postId, userId)},
-                        onDownvoteClick = {viewModel.handleDownVote("downvote",-1,postId)}
-                    )
+                                    VoteSection(
+                                        vote = postWithVote?.vote,
+                                        isBookMark = postWithVote?.isBookMark ?: false,
+                                        onUpvoteClick = {
+                                            viewModel.handleUpVote(
+                                                "upvote",
+                                                -1,
+                                                postId
+                                            )
+                                        },
+                                        onCommentClick = {},
+                                        onBookmarkClick = {
+                                            viewModel.handleBookmark(
+                                                -1,
+                                                postId,
+                                                userId
+                                            )
+                                        },
+                                        onDownvoteClick = {
+                                            viewModel.handleDownVote(
+                                                "downvote",
+                                                -1,
+                                                postId
+                                            )
+                                        }
+                                    )
 
-                    PostCommentScreen(
-                        postId = post.id.toString(),
-                        sharedPreferences = sharedPreferences,
-                        commentViewModel = commentViewModel,
+                                    PostCommentScreen(
+                                        postId = post.id.toString(),
+                                        sharedPreferences = sharedPreferences,
+                                        commentViewModel = commentViewModel,
 
-                    )
+                                        )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
-    }
-
     else {
         Column (
             modifier = Modifier.fillMaxSize(),
@@ -180,7 +199,7 @@ fun DetailPostPage(
 }
 
 
-    @Composable
+@Composable
 fun TopDetailPost(
     navHostController: NavHostController
 ) {
