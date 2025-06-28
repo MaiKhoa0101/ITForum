@@ -13,6 +13,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +65,7 @@ import com.example.itforum.service.AuthRepository
 import com.example.itforum.user.Analytics.logScreenEnter
 import com.example.itforum.user.Analytics.logScreenExit
 import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
+import com.example.itforum.user.ReportPost.view.ReportPostDialog
 
 import com.example.itforum.user.complaint.ComplaintPage
 import com.example.itforum.user.home.tag.TagScreen
@@ -392,6 +394,9 @@ fun StartRoot(navHostController: NavHostController, sharedPreferences: SharedPre
         composable ("home") {
             return@composable
         }
+        composable ("admin_root"){
+            return@composable
+        }
 
     }
 }
@@ -618,8 +623,51 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             }
 
             val postId = backStackEntry.arguments?.getString("postId") ?: return@composable
+            var userId = sharedPreferences.getString("userId", null)
+            var selectedPostId by remember { mutableStateOf<String?>(null) }
+            var showReportDialog by remember { mutableStateOf(false) }
 
-            DetailPostPage(navHostController, sharedPreferences, postId,commentViewModel)
+            DetailPostPage(
+                navHostController,
+                sharedPreferences,
+                postId,
+                commentViewModel,
+                onUpvoteClick = {
+                    postViewModel.handleUpVote(
+                        "upvote",
+                        -1,
+                        postId
+                    )
+                },
+                onDownvoteClick = {
+                    postViewModel.handleDownVote(
+                        "downvote",
+                        -1,
+                        postId
+                    )
+                },
+                onBookmarkClick = {
+                    postViewModel.handleBookmark(
+                            -1,
+                        postId,
+                        userId
+                    )
+                },
+                onReportClick = {
+                    selectedPostId = postId
+                    showReportDialog = true
+                },
+            )
+            if (showReportDialog && selectedPostId != null) {
+                ReportPostDialog(
+                    sharedPreferences = sharedPreferences,
+                    reportedPostId = selectedPostId!!,
+                    onDismissRequest = {
+                        showReportDialog = false
+                        selectedPostId = null
+                    }
+                )
+            }
         }
 
         composable("listlike") {
