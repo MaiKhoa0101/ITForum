@@ -11,6 +11,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +30,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
@@ -70,9 +74,11 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -136,6 +142,7 @@ fun CreatePostPage(
     var content by remember { mutableStateOf("") }
     var tags by remember { mutableStateOf<List<String?>?>(emptyList()) }
     var isPublished by remember { mutableStateOf("public") }
+    val focusManager = LocalFocusManager.current
 
     var isErrorTitle by remember { mutableStateOf(false) }
     LaunchedEffect(title, content) {
@@ -190,11 +197,15 @@ fun CreatePostPage(
                 }
 
             }
-            item {
-
+            item {  3
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectTapGestures(onTap = {
+                                focusManager.clearFocus()
+                            })
+                        }
                         .background(MaterialTheme.colorScheme.secondaryContainer),
                 ) {
                     userInfo?.let { IconWithText(avatar = it.avatar, name = it.name) }
@@ -293,15 +304,15 @@ fun IconWithText(
     Row(
         modifier = modifier
             .padding(horizontal = 10.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.background),
-        verticalAlignment = Alignment.CenterVertically
+            .clip(RoundedCornerShape(10.dp)),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         if (!avatar.isNullOrEmpty()) {
             AsyncImage(
                 model = avatar,
                 contentDescription = "Avatar tài khoản",
-                modifier = Modifier.size(sizeIcon)
+                modifier = Modifier.size(sizeIcon).clip(CircleShape),
             )
         } else {
             fallbackIcon?.let {
@@ -361,7 +372,8 @@ fun WritePost(
                 backgroundColor = MaterialTheme.colorScheme.background,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-            )
+                textColor = MaterialTheme.colorScheme.onBackground
+            ),
         )
         Text(
             "${textPost.length}/1000 kí tự",
@@ -384,6 +396,7 @@ fun WritePost(
 fun AddTagPost(
     onChange: (List<String?>?) -> Unit
 ) {
+
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.secondaryContainer)
@@ -413,6 +426,7 @@ fun AddTagPost(
                 ),
                 textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground),
                 modifier = Modifier
+                    .weight(3f)
                     .padding(horizontal = 10.dp)
                     .onFocusChanged { focusState ->
                         isFocused = focusState.isFocused

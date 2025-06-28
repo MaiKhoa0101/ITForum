@@ -46,6 +46,8 @@ import com.example.itforum.user.modelData.request.GetPostRequest
 
 import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.post.PostListScreen
+import com.example.itforum.user.post.viewmodel.CommentViewModel
+import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,6 +61,11 @@ fun OtherUserProfileScreen(
     val viewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
     })
+    var postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
+        initializer { PostViewModel(sharedPreferences) }
+    })
+    var commentViewModel : CommentViewModel =  viewModel(factory = viewModelFactory {
+        initializer { CommentViewModel(sharedPreferences) }})
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Thông tin", "Bài viết")
     val user by viewModel.user.collectAsState()
@@ -123,7 +130,10 @@ fun OtherUserProfileScreen(
             navController = navHostController,
             modifier = Modifier.padding(innerPadding),
             tabs = tabs,
-            sharedPreferences = sharedPreferences
+            sharedPreferences = sharedPreferences,
+            postViewModel,
+            commentViewModel
+
         )
     }
 }
@@ -136,7 +146,9 @@ fun OtherProfileContent(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     tabs: List<String>,
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+    postViewModel: PostViewModel,
+    commentViewModel: CommentViewModel
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         UserHeader(user)
@@ -160,7 +172,9 @@ fun OtherProfileContent(
                         GetPostRequest(
                             page = 1,
                             userId = user.id
-                        )
+                        ),
+                        postViewModel = postViewModel,
+                        commentViewModel = commentViewModel
                     )
                 }
             }
