@@ -23,3 +23,7 @@ data class UserResponse(
         return listOf(id, name, email, phone, if(isBanned) "Bị khóa" else "Hoạt động")
     }
 }
+
+data class SignOutResponse(
+    val message: String
+)

@@ -4,6 +4,7 @@ import com.example.itforum.user.modelData.request.LoginUser
 import com.example.itforum.user.modelData.request.RegisterUser
 import com.example.itforum.user.modelData.response.LoginResponse
 import com.example.itforum.user.modelData.response.RegisterResponse
+import com.example.itforum.user.modelData.response.SignOutResponse
 import com.example.itforum.user.modelData.response.UserResponse
 import com.example.itforum.user.modelData.response.fetchUserState
 import com.example.itforum.user.modelData.response.userUpdateResponse
@@ -46,4 +47,6 @@ interface UserService {
     @GET("user/getall")
     suspend fun getAllUser(): Response<List<UserResponse>>
 
+    @PUT("user/signOut/{userId}/{fcmToken}")
+    suspend fun signOut(@Path("userId") userId:String, @Path("fcmToken") fcmToken:String): Response<SignOutResponse>
 }
