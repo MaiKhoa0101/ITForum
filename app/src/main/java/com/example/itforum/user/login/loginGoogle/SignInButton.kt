@@ -3,6 +3,8 @@ package com.example.itforum.user.login.loginGoogle
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -27,16 +29,17 @@ import com.google.firebase.auth.GoogleAuthProvider
 fun GoogleSignInButton(onTokenReceived: (FirebaseUser?) -> Unit) {
     val context = LocalContext.current
     val activity = context as? Activity ?: return
-
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        Log.d("Google Login task", task.toString())
         try {
             val account = task.getResult(ApiException::class.java)
-            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+            Log.d("Google Login account",account.toString())
 
-            FirebaseAuth.getInstance().signOut()
+            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+            Log.d("Google Login credential",credential.toString())
 
             FirebaseAuth.getInstance().signInWithCredential(credential)
                 .addOnCompleteListener { authTask ->
@@ -49,7 +52,11 @@ fun GoogleSignInButton(onTokenReceived: (FirebaseUser?) -> Unit) {
                         onTokenReceived(null)
                     }
                 }
-
+            FirebaseAuth.getInstance().signOut()
+            getGoogleSignInClient(activity).signOut().addOnCompleteListener {
+                // Xử lý sau khi sign out thành công
+                Toast.makeText(context, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
+            }
         } catch (e: ApiException) {
             onTokenReceived( null)
         }

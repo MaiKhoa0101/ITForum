@@ -14,6 +14,30 @@
       },
       "oauth_client": [
         {
+          "client_id": "984462885199-6s4ej1frv8ij5iocfos67oo5ap9e2tre.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.itforum",
+            "certificate_hash": "e9859d7f42171c7a65cdca517085478056062d8d"
+          }
+        },
+        {
+          "client_id": "984462885199-71132go65ckh1u2ct70jcpkope86nb59.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.itforum",
+            "certificate_hash": "0086495866c185141146e7aeefe5a9b51ad45dcd"
+          }
+        },
+        {
+          "client_id": "984462885199-n1tgn1ms3iu2ulnhh9dn7r97126gq10m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.itforum",
+            "certificate_hash": "cd4f80eeac15dd14adff64946936b57e155530cd"
+          }
+        },
+        {
           "client_id": "984462885199-tmuq4ensvstme4d41of7p4ugd6o97o9p.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
