@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
@@ -130,6 +131,267 @@ fun SplashScreen(
         CircularProgressIndicator()
     }
 }
+
+@Composable
+fun StartRoot(navHostController: NavHostController, sharedPreferences: SharedPreferences) {
+    NavHost(navHostController, startDestination = "splash") {
+        composable("forgot_password") {
+
+            val coroutineScope = rememberCoroutineScope()
+            val context = LocalContext.current
+            LaunchedEffect(Unit) {
+                logScreenEnter(context, "enter_otp")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "enter_otp")
+                }
+            }
+
+
+            ForgotPasswordScreen(
+                onBackClick = { navHostController.popBackStack() },
+                onEmailSubmitted = { email ->
+                    coroutineScope.launch {
+                        val result = AuthRepository.sendOtp(email)
+                        if (result.isSuccess) {
+                            navHostController.navigate("enter_otp?email=$email")
+                        } else {
+                            Toast.makeText(context, "Gửi OTP thất bại", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            )
+
+        }
+
+        composable("intro") {
+            val context = LocalContext.current
+
+            LaunchedEffect(Unit) {
+                logScreenEnter(context, "intro") // Khi người dùng vào màn hình
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "intro") // Khi người dùng rời khỏi màn hình
+                }
+            }
+
+            IntroScreen(navHostController)
+        }
+
+        composable("splash") {
+            SplashScreen(navHostController, sharedPreferences)
+        }
+
+        composable("login") {
+            val context = LocalContext.current
+
+            LaunchedEffect(Unit) {
+                logScreenEnter(context, "login") // Ghi nhận khi vào màn hình
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "login") // Ghi nhận khi thoát màn hình
+                }
+            }
+
+            LoginScreen(
+                navHostController = navHostController,
+                sharedPreferences = sharedPreferences,
+
+                onRegisterClick = { navHostController.navigate("register") },
+                onForgotPasswordClick = { navHostController.navigate("forgot_password") },
+            )
+        }
+
+        composable("phone_otp") {
+            val context = LocalContext.current
+
+            LaunchedEffect(Unit) {
+                logScreenEnter(context, "phone_otp") // Ghi nhận khi vào màn hình
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "phone_otp") // Ghi nhận khi thoát màn hình
+                }
+            }
+
+            EnterPhoneNumberScreen(
+                onBackClick = { navHostController.popBackStack() },
+                onContinueClick = { navHostController.navigate("enter_otp") }
+            )
+        }
+
+
+        composable(
+            "enter_otp?email={email}",
+            arguments = listOf(navArgument("email") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+
+            val scope = rememberCoroutineScope()
+
+            val context = LocalContext.current
+            LaunchedEffect(Unit) {
+                logScreenEnter(context, "enter_otp")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "enter_otp")
+                }
+            }
+
+            EnterOtpScreen(
+                onBackClick = { navHostController.popBackStack() },
+                email = email,
+                onOtpSubmitted = { otp ->
+                    navHostController.navigate("reset_password_screen?email=$email&otp=$otp")
+                },
+                onResendClick = {
+                    scope.launch {
+                        try {
+                            val result = AuthRepository.sendOtp(email)
+                            if (result.isSuccess) {
+                                Toast.makeText(context, "Mã OTP đã được gửi lại", Toast.LENGTH_SHORT).show()
+                            } else {
+                                val errorMsg = result.exceptionOrNull()?.message ?: "Không thể gửi lại OTP"
+                                Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Lỗi khi gửi lại OTP: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+
+            )
+        }
+
+        composable(
+            "reset_password_screen?email={email}&otp={otp}",
+            arguments = listOf(
+                navArgument("email") { type = NavType.StringType },
+                navArgument("otp") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val context = LocalContext.current
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            val otp = backStackEntry.arguments?.getString("otp") ?: ""
+
+            val coroutineScope = rememberCoroutineScope()
+
+            LaunchedEffect(Unit) {
+                logScreenEnter(context, "enter_otp")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "enter_otp")
+                }
+            }
+            ResetPasswordScreen(
+                onBack = { navHostController.popBackStack() },
+                email = email,
+                otp = otp,
+                onReset = { newPassword ->
+                    coroutineScope.launch {
+                        val result = withContext(Dispatchers.IO) {
+                            AuthRepository.resetPassword(email, otp, newPassword)
+                        }
+                        result.onSuccess {
+                            Toast.makeText(context, "Đặt lại mật khẩu thành công", Toast.LENGTH_SHORT).show()
+                            navHostController.navigate("login") {
+                                popUpTo("reset_password_screen") { inclusive = true }
+                            }
+                        }.onFailure {
+                            Toast.makeText(context, "Thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            )
+
+        }
+
+        composable("register") {
+            val context = LocalContext.current
+
+            LaunchedEffect(Unit) {
+                logScreenEnter(context, "register") // Gửi screen_view
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "register") // Gửi thời gian ở lại (screen_exit)
+                }
+            }
+
+            RegisterScreen(
+                navHostController,
+                sharedPreferences = sharedPreferences,
+            )
+        }
+
+        composable("otp") {
+            val context = LocalContext.current
+
+            LaunchedEffect(Unit) {
+                logScreenEnter(context, "otp_verification") // Gửi screen_view khi vào màn hình
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "otp_verification") // Gửi thời gian ở lại khi thoát màn
+                }
+            }
+
+            OtpVerificationScreen(
+                onBackClick = { navHostController.popBackStack() },
+                onSubmitClick = { navHostController.navigate("success") },
+                onResendClick = { /* xử lý gửi lại */ },
+                onLoginClick = {
+                    navHostController.navigate("login") {
+                        popUpTo(0) { inclusive = true }  // xóa hết stack
+                        launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
+                    }
+                }
+            )
+        }
+
+
+        composable("success") {
+            val context = LocalContext.current
+
+            LaunchedEffect(Unit) {
+                logScreenEnter(context, "registration_success")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    logScreenExit(context, "registration_success")
+                }
+            }
+
+            RegistrationSuccessScreen(
+                onLoginClick = {
+                    navHostController.navigate("login") {
+                        popUpTo(0) { inclusive = true }  // xóa hết stack
+                        launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
+                    }
+                }
+            )
+        }
+
+        composable ("home") {
+            return@composable
+        }
+    }
+}
+
 @Composable
 fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier, onToggleTheme: () -> Unit, darkTheme: Boolean = false){
     var postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
@@ -137,7 +399,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
     })
     var commentViewModel : CommentViewModel =  viewModel(factory = viewModelFactory {
         initializer { CommentViewModel(sharedPreferences) }})
-    NavHost(navHostController, startDestination = "splash") {
+    NavHost(navHostController, startDestination = "home") {
         composable ("home") {
 
             val context = LocalContext.current
@@ -153,10 +415,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             }
 
             HomePage(navHostController, modifier, sharedPreferences, postViewModel,commentViewModel)
-        }
-
-        composable("splash") {
-            SplashScreen(navHostController, sharedPreferences)
         }
 
         composable("comment/{postId}") { backStackEntry ->
@@ -371,45 +629,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             ListLikePage(navHostController)
         }
 
-        composable("intro") {
-            val context = LocalContext.current
-
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "intro") // Khi người dùng vào màn hình
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "intro") // Khi người dùng rời khỏi màn hình
-                }
-            }
-
-            IntroScreen(navHostController)
-        }
-
-
-        composable("login") {
-            val context = LocalContext.current
-
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "login") // Ghi nhận khi vào màn hình
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "login") // Ghi nhận khi thoát màn hình
-                }
-            }
-
-            LoginScreen(
-                navHostController = navHostController,
-                sharedPreferences = sharedPreferences,
-
-                onRegisterClick = { navHostController.navigate("register") },
-                onForgotPasswordClick = { navHostController.navigate("forgot_password") },
-            )
-        }
-
         composable("settings") {
             val context = LocalContext.current
 
@@ -429,219 +648,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             Setting(navHostController, sharedPreferences, onToggleTheme = onToggleTheme, darkTheme = darkTheme)
 
         }
-
-        composable("forgot_password") {
-
-            val coroutineScope = rememberCoroutineScope()
-            val context = LocalContext.current
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "enter_otp")
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "enter_otp")
-                }
-            }
-
-
-            ForgotPasswordScreen(
-                onBackClick = { navHostController.popBackStack() },
-                onEmailSubmitted = { email ->
-                    coroutineScope.launch {
-                        val result = AuthRepository.sendOtp(email)
-                        if (result.isSuccess) {
-                            navHostController.navigate("enter_otp?email=$email")
-                        } else {
-                            Toast.makeText(context, "Gửi OTP thất bại", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            )
-
-        }
-
-        composable("phone_otp") {
-            val context = LocalContext.current
-
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "phone_otp") // Ghi nhận khi vào màn hình
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "phone_otp") // Ghi nhận khi thoát màn hình
-                }
-            }
-
-            EnterPhoneNumberScreen(
-                onBackClick = { navHostController.popBackStack() },
-                onContinueClick = { navHostController.navigate("enter_otp") }
-            )
-        }
-
-
-        composable(
-            "enter_otp?email={email}",
-            arguments = listOf(navArgument("email") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val email = backStackEntry.arguments?.getString("email") ?: ""
-
-            val scope = rememberCoroutineScope()
-
-            val context = LocalContext.current
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "enter_otp")
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "enter_otp")
-                }
-            }
-
-            EnterOtpScreen(
-                onBackClick = { navHostController.popBackStack() },
-                email = email,
-                onOtpSubmitted = { otp ->
-                    navHostController.navigate("reset_password_screen?email=$email&otp=$otp")
-                },
-                onResendClick = {
-                    scope.launch {
-                        try {
-                            val result = AuthRepository.sendOtp(email)
-                            if (result.isSuccess) {
-                                Toast.makeText(context, "Mã OTP đã được gửi lại", Toast.LENGTH_SHORT).show()
-                            } else {
-                                val errorMsg = result.exceptionOrNull()?.message ?: "Không thể gửi lại OTP"
-                                Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
-                            }
-                        } catch (e: Exception) {
-                            Toast.makeText(context, "Lỗi khi gửi lại OTP: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-
-            )
-        }
-
-
-
-
-        composable(
-            "reset_password_screen?email={email}&otp={otp}",
-            arguments = listOf(
-                navArgument("email") { type = NavType.StringType },
-                navArgument("otp") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val context = LocalContext.current
-            val email = backStackEntry.arguments?.getString("email") ?: ""
-            val otp = backStackEntry.arguments?.getString("otp") ?: ""
-
-            val coroutineScope = rememberCoroutineScope()
-
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "enter_otp")
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "enter_otp")
-                }
-            }
-            ResetPasswordScreen(
-                onBack = { navHostController.popBackStack() },
-                email = email,
-                otp = otp,
-                onReset = { newPassword ->
-                    coroutineScope.launch {
-                        val result = withContext(Dispatchers.IO) {
-                            AuthRepository.resetPassword(email, otp, newPassword)
-                        }
-                        result.onSuccess {
-                            Toast.makeText(context, "Đặt lại mật khẩu thành công", Toast.LENGTH_SHORT).show()
-                            navHostController.navigate("login") {
-                                popUpTo("reset_password_screen") { inclusive = true }
-                            }
-                        }.onFailure {
-                            Toast.makeText(context, "Thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            )
-
-        }
-
-        composable("register") {
-            val context = LocalContext.current
-
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "register") // Gửi screen_view
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "register") // Gửi thời gian ở lại (screen_exit)
-                }
-            }
-
-            RegisterScreen(
-                navHostController,
-                sharedPreferences = sharedPreferences,
-            )
-        }
-
-        composable("otp") {
-            val context = LocalContext.current
-
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "otp_verification") // Gửi screen_view khi vào màn hình
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "otp_verification") // Gửi thời gian ở lại khi thoát màn
-                }
-            }
-
-            OtpVerificationScreen(
-                onBackClick = { navHostController.popBackStack() },
-                onSubmitClick = { navHostController.navigate("success") },
-                onResendClick = { /* xử lý gửi lại */ },
-                onLoginClick = {
-                    navHostController.navigate("login") {
-                        popUpTo(0) { inclusive = true }  // xóa hết stack
-                        launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
-                    }
-                }
-            )
-        }
-
-
-        composable("success") {
-            val context = LocalContext.current
-
-            LaunchedEffect(Unit) {
-                logScreenEnter(context, "registration_success")
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    logScreenExit(context, "registration_success")
-                }
-            }
-
-            RegistrationSuccessScreen(
-                onLoginClick = {
-                    navHostController.navigate("login") {
-                        popUpTo(0) { inclusive = true }  // xóa hết stack
-                        launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
-                    }
-                }
-            )
-        }
-
 
         composable("myfeed") {
             val context = LocalContext.current

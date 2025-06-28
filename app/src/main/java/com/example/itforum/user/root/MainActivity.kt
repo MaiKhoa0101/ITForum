@@ -89,8 +89,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             ITForumTheme {
                 Root(sharedPreferences)
-
-//                CrashLogScreen()
             }
         }
     }
@@ -111,61 +109,69 @@ fun Root(sharedPreferences:SharedPreferences) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    val token = sharedPreferences.getString("access_token", null)
+
     ITForumTheme(darkTheme = darkTheme)
     {
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                ModalDrawerSheet(
-                    modifier = Modifier.width(300.dp)
-                ) {
-                    DrawerContent(
-                        sidebarItem = sidebarUserItems,
-                        navHostController = navHostController,
-                        sharedPreferences = sharedPreferences,
-                        closedrawer = {
-                            if (showTopBars) {
-                                scope.launch {
-                                    drawerState.close()
+        if (isTokenExpired(token.toString())) {
+            println("Token is expired")
+            StartRoot(navHostController, sharedPreferences)
+        } else {
+            println("Token is not expired")
+            ModalNavigationDrawer(
+                drawerState = drawerState,
+                drawerContent = {
+                    ModalDrawerSheet(
+                        modifier = Modifier.width(300.dp)
+                    ) {
+                        DrawerContent(
+                            sidebarItem = sidebarUserItems,
+                            navHostController = navHostController,
+                            sharedPreferences = sharedPreferences,
+                            closedrawer = {
+                                if (showTopBars) {
+                                    scope.launch {
+                                        drawerState.close()
+                                    }
                                 }
                             }
+                        )
+                    }
+                }
+            ) {
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        if (showTopBars) {
+                            TopBarRoot(
+                                navHostController,
+                                onMenuClick = {
+                                    scope.launch {
+                                        drawerState.open()
+                                    }
+                                },
+                            )
                         }
+                    },
+                    bottomBar = {
+                        if (showFootBars) {
+                            FootBarRoot(
+                                currentRoute = currentRoute,
+                                navHostController = navHostController
+                            )
+                        }
+                    }
+                ) { innerPadding ->
+                    BodyRoot(
+                        sharedPreferences,
+                        navHostController,
+                        modifier = Modifier.padding(innerPadding),
+                        onToggleTheme = {
+                            darkTheme = !darkTheme
+                        },
+                        darkTheme = darkTheme
                     )
                 }
-            }
-        ) {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                topBar = {
-                    if (showTopBars) {
-                        TopBarRoot(
-                            navHostController,
-                            onMenuClick = {
-                                scope.launch {
-                                    drawerState.open()
-                                }
-                            },
-                        )
-                    }
-                },
-                bottomBar = {
-                    if (showFootBars) {
-                        FootBarRoot(
-                            currentRoute = currentRoute,
-                            navHostController = navHostController
-                        )
-                    }
-                }
-            ) { innerPadding ->
-                BodyRoot(
-                    sharedPreferences,
-                    navHostController,
-                    modifier = Modifier.padding(innerPadding),
-                    onToggleTheme = {
-                        darkTheme = !darkTheme
-                    },
-                    darkTheme = darkTheme
-                )
             }
         }
     }

@@ -18,6 +18,7 @@ import com.example.itforum.service.NewsService
 import com.example.itforum.service.NotificationService
 import com.example.itforum.service.PostService
 import com.example.itforum.service.ReportAccountService
+import com.example.itforum.service.SkillService
 
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
@@ -29,7 +30,7 @@ object RetrofitInstance {
     private const val URL_Phone = "http://192.168.36.105:4000"
 
     //    private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
-    private const val SECOND_URL = "http://192.168.1.216:4000"
+    private const val SECOND_URL = "http://192.168.0.103:4000"
     val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
@@ -49,6 +50,7 @@ object RetrofitInstance {
     val reportAccountService: ReportAccountService by lazy { retrofit.create(ReportAccountService::class.java) }
     val userService: UserService by lazy {retrofit.create(UserService::class.java) }
     val reportPostService: ReportPostService by lazy { retrofit.create(ReportPostService::class.java) }
+    val skillService: SkillService by lazy {retrofit.create(SkillService::class.java) }
     val newsService: NewsService by lazy { retrofit.create(NewsService::class.java) }
     val postService: PostService by lazy {retrofit.create(PostService::class.java) }
     val complaintService: ComplaintService by lazy {retrofit.create(ComplaintService::class.java) }

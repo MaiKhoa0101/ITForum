@@ -260,12 +260,11 @@ fun PostCardWithVote(
                 {
                     Icon(
                         imageVector = Icons.Default.Bookmark,
-                        contentDescription = "Bookmark",
+                        contentDescription = "Đánh dấu",
                         modifier = Modifier.size(30.dp),
                         tint = if (isSavedPost) Color.Green else MaterialTheme.colorScheme.onBackground
                     )
                 }
-
             }
         }
     }
