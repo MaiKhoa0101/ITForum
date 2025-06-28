@@ -117,7 +117,7 @@ class NewsViewModel (
         viewModelScope.launch {
             _uiStateCreate.value = UiState.Loading
             try {
-                Log.d("ComplaintViewModel", "Request: $createNewsRequest")
+                Log.d("NewsViewModel", "Request: $createNewsRequest")
 
                 val img = createNewsRequest.img?.let {
                     prepareFilePart(context, it, "img")

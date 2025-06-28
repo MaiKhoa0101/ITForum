@@ -52,7 +52,7 @@ fun RequestPermissionUI() {
     val context = LocalContext.current
     var requestRight by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(true) }
-
+    var firstTimeRequest by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
         requestRight = checkPermission(context)
     }
@@ -123,10 +123,11 @@ fun RequestPermissionUI() {
                 )
             }
         }
+        firstTimeRequest = false
     }
 
     // Show success message when all permissions are granted
-    if (requestRight == "All right request") {
+    if (requestRight == "All right request" && firstTimeRequest) {
         LaunchedEffect(requestRight) {
             Toast.makeText(context, "Tất cả quyền đã được cấp!", Toast.LENGTH_SHORT).show()
         }

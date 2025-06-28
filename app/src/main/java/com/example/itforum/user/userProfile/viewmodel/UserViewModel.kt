@@ -142,25 +142,27 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel() {
                 val introduce = userUpdateRequest.introduce?.let {
                     MultipartBody.Part.createFormData("introduce", it)
                 }
-                val skill = userUpdateRequest.skill?.let {
-                    MultipartBody.Part.createFormData("skill", Gson().toJson(it))
+                val skill = userUpdateRequest.skill?.map {
+                    it.let { it1 -> MultipartBody.Part.createFormData("skill", it1) }
                 }
                 val certificate = userUpdateRequest.certificate?.let {
                     MultipartBody.Part.createFormData("certificate", Gson().toJson(it))
                 }
 
-                val response = RetrofitInstance.userService.updateUser(
-                    id = userId!!,
-                    name = name,
-                    phone = phone,
-                    email = email,
-                    username = username,
-                    introduce = introduce,
-                    skill = skill,
-                    certificate = certificate,
-                    avatar = avatar
-                )
-                if (response.isSuccessful) {
+                val response = skill?.let {
+                    RetrofitInstance.userService.updateUser(
+                        id = userId!!,
+                        name = name,
+                        phone = phone,
+                        email = email,
+                        username = username,
+                        introduce = introduce,
+                        skill = it,
+                        certificate = certificate,
+                        avatar = avatar
+                    )
+                }
+                if (response!!.isSuccessful) {
                     val responseBody = response.body()
                     Log.d("UserViewModel", "Success Response: ${responseBody?.message}")
                     _uiState.value = UiState.Success(
@@ -269,6 +271,4 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel() {
             }
         }
     }
-
-
 }

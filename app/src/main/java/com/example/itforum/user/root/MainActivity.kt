@@ -75,7 +75,14 @@ class MainActivity : ComponentActivity() {
             putString(FirebaseAnalytics.Param.SCREEN_CLASS, "MainActivity")
         }
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, screenBundle)
-
+        FirebaseMessaging.getInstance().subscribeToTopic("all_users")
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("FCM", "Subscribed to all_users topic")
+                } else {
+                    Log.e("FCM", "Topic subscription failed", task.exception)
+                }
+            }
 
         val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         ToastHelper.init(this)
@@ -104,14 +111,6 @@ fun Root(sharedPreferences:SharedPreferences) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-//    LaunchedEffect(Unit) {
-//        try {
-//            val token = FirebaseMessaging.getInstance().token.await()
-//            Log.d("FCM", "Token from Composable: $token")
-//        } catch (e: Exception) {
-//            Log.e("FCM", "Token fetch failed", e)
-//        }
-//    }
     ITForumTheme(darkTheme = darkTheme)
     {
         ModalNavigationDrawer(
@@ -145,7 +144,7 @@ fun Root(sharedPreferences:SharedPreferences) {
                                 scope.launch {
                                     drawerState.open()
                                 }
-                            }
+                            },
                         )
                     }
                 },

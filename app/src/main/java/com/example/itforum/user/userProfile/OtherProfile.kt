@@ -71,7 +71,9 @@ fun OtherUserProfileScreen(
     val user by viewModel.user.collectAsState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
-    LaunchedEffect(Unit) { viewModel.getUser(userId) }
+    LaunchedEffect(Unit) {
+        viewModel.getUser(userId)
+    }
 
     Scaffold(
         modifier = modifier
@@ -160,7 +162,7 @@ fun OtherProfileContent(
         when (selectedTabIndex) {
             0 -> {
                 OtherInfoOverview()
-                UserInfoDetail(user)
+                UserInfoDetail(user, modifier)
             }
             1 -> {
                 if (user != null) {

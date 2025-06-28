@@ -17,7 +17,7 @@ data class UserResponse(
     val numberComment: Int,
     val isBanned: Boolean,
     val certificate: List<Certificate>,
-    val skill: List<Skill>
+    val skill: List<String>
 ): TableRowConvertible {
     override fun toTableRow(): List<String> {
         return listOf(id, name, email, phone, if(isBanned) "Bị khóa" else "Hoạt động")
