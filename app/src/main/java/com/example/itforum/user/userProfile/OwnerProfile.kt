@@ -196,6 +196,9 @@ fun ProfileContent(
 
 @Composable
 fun UserHeader(user: UserProfileResponse?) {
+    val (userLevel, levelColor, score) = calculateUserLevel(user)
+
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -207,7 +210,7 @@ fun UserHeader(user: UserProfileResponse?) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
-                model = user?.avatar?:"https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg",
+                model = user?.avatar ?: "https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg",
                 contentDescription = "Ảnh đại diện người dùng",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -215,17 +218,18 @@ fun UserHeader(user: UserProfileResponse?) {
                     .clip(CircleShape)
             )
             Spacer(modifier = Modifier.width(50.dp))
-            Column{
-                Text(user?.username?:"Người dùng", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Text(user?.email?:"hi@gmail.com")
-
+            Column {
+                Text(user?.username ?: "Người dùng", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text(user?.email ?: "hi@gmail.com")
+                Text(getJoinDuration(user?.createdAt), fontStyle = FontStyle.Italic, fontSize = 15.sp)
 
                 Text(
-                    "Tham gia 5 năm trước",
-                    fontStyle = FontStyle.Italic,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 15.sp
+                    text = "Cấp độ: $userLevel (Điểm: $score)",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = levelColor // ✅ chỉ đổi màu chữ
                 )
+
             }
         }
 
@@ -235,6 +239,7 @@ fun UserHeader(user: UserProfileResponse?) {
     }
 }
 
+
 @Composable
 fun UserStats(user: UserProfileResponse?) {
     Column (
@@ -243,7 +248,7 @@ fun UserStats(user: UserProfileResponse?) {
         Text("Thống kê",
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp)
-        Text((user?.numberPost.toString()?:"Chưa có") + " bài viết")
+        Text((user?.totalPost.toString()?:"Chưa có") + " bài viết")
         Text((user?.numberComment.toString()?:"Không có")+" câu trả lời")
         Text("Được đánh giá 4.5 điểm")
         Text("Xếp hạng thứ 22 trong hệ thống")
@@ -375,4 +380,59 @@ fun TagItem(text: String) {
     ) {
         Text(text = text, color = Color.DarkGray)
     }
+}
+fun getJoinDuration(createdAt: String?): String {
+    if (createdAt == null) return "Thời gian tham gia không rõ"
+
+    return try {
+        val formatter = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault())
+        formatter.timeZone = java.util.TimeZone.getTimeZone("UTC")
+        val joinedDate = formatter.parse(createdAt) ?: return "Không rõ"
+        val now = java.util.Date()
+
+        val diffMillis = now.time - joinedDate.time
+        val days = diffMillis / (1000 * 60 * 60 * 24)
+        val months = days / 30
+        val years = days / 365
+
+        when {
+            years >= 1 -> "Tham gia cách đây $years năm"
+            months >= 1 -> "Tham gia cách đây $months tháng"
+            else -> "Tham gia gần đây"
+        }
+    } catch (e: Exception) {
+        Log.e("JoinDuration", "Lỗi parse createdAt: $e")
+        "Không rõ thời gian tham gia"
+    }
+}fun calculateUserLevel(user: UserProfileResponse?): Triple<String, Color, Int> {
+    if (user == null) return Triple("Không xác định", Color.Gray, 0)
+
+    val totalPostScore = (user.totalPost ?: 0) * 2
+    val totalCommentScore = (user.numberComment ?: 0)
+
+    val formatter = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault())
+    formatter.timeZone = java.util.TimeZone.getTimeZone("UTC")
+    val joinedDate = try {
+        formatter.parse(user.createdAt ?: "")
+    } catch (e: Exception) {
+        null
+    }
+
+    val now = java.util.Date()
+    val yearsActive = if (joinedDate != null) {
+        val diffMillis = now.time - joinedDate.time
+        (diffMillis / (1000 * 60 * 60 * 24 * 365)).toInt()
+    } else 0
+
+    val totalScore = totalPostScore + totalCommentScore + (yearsActive * 5)
+
+    val levelColorPair = when {
+        totalScore >= 100 -> "💎 Kim cương\n" to Color(0xFF9C27B0)
+        totalScore >= 70 -> "🥇 Vàng\n" to Color(0xFFFFD700)
+        totalScore >= 40 -> "🥈 Bạc\n" to Color(0xFFC0C0C0)
+        totalScore >= 20 -> "🥉 Đồng\n" to Color(0xFFCD7F32)
+        else -> "🌱 Tân thủ\n" to Color(0xFFE0E0E0)
+    }
+
+    return Triple(levelColorPair.first, levelColorPair.second, totalScore)
 }

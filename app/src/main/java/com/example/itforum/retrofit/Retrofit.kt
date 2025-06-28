@@ -25,13 +25,13 @@ import com.example.itforum.user.login.otp.AuthService
 
 object RetrofitInstance {
     private const val SECOND_URL  = "http://192.168.1.216:4000"
-    private const val URL_Phone = "http://192.168.0.112:4000"
+    private const val URL_Phone = "http://192.168.1.161:4000"
     //    private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
 //    private const val SECOND_URL = "https://192.168.1.216:4000"
     val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(10, TimeUnit.SECONDS)
-        .writeTimeout(10, TimeUnit.SECONDS)
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
         .build()
 
     val retrofit = Retrofit.Builder()
