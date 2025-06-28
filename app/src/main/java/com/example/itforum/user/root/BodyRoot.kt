@@ -62,6 +62,7 @@ import com.example.itforum.admin.adminCrashlytic.UserSession.email
 import com.example.itforum.service.AuthRepository
 import com.example.itforum.user.Analytics.logScreenEnter
 import com.example.itforum.user.Analytics.logScreenExit
+import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
 
 import com.example.itforum.user.complaint.ComplaintPage
 import com.example.itforum.user.news.DetailNewsPage
@@ -791,6 +792,15 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             AdminScreen(sharedPreferences)
         }
 
+        composable("report_account/{reportedUserId}") { backStackEntry ->
+            val reportedUserId = backStackEntry.arguments?.getString("reportedUserId") ?: ""
+            val reporterUserId = sharedPreferences.getString("userId", "") ?: ""
 
+            CreateReportAccountScreen(
+                reporterUserId = reporterUserId,
+                reportedUserId = reportedUserId,
+                onBack = { navHostController.popBackStack() }
+            )
+        }
     }
 }

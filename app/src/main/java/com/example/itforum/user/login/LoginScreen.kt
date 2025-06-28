@@ -1,10 +1,13 @@
 package com.example.itforum.user.login
-
+import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.delay
 import android.content.SharedPreferences
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,10 +24,18 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
+import androidx.compose.ui.draw.scale
 import com.example.itforum.R
 
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -230,35 +241,50 @@ fun HeaderSection() {
         }
     }
 }
-
 @Composable
 fun PhoneOrEmailInput(value: String, isValid: Boolean, onValueChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text("Số điện thoại hoặc Email", fontSize = 20.sp) },
-        isError = value.isNotEmpty() && !isValid,
-        modifier = Modifier.fillMaxWidth(0.9f)
-    )
-    if (!isValid && value.isNotEmpty()) {
-        Text("Số điện thoại hoặc email không hợp lệ", color = Color.Red)
+    Column(modifier = Modifier.fillMaxWidth(0.9f)) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text("Số điện thoại hoặc Email") },
+            isError = value.isNotEmpty() && !isValid,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        if (!isValid && value.isNotEmpty()) {
+            Text("Số điện thoại hoặc email không hợp lệ", color = Color.Red, fontSize = 14.sp)
+        }
     }
 }
 
 @Composable
 fun PasswordInput(value: String, isValid: Boolean, onValueChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text("Mật khẩu", fontSize = 20.sp) },
-        visualTransformation = PasswordVisualTransformation(),
-        isError = value.isNotEmpty() && !isValid,
-        modifier = Modifier.fillMaxWidth(0.9f)
-    )
-    if (!isValid && value.isNotEmpty()) {
-        Text("Mật khẩu phải từ 6 ký tự", color = Color.Red)
+    var showPassword by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxWidth(0.9f)) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text("Mật khẩu") },
+            visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                val icon = if (showPassword) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff
+                val description = if (showPassword) "Ẩn mật khẩu" else "Hiện mật khẩu"
+                IconButton(onClick = { showPassword = !showPassword }) {
+                    Icon(imageVector = icon, contentDescription = description)
+                }
+            },
+            isError = value.isNotEmpty() && !isValid,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        if (!isValid && value.isNotEmpty()) {
+            Text("Mật khẩu phải từ 6 ký tự", color = Color.Red, fontSize = 14.sp)
+        }
     }
 }
+
 
 @Composable
 fun ForgotPasswordText(onClick: () -> Unit) {
@@ -289,5 +315,4 @@ fun RegisterText(onClick: () -> Unit) {
         )
     }
 }
-
 
