@@ -21,10 +21,6 @@ import com.example.itforum.service.ReportAccountService
 import com.example.itforum.service.SkillService
 import com.example.itforum.user.login.otp.AuthService
 
-import retrofit2.converter.scalars.ScalarsConverterFactory
-
-//import com.example.itforum.service.AuthApi
-
 object RetrofitInstance {
     private const val THIRD_URL  = "http://192.168.1.216:4000"
     private const val URL_Phone = "http://192.168.36.105:4000"
