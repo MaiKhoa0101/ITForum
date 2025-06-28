@@ -36,7 +36,7 @@ interface UserService {
         @Part username: MultipartBody.Part?,
         @Part introduce: MultipartBody.Part?,
         @Part skill: List<MultipartBody.Part?>,
-        @Part certificate: MultipartBody.Part?,
+        @Part certificate: List<MultipartBody.Part?>,
         @Part avatar: MultipartBody.Part?
     ): Response<userUpdateResponse>
 

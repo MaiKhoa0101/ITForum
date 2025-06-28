@@ -108,6 +108,7 @@ import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.home.tag.ViewModel.TagViewModel
 import com.example.itforum.user.modelData.request.CreatePostRequest
 import com.example.itforum.user.post.viewmodel.PostViewModel
+import com.example.itforum.user.skeleton.SkeletonPost
 import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 
 data class icontext(
@@ -188,17 +189,23 @@ fun CreatePostPage(
                     }
                 }
             }
-            item{
+            item {
                 if (progress in 0f..1f && progress != 0f) {
                     Column(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
                     ) {
-                        CircularProgressIndicator(progress = progress)
-                        Text("Đang đăng bài: ${(progress * 100).toInt()}%")
+                        Text(
+                            text = "Đang đăng bài: ${(progress * 100).toInt()}%",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SkeletonPost() // mô phỏng một bài viết đang được tải lên
                     }
                 }
-
             }
+
             item {  3
                 Column(
                     modifier = Modifier
