@@ -35,7 +35,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
@@ -49,7 +53,9 @@ fun Setting(
     darkTheme: Boolean
 ) {
     val context = LocalContext.current
-
+    val userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
+        initializer { UserViewModel(sharedPreferences) }
+    })
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -124,7 +130,11 @@ fun Setting(
                 sharedPreferences.edit().remove("role").apply()
                 sharedPreferences.edit().remove("access_token").apply()
                 sharedPreferences.edit().remove("loginType").apply() // ✅ Quan trọng!
-
+                val userId = sharedPreferences.getString("userId", null)
+                Log.d("fcm userId", userId.toString())
+                if (userId != null) {
+                    userViewModel.SignOut(userId)
+                }
                 // Đăng xuất Firebase
                 FirebaseAuth.getInstance().signOut()
 

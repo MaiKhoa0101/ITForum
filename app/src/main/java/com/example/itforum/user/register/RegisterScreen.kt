@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,6 +70,8 @@ fun RegisterScreen(
 
     val uiState by registerViewModel.uiState.collectAsState()
     var canSubmit by remember {mutableStateOf(false)}
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState) {
         if (uiState is UiState.Success) {
@@ -179,13 +182,22 @@ fun RegisterScreen(
                     password = it
                     passwordError = false
                 },
+
                 label = { Text("Mật khẩu") },
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    Text(
+                        text = if (passwordVisible) "🐵" else "🙈",
+                        modifier = Modifier.clickable { passwordVisible = !passwordVisible },
+                        fontSize = 20.sp
+                    )
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 isError = passwordError,
                 textStyle = androidx.compose.ui.text.TextStyle(color = Color.Black),
                 modifier = Modifier.fillMaxWidth()
             )
+
 
             if (passwordError) {
                 Text(
@@ -203,12 +215,20 @@ fun RegisterScreen(
                     confirmPasswordError = false
                 },
                 label = { Text("Xác nhận mật khẩu") },
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    Text(
+                        text = if (confirmPasswordVisible) "🐵" else "🙈",
+                        modifier = Modifier.clickable { confirmPasswordVisible = !confirmPasswordVisible },
+                        fontSize = 20.sp
+                    )
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 isError = confirmPasswordError,
                 textStyle = androidx.compose.ui.text.TextStyle(color = Color.Black),
                 modifier = Modifier.fillMaxWidth()
             )
+
 
             if (confirmPasswordError) {
                 Text(

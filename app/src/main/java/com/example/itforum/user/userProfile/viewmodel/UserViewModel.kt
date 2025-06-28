@@ -25,6 +25,7 @@ import java.io.File
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 
 class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel() {
@@ -162,28 +163,33 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel() {
                         avatar = avatar
                     )
                 }
-                if (response!!.isSuccessful) {
-                    val responseBody = response.body()
-                    Log.d("UserViewModel", "Success Response: ${responseBody?.message}")
-                    _uiState.value = UiState.Success(
-                        responseBody?.message ?: "Cập nhật thành công"
-                    )
+                if (response != null) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body()
+                        Log.d("UserViewModel", "Success Response: ${responseBody?.message}")
+                        _uiState.value = UiState.Success(
+                            responseBody?.message ?: "Cập nhật thành công"
+                        )
+                        delay(500) // Cho Compose thời gian phản ứng trước khi đổi trạng thái
+                        _uiState.value = UiState.Idle
+                    } else {
+                        // Get error details from response body
+                        val errorBody = response.errorBody()?.string()
+                        Log.e("UserViewModel", "Error Response Body: $errorBody")
+
+                        val errorMessage = when (response.code()) {
+                            400 -> "Dữ liệu không hợp lệ: $errorBody"
+                            404 -> "Không tìm thấy người dùng"
+                            500 -> "Lỗi server: $errorBody"
+                            else -> "Lỗi không xác định (${response.code()}): $errorBody"
+                        }
+
+                        showError(errorMessage)
+                        _uiState.value = UiState.Error(errorMessage)
+                    }
+                } else{
                     delay(500) // Cho Compose thời gian phản ứng trước khi đổi trạng thái
                     _uiState.value = UiState.Idle
-                } else {
-                    // Get error details from response body
-                    val errorBody = response.errorBody()?.string()
-                    Log.e("UserViewModel", "Error Response Body: $errorBody")
-
-                    val errorMessage = when (response.code()) {
-                        400 -> "Dữ liệu không hợp lệ: $errorBody"
-                        404 -> "Không tìm thấy người dùng"
-                        500 -> "Lỗi server: $errorBody"
-                        else -> "Lỗi không xác định (${response.code()}): $errorBody"
-                    }
-
-                    showError(errorMessage)
-                    _uiState.value = UiState.Error(errorMessage)
                 }
             } catch (e: IOException) {
                 val errorMsg = "Lỗi kết nối mạng: ${e.localizedMessage}"
@@ -268,6 +274,52 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel() {
                 val msg = "Lỗi đọc Firestore: ${e.localizedMessage ?: "Không rõ"}"
                 Log.e("UserViewModel", msg, e)
                 _uiState.value = UiState.Error(msg)
+            }
+        }
+    }
+    fun SignOut(userId: String) {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            val fcmToken = FirebaseMessaging.getInstance().token.await()
+            Log.d("fcm userId UserViewModel", "FCM Token: $fcmToken")
+            try {
+                val response = RetrofitInstance.userService.signOut(
+                    userId = userId,
+                    fcmToken = fcmToken
+                )
+                if (response.isSuccessful) {
+                    val responseBody = response.body()
+                    Log.d("UserViewModel", "Success Response: ${responseBody?.message}")
+                    _uiState.value = UiState.Success(
+                        responseBody?.message ?: "Đăng xuất thành công"
+                    )
+                    delay(500) // Cho Compose thời gian phản ứng trước khi đổi trạng thái
+                    _uiState.value = UiState.Idle
+                } else {
+                    // Get error details from response body
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("UserViewModel", "Error Response Body: $errorBody")
+
+                    val errorMessage = when (response.code()) {
+                        400 -> "Dữ liệu không hợp lệ: $errorBody"
+                        404 -> "Không tìm thấy người dùng"
+                        500 -> "Lỗi server: $errorBody"
+                        else -> "Lỗi không xác định (${response.code()}): $errorBody"
+                    }
+
+                    showError(errorMessage)
+                    _uiState.value = UiState.Error(errorMessage)
+                }
+            } catch (e: IOException) {
+                val errorMsg = "Lỗi kết nối mạng: ${e.localizedMessage}"
+                Log.e("UserViewModel", errorMsg, e)
+                _uiState.value = UiState.Error(errorMsg)
+                showError("Không thể kết nối máy chú, vui lòng kiểm tra mạng.")
+            } catch (e: Exception) {
+                val errorMsg = "Lỗi hệ thống: ${e.message ?: e.localizedMessage}"
+                Log.e("UserViewModel", errorMsg, e)
+                _uiState.value = UiState.Error(errorMsg)
+                showError("Lỗi bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
             }
         }
     }

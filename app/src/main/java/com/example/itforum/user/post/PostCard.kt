@@ -167,7 +167,8 @@ fun PostCardWithVote(
             Text(
                 text = post.content ?: "",
                 fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Normal
+                ,
                 color = MaterialTheme.colorScheme.onBackground
             )
 
