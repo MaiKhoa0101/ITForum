@@ -66,6 +66,8 @@ import com.example.itforum.user.Analytics.logScreenExit
 import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
 
 import com.example.itforum.user.complaint.ComplaintPage
+import com.example.itforum.user.home.tag.TagScreen
+import com.example.itforum.user.home.tag.ViewModel.TagViewModel
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.post.viewmodel.CommentViewModel
@@ -390,6 +392,7 @@ fun StartRoot(navHostController: NavHostController, sharedPreferences: SharedPre
         composable ("home") {
             return@composable
         }
+
     }
 }
 
@@ -400,6 +403,8 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
     })
     var commentViewModel : CommentViewModel =  viewModel(factory = viewModelFactory {
         initializer { CommentViewModel(sharedPreferences) }})
+    var tagViewModel : TagViewModel = viewModel(factory = viewModelFactory {
+        initializer { TagViewModel() }})
     NavHost(navHostController, startDestination = "home") {
         composable ("home") {
 
@@ -418,6 +423,9 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             HomePage(navHostController, modifier, sharedPreferences, postViewModel,commentViewModel)
         }
 
+        composable("tag") {
+            TagScreen(tagViewModel)
+        }
         composable("comment/{postId}") { backStackEntry ->
             val postId = backStackEntry.arguments?.getString("postId") ?: ""
 
@@ -593,7 +601,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 }
             }
 
-            CreatePostPage(modifier, navHostController, sharedPreferences, postViewModel)
+            CreatePostPage(modifier, navHostController, sharedPreferences, postViewModel,tagViewModel)
         }
 
         composable("detail_post/{postId}") { backStackEntry ->
@@ -718,7 +726,8 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 viewModel = viewModel,
                 postViewModel = postViewModel,
                 navHostController,
-                sharedPreferences
+                sharedPreferences,
+                tagViewModel
             )
         }
 

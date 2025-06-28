@@ -105,6 +105,7 @@ import com.example.itforum.user.FilterWords.WordFilter
 import com.example.itforum.user.effect.UiStateMessage
 
 import com.example.itforum.user.effect.model.UiState
+import com.example.itforum.user.home.tag.ViewModel.TagViewModel
 import com.example.itforum.user.modelData.request.CreatePostRequest
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.userProfile.viewmodel.UserViewModel
@@ -120,7 +121,8 @@ fun CreatePostPage(
     modifier: Modifier,
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences,
-    postViewModel: PostViewModel
+    postViewModel: PostViewModel,
+    tagViewModel: TagViewModel
 ) {
     val context = LocalContext.current
     var userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
