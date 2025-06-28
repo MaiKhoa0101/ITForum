@@ -13,6 +13,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,15 +65,22 @@ import com.example.itforum.service.AuthRepository
 import com.example.itforum.user.Analytics.logScreenEnter
 import com.example.itforum.user.Analytics.logScreenExit
 import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
+import com.example.itforum.user.ReportPost.view.ReportPostDialog
 
 import com.example.itforum.user.complaint.ComplaintPage
+import com.example.itforum.user.home.tag.TagScreen
+import com.example.itforum.user.home.tag.ViewModel.TagViewModel
 import com.example.itforum.user.news.DetailNewsPage
+import com.example.itforum.user.post.CommentDialogWrapper
+import com.example.itforum.user.post.ConfirmDeleteDialog
+import com.example.itforum.user.post.OptionDialog
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.post.viewmodel.CommentViewModel
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.userProfile.OtherUserProfileScreen
 import com.example.itforum.user.userProfile.UserProfileScreen
 import com.example.itforum.user.setting.Setting
+import com.example.itforum.user.skeleton.SkeletonBox
 import com.example.itforum.user.utilities.chat.ChatAIApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -129,7 +137,7 @@ fun SplashScreen(
 
     // Giao diện loading đơn giản
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
+        SkeletonBox()
     }
 }
 
@@ -390,17 +398,41 @@ fun StartRoot(navHostController: NavHostController, sharedPreferences: SharedPre
         composable ("home") {
             return@composable
         }
+        composable ("admin_root"){
+            return@composable
+        }
+
     }
 }
 
 @Composable
-fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier, onToggleTheme: () -> Unit, darkTheme: Boolean = false){
+fun BodyRoot(sharedPreferences: SharedPreferences,
+             navHostController: NavHostController,
+             modifier: Modifier, onToggleTheme: () -> Unit,
+             darkTheme: Boolean = false,
+             role:String?
+){
     var postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(sharedPreferences) }
     })
     var commentViewModel : CommentViewModel =  viewModel(factory = viewModelFactory {
         initializer { CommentViewModel(sharedPreferences) }})
+    var tagViewModel : TagViewModel = viewModel(factory = viewModelFactory {
+        initializer { TagViewModel() }})
     NavHost(navHostController, startDestination = "home") {
+    val startDestination = if (role == "admin") {
+        "admin_root"
+    } else {
+        "home"
+    }
+    println("role "+ role)
+    NavHost(navHostController,
+        startDestination = startDestination,
+    ) {
+
+        composable ("admin_root"){
+            AdminScreen(sharedPreferences)
+        }
         composable ("home") {
 
             val context = LocalContext.current
@@ -418,6 +450,12 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             HomePage(navHostController, modifier, sharedPreferences, postViewModel,commentViewModel)
         }
 
+        composable("tag") {
+            TagScreen(tagViewModel)
+        }
+        composable("login"){
+            return@composable
+        }
         composable("comment/{postId}") { backStackEntry ->
             val postId = backStackEntry.arguments?.getString("postId") ?: ""
 
@@ -593,11 +631,12 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 }
             }
 
-            CreatePostPage(modifier, navHostController, sharedPreferences, postViewModel)
+            CreatePostPage(modifier, navHostController, sharedPreferences, postViewModel,tagViewModel)
         }
 
         composable("detail_post/{postId}") { backStackEntry ->
             val context = LocalContext.current
+
 
             LaunchedEffect(Unit) {
                 logScreenEnter(context, "detail_post")
@@ -610,8 +649,82 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             }
 
             val postId = backStackEntry.arguments?.getString("postId") ?: return@composable
+            var userId = sharedPreferences.getString("userId", null)
+            var selectedPostId by remember { mutableStateOf<String?>(null) }
+            var showReportDialog by remember { mutableStateOf(false) }
 
-            DetailPostPage(navHostController, sharedPreferences, postId,commentViewModel)
+            var showOptionDialog by remember { mutableStateOf(false) }
+            var showDeleteDialog by remember { mutableStateOf(false) }
+            var selectedUserId by remember { mutableStateOf<String?>(null) }
+
+            DetailPostPage(
+                navHostController,
+                sharedPreferences,
+                postId,
+                commentViewModel,
+                onUpvoteClick = {
+                    postViewModel.handleUpVote(
+                        "upvote",
+                        -1,
+                        postId
+                    )
+                },
+                onDownvoteClick = {
+                    postViewModel.handleDownVote(
+                        "downvote",
+                        -1,
+                        postId
+                    )
+                },
+                onBookmarkClick = {
+                    postViewModel.handleBookmark(
+                            -1,
+                        postId,
+                        userId
+                    )
+                },
+                onReportClick = {it ->
+                    selectedUserId = it
+                    selectedPostId = postId
+                    showOptionDialog =  true
+                },
+            )
+            if (showOptionDialog && selectedUserId!= null){
+                OptionDialog(showOptionDialog,
+                    onDismiss = {
+                        showOptionDialog = false
+                    },
+                    onShowReport = {
+                        showReportDialog = true
+                        showOptionDialog = false
+                    },
+                    onDeletePost = {
+                        showDeleteDialog = true
+                        showOptionDialog =  false
+                    },
+                    isMyPost = (selectedUserId == userId ))
+            }
+
+            if (showReportDialog && selectedPostId != null) {
+                ReportPostDialog(
+                    sharedPreferences = sharedPreferences,
+                    reportedPostId = selectedPostId!!,
+                    onDismissRequest = {
+                        showReportDialog = false
+                        selectedPostId = null
+                    }
+                )
+            }
+            if (showDeleteDialog && selectedPostId!= null){
+                ConfirmDeleteDialog(
+                    showDialog = showDeleteDialog,
+                    onDismiss = {
+                        showDeleteDialog = false
+                    },
+                    onConfirm = {postViewModel.handleHidePost(postId = selectedPostId)
+                        showDeleteDialog =  false}
+                )
+            }
         }
 
         composable("listlike") {
@@ -718,7 +831,8 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 viewModel = viewModel,
                 postViewModel = postViewModel,
                 navHostController,
-                sharedPreferences
+                sharedPreferences,
+                tagViewModel
             )
         }
 
@@ -792,9 +906,6 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
         }
 
 
-        composable ("admin_root"){
-            AdminScreen(sharedPreferences)
-        }
 
         composable("report_account/{reportedUserId}") { backStackEntry ->
             val reportedUserId = backStackEntry.arguments?.getString("reportedUserId") ?: ""

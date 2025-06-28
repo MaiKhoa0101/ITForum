@@ -27,6 +27,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
@@ -117,6 +118,10 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel() {
     }
 
     fun ModifierUser(userUpdateRequest: UserUpdateRequest, context: Context) {
+        //test
+
+
+
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
@@ -127,7 +132,6 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel() {
                     prepareFilePart(context, it, "avatar")
                 }
 
-                // Chỉ tạo MultipartBody.Part cho các trường không null
                 val name = userUpdateRequest.name?.let {
                     MultipartBody.Part.createFormData("name", it)
                 }
@@ -144,61 +148,55 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel() {
                     MultipartBody.Part.createFormData("introduce", it)
                 }
                 val skill = userUpdateRequest.skill?.map {
-                    it.let { it1 -> MultipartBody.Part.createFormData("skill", it1) }
+                    MultipartBody.Part.createFormData("skill", it)
+                } ?: emptyList()
+                val certificateJson = userUpdateRequest.certificate?.let {
+                    Gson().toJson(it) // Convert List<Certificate> to JSON string
                 }
-                val certificate = userUpdateRequest.certificate?.let {
-                    MultipartBody.Part.createFormData("certificate", Gson().toJson(it))
-                }
-
-                val response = skill?.let {
-                    RetrofitInstance.userService.updateUser(
-                        id = userId!!,
-                        name = name,
-                        phone = phone,
-                        email = email,
-                        username = username,
-                        introduce = introduce,
-                        skill = it,
-                        certificate = certificate,
-                        avatar = avatar
+                val certificatePart = certificateJson?.let {
+                    MultipartBody.Part.createFormData(
+                        "certificate",
+                        "certificate.json", // optional filename
+                        it.toRequestBody("application/json".toMediaTypeOrNull())
                     )
                 }
-                if (response != null) {
-                    if (response.isSuccessful) {
-                        val responseBody = response.body()
-                        Log.d("UserViewModel", "Success Response: ${responseBody?.message}")
-                        _uiState.value = UiState.Success(
-                            responseBody?.message ?: "Cập nhật thành công"
-                        )
-                        delay(500) // Cho Compose thời gian phản ứng trước khi đổi trạng thái
-                        _uiState.value = UiState.Idle
-                    } else {
-                        // Get error details from response body
-                        val errorBody = response.errorBody()?.string()
-                        Log.e("UserViewModel", "Error Response Body: $errorBody")
 
-                        val errorMessage = when (response.code()) {
-                            400 -> "Dữ liệu không hợp lệ: $errorBody"
-                            404 -> "Không tìm thấy người dùng"
-                            500 -> "Lỗi server: $errorBody"
-                            else -> "Lỗi không xác định (${response.code()}): $errorBody"
-                        }
+                println(userUpdateRequest.certificate)
 
-                        showError(errorMessage)
-                        _uiState.value = UiState.Error(errorMessage)
-                    }
-                } else{
-                    delay(500) // Cho Compose thời gian phản ứng trước khi đổi trạng thái
+
+                // ✅ Gửi API bất kể skill null hay không
+                val response = RetrofitInstance.userService.updateUser(
+                    id = userId!!,
+                    name = name,
+                    phone = phone,
+                    email = email,
+                    username = username,
+                    introduce = introduce,
+                    skill = skill,
+                    certificate = listOfNotNull( certificatePart),
+                    avatar = avatar
+                )
+
+                if (response.isSuccessful) {
+                    val responseBody = response.body()
+                    Log.d("UserViewModel", "Success Response: ${responseBody?.message}")
+                    _uiState.value = UiState.Success(responseBody?.message ?: "Cập nhật thành công")
+                    delay(500)
                     _uiState.value = UiState.Idle
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    val errorMessage = "Lỗi cập nhật: $errorBody"
+                    Log.e("UserViewModel", errorMessage)
+                    _uiState.value = UiState.Error(errorMessage)
+                    showError(errorMessage)
                 }
+
             } catch (e: IOException) {
                 val errorMsg = "Lỗi kết nối mạng: ${e.localizedMessage}"
-                Log.e("UserViewModel", errorMsg, e)
                 _uiState.value = UiState.Error(errorMsg)
-                showError("Không thể kết nối máy chú, vui lòng kiểm tra mạng.")
+                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
             } catch (e: Exception) {
-                val errorMsg = "Lỗi hệ thống: ${e.message ?: e.localizedMessage}"
-                Log.e("UserViewModel", errorMsg, e)
+                val errorMsg = "Lỗi hệ thống: ${e.message}"
                 _uiState.value = UiState.Error(errorMsg)
                 showError("Lỗi bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
             }

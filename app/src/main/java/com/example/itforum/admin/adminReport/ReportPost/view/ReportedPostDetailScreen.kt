@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.net.toUri
+import com.example.itforum.user.skeleton.SkeletonBox
 
 @Composable
 fun ReportedPostDetailScreen(
@@ -163,7 +164,7 @@ fun ReportedPostDetailScreen(
     else {
             Box(modifier = Modifier.padding(16.dp)) {
                 Column {
-                    CircularProgressIndicator()
+                    SkeletonBox()
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Đang tải dữ liệu bài viết...")
                 }

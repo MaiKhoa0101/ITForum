@@ -21,16 +21,12 @@ import com.example.itforum.service.ReportAccountService
 import com.example.itforum.service.SkillService
 import com.example.itforum.user.login.otp.AuthService
 
-import retrofit2.converter.scalars.ScalarsConverterFactory
-
-//import com.example.itforum.service.AuthApi
-
 object RetrofitInstance {
     private const val THIRD_URL  = "http://192.168.1.216:4000"
     private const val URL_Phone = "http://192.168.36.105:4000"
 
     //    private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
-    private const val SECOND_URL = "http://192.168.1.145:4000"
+    private const val SECOND_URL = "http://192.168.222.22:4000"
     val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
@@ -57,8 +53,8 @@ object RetrofitInstance {
     val skillService: SkillService by lazy { retrofit.create(SkillService::class.java) }
     val api: AnalyticsApi by lazy {
         Retrofit.Builder()
-//            .baseUrl(SECOND_URL)
-            .baseUrl(URL_Phone)
+            .baseUrl(SECOND_URL)
+//            .baseUrl(URL_Phone)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(AnalyticsApi::class.java)

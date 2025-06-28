@@ -103,13 +103,14 @@ fun Root(sharedPreferences:SharedPreferences) {
     val navHostController = rememberNavController()
     val navBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val showTopBars = currentRoute in listOf("home","bookmark","follow")
+    val showTopBars = currentRoute in listOf("home","bookmark","follow","tag")
     val showFootBars = currentRoute in listOf("home", "searchscreen", "notification", "personal","bookmark")
     //thay doi ơ day
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     val token = sharedPreferences.getString("access_token", null)
+    val role = sharedPreferences.getString("role", null)
 
     ITForumTheme(darkTheme = darkTheme)
     {
@@ -169,7 +170,8 @@ fun Root(sharedPreferences:SharedPreferences) {
                         onToggleTheme = {
                             darkTheme = !darkTheme
                         },
-                        darkTheme = darkTheme
+                        darkTheme = darkTheme,
+                        role = role
                     )
                 }
             }

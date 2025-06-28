@@ -96,7 +96,6 @@ fun LoginScreen(
                 }
                 else {
                     navHostController.navigate("home")
-//                    subscribeToAppTopic()
                 }
             }
         }else if(uiState is UiState.Loading){

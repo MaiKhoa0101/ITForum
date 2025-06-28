@@ -67,11 +67,10 @@ fun PostCardWithVote(
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences
 ) {
-    var isChange by remember { mutableStateOf(false) }
     var upvotes by remember { mutableStateOf(vote?.data?.upVoteData?.total?: 0) }
-    var isVote by remember { mutableStateOf(vote?.data?.userVote) }
     var isSavedPost by remember { mutableStateOf(isBookMark) }
 
+    var isVote by remember { mutableStateOf(vote?.data?.userVote) }
 
     var isChangeUp by remember { mutableStateOf(false) }
     var isChangeDown by remember { mutableStateOf(false) }

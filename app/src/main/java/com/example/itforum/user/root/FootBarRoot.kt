@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.itforum.R
+import com.example.itforum.user.skeleton.SkeletonPost
 
 
 @Composable
@@ -81,6 +82,7 @@ fun FootBarRoot(currentRoute:String?,navHostController: NavHostController) {
                 .align(Alignment.TopCenter)
                 .offset(y = -30.dp), // Elevate the button
         )
+//        SkeletonPost()
     }
 }
 
