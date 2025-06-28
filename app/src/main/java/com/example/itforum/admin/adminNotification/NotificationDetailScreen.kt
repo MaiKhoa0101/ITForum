@@ -35,6 +35,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,15 +52,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.example.itforum.R
+import com.example.itforum.admin.components.convertDateTime
+import com.example.itforum.user.notification.viewmodel.NotificationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationDetailScreen(
     navHostController: NavHostController,
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+    notificationId: String
 ) {
+    val notificationViewModel: NotificationViewModel = viewModel(factory = viewModelFactory {
+        initializer { NotificationViewModel(sharedPreferences) }
+    })
+    val notification by notificationViewModel.notification.collectAsState()
+    LaunchedEffect(Unit) {
+        notificationViewModel.getNotificationById(notificationId)
+    }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     Scaffold(
         modifier = Modifier
@@ -108,12 +123,14 @@ fun NotificationDetailScreen(
         LazyColumn(
             modifier = Modifier.padding(innerPadding)
         ) {
-            item { TitleWithCard(title = "Tiêu đề", content = "Bug alert") }
-            item { TitleWithCard(title = "Nội dung", content = "Nội dung thông báo Nội dung thông báo Nội dung thông báo Nội dung thông báo Nội dung thông báo Nội dung thông báo Nội dung thông báo Nội dung thông báo Nội dung thông báo Nội dung thông báo") }
-            item { TitleWithCard(title = "Thời gian gửi", content = "24/04/2024 10:00 AM") }
-            item { TitleWithCard(title = "Trạng thái", content = "Đã gửi", color = Color.Green) }
-            item { TitleWithCard(title = "Người nhận", content = "Tất cả") }
-            item { TitleWithCard(title = "Người tạo", content = "Admin") }
+            item { notification?.let { TitleWithCard(title = "Tiêu đề", content = it.title) } }
+            item { notification?.let { TitleWithCard(title = "Nội dung", content = it.content) } }
+            item { notification?.postId?.let { TitleWithCard(title = "Bài viết", content = it) } }
+            item { TitleWithCard(title = "Thời gian gửi", content = notification?.let {
+                convertDateTime(
+                    it.createdAt)
+            }.toString()) }
+            item { TitleWithCard(title = "Người nhận", content = notification?.userReceiveNotificationId?:"Tất cả") }
             item { SectionButton({},{}) }
         }
     }

@@ -10,31 +10,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.example.itforum.admin.components.AdminScreenLayout
 import com.example.itforum.admin.components.TableData
 import com.example.itforum.admin.components.TableRowConvertible
 import com.example.itforum.admin.components.convertToTableRows
+import com.example.itforum.user.modelData.response.Notification
+import com.example.itforum.user.notification.viewmodel.NotificationViewModel
 import com.example.itforum.user.post.icontext
 import java.time.Instant
-
-data class Notification(
-    val id: String,
-    val title: String,
-    val content: String,
-    val receiver: String,
-    val createdAt: String,
-    val status: String,
-    ) : TableRowConvertible {
-    override fun toTableRow(): List<String> {
-        return listOf(id, title, content, receiver, createdAt, status)
-    }
-}
 
 @Composable
 fun AdminNotification (
@@ -43,29 +38,27 @@ fun AdminNotification (
     modifier: Modifier
 ) {
     val context = LocalContext.current
-
+    val notificationViewModel: NotificationViewModel = viewModel(factory = viewModelFactory {
+        initializer { NotificationViewModel(sharedPreferences) }
+    })
+    val notificationList by notificationViewModel.notificationList.collectAsState()
+    LaunchedEffect(Unit) {
+        notificationViewModel.getAllNotifications()
+    }
     val menuOptions = listOf(
-        icontext(Icons.Default.Edit,"Xem chi tiết",{ notifyId ->
-            navController.navigate("detail_notify")
+        icontext(Icons.Default.Edit,"Xem chi tiết",{ notificationId ->
+            navController.navigate("detail_notify/$notificationId")
         }),
-        icontext(Icons.Default.Delete,"Xóa",{ notifyId -> })
+        icontext(Icons.Default.Delete,"Xóa",{ notificationId -> })
     )
     val filterOptions = mapOf(
         "Thời gian" to listOf("Mới nhất", "Cũ nhất"),
         "Trạng thái" to listOf("Đã gửi", "Nháp")
     )
-    var listNotify = listOf(
-        Notification("1","Bug alert","hahahahaha","Tất cả","12/04/25","Đã gửi"),
-        Notification("2","New update","hahahahaha","Tất cả","11/04/25","Đã gửi"),
-        Notification("3","Test msg","hahahahaha","Tất cả","10/04/25","Đã gửi"),
-        Notification("4","eror 404","hahahahaha","Tất cả","10/03/25","Đã gửi"),
-        Notification("5","Bảo trì","hahahahaha","Tất cả","08/03/25","Đã gửi"),
-        Notification("6","eror 404","hahahahaha","Tất cả","12/04/25","Đã gửi"),
-        Notification("7","Bug alert","hahahahaha","Tất cả","10/03/25","Đã gửi"),
-        )
-    listNotify.let {
+
+    notificationList.let {
         AdminScreenLayout(
-            title = "Quản lý tin tức",
+            title = "Quản lý thông báo",
             itemCount = it.size,
             modifier = modifier,
             addComposed = {
@@ -87,13 +80,13 @@ fun AdminNotification (
                 }
             },
             searchTable = { searchText ->
-                val dataFiltered = listNotify.filter { item ->
+                val dataFiltered = notificationList.filter { item ->
                     searchText.isBlank() || listOf(
                         item.id,
                         item.createdAt,
                         item.title,
                         item.content,
-                        item.receiver
+                        item.userReceiveNotificationId?:"Tất cả"
                     ).any { it.contains(searchText, ignoreCase = true) }
                 }
                 return@AdminScreenLayout dataFiltered
@@ -115,7 +108,7 @@ fun AdminNotification (
             },
             table = {dataFiltered ->
                 TableData(
-                    headers = listOf("ID", "Tiêu đề", "Nội dung", "Người nhận", "Thời gian", "Trạng thái","Tùy chỉnh"),
+                    headers = listOf("ID", "Tiêu đề", "Nội dung", "Người nhận", "Bài viết", "Thời gian", "Tùy chỉnh"),
                     rows = convertToTableRows(dataFiltered as List<TableRowConvertible>),
                     menuOptions = menuOptions,
                     sharedPreferences = sharedPreferences,

@@ -1,6 +1,7 @@
 package com.example.itforum.user.notification
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +44,7 @@ import com.example.itforum.user.notification.viewmodel.NotificationViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.example.itforum.user.modelData.response.Notification
+import com.google.firebase.messaging.FirebaseMessaging
 
 
 @Composable
@@ -193,4 +195,14 @@ fun NotifyChild(
             }
         }
     }
+}
+fun subscribeToAppTopic() {
+    FirebaseMessaging.getInstance().subscribeToTopic("all_users")
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Log.d("FCM", "Subscribed to all_users topic")
+            } else {
+                Log.e("FCM", "Topic subscription failed", task.exception)
+            }
+        }
 }
