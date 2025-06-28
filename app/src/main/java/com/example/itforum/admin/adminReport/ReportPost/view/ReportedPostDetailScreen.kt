@@ -114,6 +114,17 @@ fun ReportedPostDetailScreen(
                 Text("Lý do tố cáo:", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(8.dp))
                 DetailItem(label = "•", value = data!!.reason, divider = false)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Kết quả phân tích AI:", style = MaterialTheme.typography.titleMedium)
+
+                val ai = data!!.aiAnalysis
+                if (ai != null) {
+                    DetailItem("Mức độ vi phạm (%)", "${ai.violationPercentage}")
+                    DetailItem("Giải thích", ai.reason)
+                    DetailItem("Có nên khóa bài viết?", if (ai.shouldBan) "✅ Có" else "❌ Không")
+                } else {
+                    Text("⏳ Đang phân tích AI hoặc chưa có kết quả.")
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
                 val scope = rememberCoroutineScope()

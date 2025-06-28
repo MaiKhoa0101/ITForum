@@ -1,11 +1,17 @@
 package com.example.itforum.admin.adminReport.ReportPost.model.response
 
+data class AiAnalysis(
+    val violationPercentage: Int,
+    val reason: String,
+    val shouldBan: Boolean
+)
 data class ReportedPostDetailResponse(
     val _id: String,
     val reason: String,
     val createdAt: String,
     val reportedPost: ReportedPostDetail,
-    val reporterUser: ReporterUser
+    val reporterUser: ReporterUser,
+    val aiAnalysis: AiAnalysis?
 )
 
 data class ReportedPostDetail(
