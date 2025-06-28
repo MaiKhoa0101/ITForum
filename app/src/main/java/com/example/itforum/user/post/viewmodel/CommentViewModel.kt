@@ -30,7 +30,7 @@ class CommentViewModel(
         viewModelScope.launch {
             _uiState.value = UiStateComment.Loading
             try {
-                val res = RetrofitInstance.postService.getCommentData(postId, 1, 5)
+                val res = RetrofitInstance.postService.getCommentData(postId, 1, 10)
                 if (res.isSuccessful && res.body() != null) {
                     val comments = res.body()?.comments ?: emptyList()
                     allComment.clear()

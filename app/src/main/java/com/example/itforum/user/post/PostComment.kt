@@ -1,5 +1,6 @@
 package com.example.itforum.user.post
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,15 +36,17 @@ import com.example.itforum.user.post.viewmodel.CommentViewModel
 fun PostCommentScreen(
     postId: String,
     sharedPreferences: SharedPreferences,
+    commentViewModel: CommentViewModel
 ) {
-    val viewModel: CommentViewModel = viewModel(factory = viewModelFactory {
-        initializer { CommentViewModel(sharedPreferences) }
-    })
-    val uiState by viewModel.uiState.collectAsState()
+
+    val uiState by commentViewModel.uiState.collectAsState()
     var comments by remember { mutableStateOf(listOf<Comment>()) }
     var isSubmittingComment by remember { mutableStateOf(false) }
 
-    LaunchedEffect(postId) { viewModel.fetchComment(postId) }
+    LaunchedEffect(postId) {
+        commentViewModel.fetchComment(postId)
+    }
+
     LaunchedEffect(uiState) {
         if (uiState is UiStateComment.SuccessFetchComment) {
             comments = (uiState as UiStateComment.SuccessFetchComment).comments
@@ -93,10 +96,10 @@ fun PostCommentScreen(
                         CommentCard(
                             comment = comment,
                             fetchReply = { commentId, onLoaded ->
-                                viewModel.fetchReply(commentId, onLoaded)
+                                commentViewModel.fetchReply(commentId, onLoaded)
                             },
                             onSubmitReply = { commentId, replyText, onReplyPosted ->
-                                viewModel.postReply(commentId, replyText) { newReply ->
+                                commentViewModel.postReply(commentId, replyText) { newReply ->
                                     onReplyPosted(newReply)
                                 }
                             }
@@ -114,7 +117,7 @@ fun PostCommentScreen(
                 CommentInputSection(
                     onSubmitComment = { commentText ->
                         isSubmittingComment = true
-                        viewModel.postComment(postId, commentText) { newComment ->
+                        commentViewModel.postComment(postId, commentText) { newComment ->
                             comments = listOf(newComment) + comments
                             isSubmittingComment = false
                         }
@@ -134,6 +137,7 @@ fun PostCommentBottomSheet(
     onDismissRequest: () -> Unit,
     postId: String,
     sharedPreferences: SharedPreferences,
+    commentViewModel: CommentViewModel
 ) {
     val bottomSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Expanded,
@@ -176,7 +180,8 @@ fun PostCommentBottomSheet(
                 // Comment screen content
                 PostCommentScreen(
                     postId = postId,
-                    sharedPreferences = sharedPreferences
+                    sharedPreferences = sharedPreferences,
+                    commentViewModel = commentViewModel
                 )
             }
         },
@@ -193,7 +198,8 @@ fun PostCommentBottomSheet(
 fun CommentDialogWrapper(
     postId: String,
     sharedPreferences: SharedPreferences,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    commentViewModel: CommentViewModel
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -206,7 +212,8 @@ fun CommentDialogWrapper(
             PostCommentBottomSheet(
                 postId = postId,
                 sharedPreferences = sharedPreferences,
-                onDismissRequest = onDismiss
+                onDismissRequest = onDismiss,
+                commentViewModel = commentViewModel
             )
         }
     }
