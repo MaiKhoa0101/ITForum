@@ -30,7 +30,8 @@ import com.example.itforum.user.effect.model.UiStateComment
 import com.example.itforum.user.modelData.response.Comment
 import com.example.itforum.user.modelData.response.Reply
 import com.example.itforum.user.post.viewmodel.CommentViewModel
-
+import com.example.itforum.user.skeleton.SkeletonBox
+import com.example.itforum.user.skeleton.SkeletonPost
 
 
 @Composable
@@ -76,7 +77,7 @@ fun PostCommentScreen(
                     modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    SkeletonBox()
                 }
             }
             is UiStateComment.Error -> {
@@ -308,7 +309,7 @@ fun CommentCard(
                 if (showReplies) {
                     if (isLoadingReplies) {
                         Row(Modifier.padding(start = 40.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                            SkeletonBox(Modifier.size(16.dp))
                             Spacer(Modifier.width(8.dp))
                             Text("Loading replies...")
                         }
@@ -408,6 +409,57 @@ fun CommentInputSection(
 
             Spacer(modifier = Modifier.width(8.dp))
 
+
+            Column(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = commentText,
+                    onValueChange = { commentText = it },
+                    placeholder = {
+                        Text(
+                            "Write a comment...",
+                            color = Color(0xFF65676B),
+                            style = MaterialTheme.typography.body1
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        backgroundColor = Color(0xFFF0F2F5),
+                        focusedBorderColor = Color(0xFF1877F2),
+                        unfocusedBorderColor = Color(0xFFDDDDDD)
+                    ),
+                    shape = MaterialTheme.shapes.medium,
+                    maxLines = 4,
+                    textStyle = MaterialTheme.typography.body1.copy(color = Color(0xFF050505))
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(
+                        onClick = {
+                            if (commentText.isNotBlank()) {
+                                onSubmitComment(commentText.trim())
+                                commentText = ""
+                            }
+                        },
+                        enabled = commentText.isNotBlank() && !isLoading,
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color(0xFF1877F2),
+                            contentColor = Color.White,
+                            disabledBackgroundColor = Color(0xFFE4E6EA)
+                        ),
+                        shape = MaterialTheme.shapes.medium,
+                        modifier = Modifier.height(36.dp)
+                    ) {
+                        if (isLoading) {
+                            SkeletonBox()
+                        } else {
+                            Text("Post", style = MaterialTheme.typography.button)
+                        }
+
             OutlinedTextField(
                 value = commentText,
                 onValueChange = { commentText = it },
@@ -432,6 +484,7 @@ fun CommentInputSection(
                     if (commentText.isNotBlank()) {
                         onSubmitComment(commentText.trim())
                         commentText = ""
+
                     }
                 },
                 enabled = commentText.isNotBlank() && !isLoading,
@@ -548,11 +601,7 @@ fun ReplyInputSection(
                     modifier = Modifier.height(32.dp)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(14.dp),
-                            strokeWidth = 2.dp,
-                            color = Color.White
-                        )
+                        SkeletonBox()
                     } else {
                         Text("Reply", color = MaterialTheme.colorScheme.onBackground)
                     }

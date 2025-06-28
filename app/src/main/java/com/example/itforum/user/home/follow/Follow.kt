@@ -40,6 +40,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.R
 import com.example.itforum.user.post.viewmodel.PostViewModel
+import com.example.itforum.user.skeleton.SkeletonBox
 import kotlinx.coroutines.launch
 
 @Composable
@@ -88,7 +89,7 @@ fun FollowScreen(
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        SkeletonBox()
                     }
                 }
                 followersError != null -> {
@@ -145,7 +146,7 @@ fun FollowScreen(
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        SkeletonBox()
                     }
                 }
                 randomUsersError != null -> {

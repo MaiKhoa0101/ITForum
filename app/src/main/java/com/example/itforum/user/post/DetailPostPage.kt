@@ -187,7 +187,7 @@ fun DetailPostPage(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         IconButton(onClick = {
-                                            post.id?.let { onReportClick(it) }
+                                            post.id?.let { onReportClick(postWithVote!!.post.userId.toString()) }
                                         }
                                         ) {
                                             Icon(

@@ -68,13 +68,19 @@ import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
 import com.example.itforum.user.ReportPost.view.ReportPostDialog
 
 import com.example.itforum.user.complaint.ComplaintPage
+import com.example.itforum.user.home.tag.TagScreen
+import com.example.itforum.user.home.tag.ViewModel.TagViewModel
 import com.example.itforum.user.news.DetailNewsPage
+import com.example.itforum.user.post.CommentDialogWrapper
+import com.example.itforum.user.post.ConfirmDeleteDialog
+import com.example.itforum.user.post.OptionDialog
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.post.viewmodel.CommentViewModel
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.userProfile.OtherUserProfileScreen
 import com.example.itforum.user.userProfile.UserProfileScreen
 import com.example.itforum.user.setting.Setting
+import com.example.itforum.user.skeleton.SkeletonBox
 import com.example.itforum.user.utilities.chat.ChatAIApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -131,7 +137,7 @@ fun SplashScreen(
 
     // Giao diện loading đơn giản
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
+        SkeletonBox()
     }
 }
 
@@ -395,6 +401,7 @@ fun StartRoot(navHostController: NavHostController, sharedPreferences: SharedPre
         composable ("admin_root"){
             return@composable
         }
+
     }
 }
 
@@ -410,6 +417,9 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
     })
     var commentViewModel : CommentViewModel =  viewModel(factory = viewModelFactory {
         initializer { CommentViewModel(sharedPreferences) }})
+    var tagViewModel : TagViewModel = viewModel(factory = viewModelFactory {
+        initializer { TagViewModel() }})
+    NavHost(navHostController, startDestination = "home") {
     val startDestination = if (role == "admin") {
         "admin_root"
     } else {
@@ -440,6 +450,9 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
             HomePage(navHostController, modifier, sharedPreferences, postViewModel,commentViewModel)
         }
 
+        composable("tag") {
+            TagScreen(tagViewModel)
+        }
         composable("login"){
             return@composable
         }
@@ -618,11 +631,12 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
                 }
             }
 
-            CreatePostPage(modifier, navHostController, sharedPreferences, postViewModel)
+            CreatePostPage(modifier, navHostController, sharedPreferences, postViewModel,tagViewModel)
         }
 
         composable("detail_post/{postId}") { backStackEntry ->
             val context = LocalContext.current
+
 
             LaunchedEffect(Unit) {
                 logScreenEnter(context, "detail_post")
@@ -638,6 +652,10 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
             var userId = sharedPreferences.getString("userId", null)
             var selectedPostId by remember { mutableStateOf<String?>(null) }
             var showReportDialog by remember { mutableStateOf(false) }
+
+            var showOptionDialog by remember { mutableStateOf(false) }
+            var showDeleteDialog by remember { mutableStateOf(false) }
+            var selectedUserId by remember { mutableStateOf<String?>(null) }
 
             DetailPostPage(
                 navHostController,
@@ -665,11 +683,28 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
                         userId
                     )
                 },
-                onReportClick = {
+                onReportClick = {it ->
+                    selectedUserId = it
                     selectedPostId = postId
-                    showReportDialog = true
+                    showOptionDialog =  true
                 },
             )
+            if (showOptionDialog && selectedUserId!= null){
+                OptionDialog(showOptionDialog,
+                    onDismiss = {
+                        showOptionDialog = false
+                    },
+                    onShowReport = {
+                        showReportDialog = true
+                        showOptionDialog = false
+                    },
+                    onDeletePost = {
+                        showDeleteDialog = true
+                        showOptionDialog =  false
+                    },
+                    isMyPost = (selectedUserId == userId ))
+            }
+
             if (showReportDialog && selectedPostId != null) {
                 ReportPostDialog(
                     sharedPreferences = sharedPreferences,
@@ -678,6 +713,16 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
                         showReportDialog = false
                         selectedPostId = null
                     }
+                )
+            }
+            if (showDeleteDialog && selectedPostId!= null){
+                ConfirmDeleteDialog(
+                    showDialog = showDeleteDialog,
+                    onDismiss = {
+                        showDeleteDialog = false
+                    },
+                    onConfirm = {postViewModel.handleHidePost(postId = selectedPostId)
+                        showDeleteDialog =  false}
                 )
             }
         }
@@ -786,7 +831,8 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
                 viewModel = viewModel,
                 postViewModel = postViewModel,
                 navHostController,
-                sharedPreferences
+                sharedPreferences,
+                tagViewModel
             )
         }
 

@@ -21,43 +21,57 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.itforum.user.home.myfeed.TagChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import com.example.itforum.user.home.tag.ViewModel.TagViewModel
+import androidx.compose.runtime.getValue
+import com.example.itforum.user.modelData.response.TagItem
 
 @Composable
-fun TagScreen(){
-    val tagList = TagRepository.tagList
+fun TagScreen(tagViewModel: TagViewModel ) {
+    val tagList by tagViewModel.tagList.collectAsState()
 
-
+    LaunchedEffect(Unit) {
+        tagViewModel.getAllTags()
+    }
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 30.dp, vertical = 50.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 30.dp, vertical = 50.dp)
     ) {
-        item{
+        item { Spacer(Modifier.height(110.dp)) }
+        item {
             Spacer(Modifier.height(10.dp))
             Text(text = "Trending Tags", fontWeight = FontWeight.Bold, fontSize = 30.sp)
             Spacer(Modifier.height(20.dp))
         }
+
         items(tagList.size) { i ->
             ListTagsWidget(tag = tagList[i], index = (i + 1).toString())
         }
-        item{
+
+        item {
             Spacer(Modifier.height(10.dp))
             Text(text = "Popular Tags", fontWeight = FontWeight.Bold, fontSize = 30.sp)
             Spacer(Modifier.height(20.dp))
         }
+
         items(tagList.size) { i ->
             ListTagsWidget(tag = tagList[i], index = (i + 1).toString())
         }
+
         item {
             Spacer(Modifier.height(30.dp))
             Text(text = "All Tags", fontWeight = FontWeight.Bold, fontSize = 30.sp)
             Spacer(Modifier.height(10.dp))
 
             AllTagsWidget(tags = tagList)
-
         }
     }
 }
+
 @Composable
-fun ListTagsWidget(tag: TagModel, index: String){
+fun ListTagsWidget(tag: TagItem, index: String){
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -71,7 +85,7 @@ fun ListTagsWidget(tag: TagModel, index: String){
 }
 @Composable
 fun AllTagsWidget(
-    tags: List<TagModel>,
+    tags: List<TagItem>,
     modifier: Modifier = Modifier,
     onTagClick: (String) -> Unit = {}// ✅ thêm callback
 
@@ -103,30 +117,4 @@ fun AllTagsWidget(
         }
     }
 }
-//
-//@Composable
-//fun AllTagsWidget(tags: List<TagModel>, modifier: Modifier = Modifier) {
-//    val groupedTags = tags.groupBy { it.name.first().uppercaseChar() }
-//    val sortedKeys = groupedTags.keys.sorted()
-//
-//    Column(modifier = modifier.padding(16.dp)) {
-//        sortedKeys.forEach { key ->
-//            Text(
-//                text = key.toString(),
-//                style = MaterialTheme.typography.bodyLarge,
-//                modifier = Modifier.padding(vertical = 8.dp)
-//            )
-//
-//            groupedTags[key]?.forEach { tag ->
-//                TagChip(
-//                    text = tag.name,
-//                    selected = false,
-//                    onSelected = { /* Toggle selection */ },
-//                    modifier = Modifier
-//                        .padding(vertical = 4.dp)
-//                        .wrapContentSize()
-//                )
-//            }
-//        }
-//    }
-//}
+

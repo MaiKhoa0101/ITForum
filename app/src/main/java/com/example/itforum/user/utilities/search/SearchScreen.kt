@@ -34,7 +34,9 @@ import com.example.itforum.user.home.tag.TagRepository
 import androidx.compose.material.icons.filled.Search
 import androidx.navigation.NavHostController
 import com.example.itforum.user.home.tag.TagModel
+import com.example.itforum.user.home.tag.ViewModel.TagViewModel
 import com.example.itforum.user.modelData.response.PostWithVote
+import com.example.itforum.user.modelData.response.TagItem
 import com.example.itforum.user.post.PostCardWithVote
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.utilities.search.SearchViewModel
@@ -45,7 +47,8 @@ fun SearchScreen(
     viewModel: SearchViewModel,
     postViewModel: PostViewModel,
     navHostController: NavHostController,
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+    tagViewModel: TagViewModel
 ) {
     val context = LocalContext.current
 
@@ -55,7 +58,7 @@ fun SearchScreen(
     var searchQuery by remember { mutableStateOf("") }
     var historyItems by remember { mutableStateOf<List<String>>(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
-    val tagList = TagRepository.tagList
+    val tagList by tagViewModel.tagList.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
     var selectedTabIndex by remember { mutableStateOf(0) }
 
@@ -67,8 +70,10 @@ fun SearchScreen(
     // Load history when screen loads
     LaunchedEffect(userId) {
         if (userId != null) {
+            tagViewModel.getAllTags()
             historyItems = SearchHistoryManager.getSearchHistory(context, userId)
         }
+
     }
 
 
@@ -200,7 +205,7 @@ fun SearchScreen(
 @Composable
 private fun SearchHistoryAndTags(
     historyItems: List<String>,
-    tagList: List<TagModel>,
+    tagList: List<TagItem>,
     onHistoryClick: (String) -> Unit,
     onTagClick: (String) -> Unit,
     onDeleteHistory: (String) -> Unit

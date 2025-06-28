@@ -3,6 +3,7 @@ package com.example.itforum.user.userProfile
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -115,6 +116,9 @@ class EditProfileViewModel : ViewModel() {
     var originalSkills: List<String>? = null
     var originalCertificate: List<Certificate>? = null
 
+    fun isOriginalDataLoaded(): Boolean {
+        return originalName.isNotBlank()
+    }
 
 
     // Hàm để lưu dữ liệu gốc khi load user info
@@ -143,21 +147,39 @@ class EditProfileViewModel : ViewModel() {
     }
 
     fun saveChanges(userViewModel: UserViewModel, context: Context) {
+        if (passInput.isNotBlank() && passInput != repassInput) {
+            Toast.makeText(context, "Mật khẩu nhập lại không khớp", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val request = UserUpdateRequest(
-            // Chỉ gửi các trường đã thay đổi
             name = if (nameInput != originalName && nameInput.isNotBlank()) nameInput else null,
             username = if (usernameInput != originalUsername && usernameInput.isNotBlank()) usernameInput else null,
             email = if (emailInput != originalEmail && emailInput.isNotBlank()) emailInput else null,
             phone = if (phoneInput != originalPhone && phoneInput.isNotBlank()) phoneInput else null,
             introduce = if (introduce != originalIntroduce && introduce.isNotBlank()) introduce else null,
             avatar = if (avatarURL != originalAvatarURL) avatarURL else null,
-            password = passInput.takeIf { it.isNotBlank() }, // Password luôn gửi nếu có
+            password = passInput.takeIf { it.isNotBlank() },
             certificate = if (certificateInput != originalCertificate) certificateInput else null,
             skill = if (skillsInput != originalSkills) skillsInput else null,
         )
 
+        println("Gửi request cập nhật: $request")
         userViewModel.ModifierUser(request, context)
     }
+
+    fun hasChanges(): Boolean {
+        return nameInput != originalName ||
+                usernameInput != originalUsername ||
+                emailInput != originalEmail ||
+                phoneInput != originalPhone ||
+                introduce != originalIntroduce ||
+                avatarURL != originalAvatarURL ||
+                passInput.isNotBlank() || // luôn coi như có thay đổi nếu có nhập pass
+                skillsInput != originalSkills ||
+                certificateInput != originalCertificate
+    }
+
 }
 @Composable
 fun EditProfileBody(modifier: Modifier, user: UserProfileResponse?, viewModel: EditProfileViewModel) {
@@ -266,7 +288,35 @@ fun EditProfileBody(modifier: Modifier, user: UserProfileResponse?, viewModel: E
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ){
-//            FieldTagText("Đại học...", tempCertificate) { tempCertificate = it }
+            var tempCertificate by remember { mutableStateOf("") }
+            var expandedCertificateField by remember { mutableStateOf(false) }
+            var certificateFieldHasFocus by remember { mutableStateOf(false) }
+
+            FieldTagText(
+                placeHolder = "Đại học...",
+                text = tempCertificate,
+                expanded = expandedCertificateField,
+                hasFocus = certificateFieldHasFocus,
+                onFocusChange = { focus ->
+                    certificateFieldHasFocus = focus
+                    expandedCertificateField = focus
+                },
+                onDismiss = { expandedCertificateField = false },
+                onFilterChange = {
+                    DropdownMenuItem(
+                        text = { Text("Gợi ý: IELTS, TOEIC...") },
+                        onClick = {
+                            tempCertificate = "IELTS"
+                            expandedCertificateField = false
+                        }
+                    )
+                },
+                onTextChange = {
+                    tempCertificate = it
+                    expandedCertificateField = true
+                }
+            )
+
             AddButton(
                 tempCertificate,
                 onAdd = {
@@ -400,23 +450,45 @@ fun TagEditableItem(text: String, onDelete: (tagName: String) -> Unit = {}) {
 
 
 
+//@Composable
+//fun ButtonSaveModify(onSave: () -> Unit) {
+//    OutlinedButton (
+//        onClick = onSave,
+//        modifier = Modifier
+//            .padding(16.dp)
+//            .fillMaxWidth(),
+//        colors = ButtonDefaults.buttonColors(
+//            containerColor = MaterialTheme.colorScheme.primaryContainer,        // Màu nền (background)
+//            contentColor = Color.White,         // Màu chữ / icon
+//            disabledContainerColor = Color.Gray,  // Màu nền khi disabled
+//            disabledContentColor = Color.LightGray // Màu chữ khi disabled
+//        )
+//    ) {
+//        Text("Lưu thay đổi")
+//    }
+//}
 @Composable
-fun ButtonSaveModify(onSave: () -> Unit) {
-    OutlinedButton (
+fun ButtonSaveModify(
+    hasChanges: Boolean,
+    onSave: () -> Unit
+) {
+    OutlinedButton(
         onClick = onSave,
+        enabled = hasChanges,
         modifier = Modifier
             .padding(16.dp)
             .fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,        // Màu nền (background)
-            contentColor = Color.White,         // Màu chữ / icon
-            disabledContainerColor = Color.Gray,  // Màu nền khi disabled
-            disabledContentColor = Color.LightGray // Màu chữ khi disabled
+            containerColor = if (hasChanges) MaterialTheme.colorScheme.primaryContainer else Color.Gray,
+            contentColor = Color.White,
+            disabledContainerColor = Color.LightGray,
+            disabledContentColor = Color.DarkGray
         )
     ) {
-        Text("Lưu thay đổi")
+        Text(if (hasChanges) "Lưu thay đổi" else "Không có thay đổi gì")
     }
 }
+
 
 
 @Composable
@@ -537,7 +609,6 @@ fun FieldTagText(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfile(
@@ -547,35 +618,57 @@ fun EditProfile(
 ) {
     val viewModel: EditProfileViewModel by remember { mutableStateOf(EditProfileViewModel()) }
     val context = LocalContext.current
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
-    var userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
+    val userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
     })
 
     val userInfo by userViewModel.user.collectAsState()
     val uiState by userViewModel.uiState.collectAsState()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
+
+
+//    LaunchedEffect(uiState) {
+//        println("UI State duoc thay doi")
+//        when (uiState) {
+//            is UiState.Success -> {
+//                println("uiState là success")
+//                navHostController.popBackStack()
+//            }
+//            is UiState.Error -> {
+//                println("uiState là error")
+//            }
+//            is UiState.Loading -> {
+//                // Đang tải
+//            }
+//            else -> {}
+//        }
+//    }
     LaunchedEffect(uiState) {
-        println("UI State duoc thay doi")
-        if (uiState is UiState.Success) {
-            println("uiState là success")
-            navHostController.popBackStack()
-        }
-        if (uiState is UiState.Error) {
-            println("uiState là error")
-
-        }
-        if (uiState is UiState.Loading) {
-
+        println("UI State duoc thay doi: ${uiState::class.simpleName}")
+        when (uiState) {
+            is UiState.Success -> {
+                println("uiState là success")
+                navHostController.popBackStack()
+            }
+            is UiState.Error -> {
+                println("uiState là error: ${(uiState as UiState.Error).message}")
+            }
+            is UiState.Loading -> {
+                println("uiState là loading")
+            }
+            else -> {
+                println("uiState là trạng thái khác không xác định: $uiState")
+            }
         }
     }
+
 
     LaunchedEffect(Unit) {
         userViewModel.getUser()
     }
 
-    // Cập nhật dữ liệu khi userInfo thay đổi
     LaunchedEffect(userInfo) {
         userInfo?.let { user ->
             viewModel.setOriginalData(user)
@@ -588,7 +681,13 @@ fun EditProfile(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text("Edit Profile", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center) },
+                title = {
+                    Text(
+                        "Chỉnh sửa trang cá nhân",
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                 navigationIcon = {
                     Icon(
@@ -612,10 +711,15 @@ fun EditProfile(
             item {
                 EditProfileBody(modifier, userInfo, viewModel)
             }
+
             item {
-                ButtonSaveModify {
-                    viewModel.saveChanges(userViewModel = userViewModel, context = context)
-                }
+                ButtonSaveModify(
+                    hasChanges = viewModel.hasChanges(),
+                    onSave = {
+                        viewModel.saveChanges(userViewModel = userViewModel, context = context)
+                    }
+                )
+
             }
         }
     }
