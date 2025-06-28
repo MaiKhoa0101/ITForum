@@ -19,18 +19,17 @@ import com.example.itforum.service.NotificationService
 import com.example.itforum.service.PostService
 import com.example.itforum.service.ReportAccountService
 import com.example.itforum.service.SkillService
+import com.example.itforum.service.TagService
 import com.example.itforum.user.login.otp.AuthService
-
-import retrofit2.converter.scalars.ScalarsConverterFactory
-
-//import com.example.itforum.service.AuthApi
 
 object RetrofitInstance {
     private const val THIRD_URL  = "http://192.168.1.216:4000"
     private const val URL_Phone = "http://192.168.36.105:4000"
 
     //    private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
-    private const val SECOND_URL = "http://192.168.1.2:4000"
+
+    private const val SECOND_URL = "http://192.168.1.6:4000"
+
     val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(60, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
@@ -55,6 +54,7 @@ object RetrofitInstance {
     val aiCrashService: AiCrashService by lazy { retrofit.create(AiCrashService::class.java) }
     val notificationService: NotificationService by lazy { retrofit.create(NotificationService::class.java) }
     val skillService: SkillService by lazy { retrofit.create(SkillService::class.java) }
+    val tagService : TagService by lazy { retrofit.create(TagService::class.java) }
     val api: AnalyticsApi by lazy {
         Retrofit.Builder()
 //            .baseUrl(SECOND_URL)

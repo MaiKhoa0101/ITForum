@@ -80,8 +80,11 @@ fun PostListScreen(
     val canLoadMore by postViewModel.canLoadMore.collectAsState()
     var showCommentDialog by remember { mutableStateOf(false) }
     var selectedPostId by remember { mutableStateOf<String?>(null) }
+    var selectedUserId by remember { mutableStateOf<String?>(null) }
     var userId = sharedPreferences.getString("userId", null)
     var showReportDialog by remember { mutableStateOf(false) }
+    var showOptionDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val isLoading by postViewModel.isLoading.collectAsState()
 
@@ -176,7 +179,8 @@ fun PostListScreen(
                         },
                         onReportClick = {
                             selectedPostId = postWithVote.post.id
-                            showReportDialog = true
+                            selectedUserId =  postWithVote.post.userId
+                            showOptionDialog =  true
                         },
                         navHostController = navHostController,
                         sharedPreferences = sharedPreferences
@@ -281,6 +285,21 @@ fun PostListScreen(
                 }, commentViewModel = commentViewModel
             )
         }
+        if (showOptionDialog && selectedUserId!= null){
+            OptionDialog(showOptionDialog,
+                onDismiss = {
+                    showOptionDialog = false
+                },
+                onShowReport = {
+                    showReportDialog = true
+                    showOptionDialog = false
+                },
+                onDeletePost = {
+                    showDeleteDialog = true
+                    showOptionDialog =  false
+                },
+                isMyPost = (selectedUserId == userId ))
+        }
 
         if (showReportDialog && selectedPostId != null) {
             ReportPostDialog(
@@ -292,6 +311,17 @@ fun PostListScreen(
                 }
             )
         }
+        if (showDeleteDialog && selectedPostId!= null){
+            ConfirmDeleteDialog(
+                showDialog = showDeleteDialog,
+                onDismiss = {
+                    showDeleteDialog = false
+                },
+                onConfirm = {postViewModel.handleHidePost(postId = selectedPostId)
+                showDeleteDialog =  false}
+            )
+        }
+
     }
 }
 

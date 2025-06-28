@@ -563,4 +563,14 @@ class PostViewModel(
             }
         }
     }
+    fun handleHidePost(postId: String?){
+        viewModelScope.launch {
+            val res = RetrofitInstance.postService.hidePost(postId.toString())
+            if (res.isSuccessful){
+                val currentList = _postsWithVotes.value.toMutableList()
+                currentList.removeAll { it.post.id == postId }
+                _postsWithVotes.value = currentList
+            }
+        }
+    }
 }
