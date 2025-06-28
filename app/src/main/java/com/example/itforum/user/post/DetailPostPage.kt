@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -35,12 +34,8 @@ import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbDownOffAlt
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.ThumbUpOffAlt
-import androidx.compose.material.icons.outlined.BookmarkAdd
-import androidx.compose.material.icons.outlined.InsertComment
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MovableContent
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +50,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -69,7 +63,7 @@ import coil.compose.AsyncImage
 import com.example.itforum.R
 
 import com.example.itforum.user.modelData.response.GetVoteResponse
-import com.example.itforum.user.modelData.response.PostResponse
+import com.example.itforum.user.post.viewmodel.CommentViewModel
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.skeleton.SkeletonBox
 import com.example.itforum.user.skeleton.SkeletonPost
@@ -78,7 +72,8 @@ import com.example.itforum.user.skeleton.SkeletonPost
 fun DetailPostPage(
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences,
-    postId: String
+    postId: String,
+    commentViewModel: CommentViewModel
 ) {
 
 
@@ -86,12 +81,11 @@ fun DetailPostPage(
         initializer { PostViewModel(sharedPreferences) }
     })
 
-    val post by viewModel.selectedPost.collectAsState()
-    val vote by viewModel.selectedVote.collectAsState()
+    var userId = sharedPreferences.getString("userId", null)
+    val postWithVote by viewModel.selectedPostWithVote.collectAsState()
 
     LaunchedEffect(postId) {
         viewModel.fetchPostById(postId)
-
     }
 
     if (post != null && post!!.isHidden == false) {
@@ -104,30 +98,57 @@ fun DetailPostPage(
                 Column(modifier = Modifier.fillMaxSize()) {
                     TopDetailPost(navHostController)
 
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White)
-                    ) {
-                        item {
-                            AvatarNameDetail(
-                                avatar = post!!.avatar.toString(),
-                                name = post!!.userName ?: "unknown",
-                                time = post!!.createdAt ?: ""
-                            )
 
-                            ContentPost(
-                                post!!.title ?: "",
-                                post!!.content ?: "",
-                                post!!.tags ?: emptyList()
-                            )
+    postWithVote?.post?.let { post ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF00AEFF))
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                TopDetailPost(navHostController)
 
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Log.d("imgs", post!!.imageUrls.toString())
-                            PostMediaSection(post!!.imageUrls, post!!.videoUrls)
-                            PostCommentScreen(postId, sharedPreferences)
-                        }
-                    }
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White)
+                ) {
+                    AvatarNameDetail(
+                        avatar = post.avatar.orEmpty(),
+                        name = post.userName ?: "unknown",
+                        time = post.createdAt ?: ""
+                    )
+
+                    ContentPost(
+                        title = post.title.orEmpty(),
+                        content = post.content.orEmpty(),
+                        tags = post.tags ?: emptyList()
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Log.d("imgs", post.imageUrls.toString())
+
+                    PostMediaSection(
+                        imageUrls = post.imageUrls ?: emptyList(),
+                        videoUrls = post.videoUrls ?: emptyList()
+                    )
+
+                    VoteSection(
+                        vote = postWithVote?.vote,
+                        isBookMark = postWithVote?.isBookMark ?: false,
+                        onUpvoteClick = {viewModel.handleUpVote("upvote",-1,postId)},
+                        onCommentClick = {},
+                        onBookmarkClick = {viewModel.handleBookmark(-1,postId, userId)},
+                        onDownvoteClick = {viewModel.handleDownVote("downvote",-1,postId)}
+                    )
+
+                    PostCommentScreen(
+                        postId = post.id.toString(),
+                        sharedPreferences = sharedPreferences,
+                        commentViewModel = commentViewModel,
+
+                    )
                 }
             }
         }
@@ -159,7 +180,7 @@ fun DetailPostPage(
 }
 
 
-@Composable
+    @Composable
 fun TopDetailPost(
     navHostController: NavHostController
 ) {
@@ -279,279 +300,93 @@ fun MediaPost() {
     }
 }
 
-//@Composable
-//fun ActionsPost(
-//    navHostController: NavHostController
-//) {
-//    Row(
-//        horizontalArrangement = Arrangement.SpaceEvenly,
-//        modifier = Modifier.fillMaxWidth()
-//    ) {
-//        // Upvote/Downvote section
-//        Row(verticalAlignment = Alignment.CenterVertically) {
-//            IconButton(onClick = {
-//                onUpvoteClick()
-//                if(isVote == "upvote"){
-//                    upvotes --
-//                    isVote = "none"
-//                }else if(isVote == "downvote" || isVote == "none"){
-//                    upvotes++
-//                    isVote = "upvote"
-//                }
-//                isChange = true
-//            } ) {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.upvote),
-//                    contentDescription = "Upvote",
-//                    modifier = Modifier.size(30.dp),
-//                    tint = if (isVote == "upvote") Color.Green else Color.Unspecified
-//                )
-//            }
-//            Text(
-//                text = "${upvotes}",
-//                fontSize = 16.sp,
-//                fontWeight = FontWeight.SemiBold
-//            )
-//            IconButton(onClick = {
-//                onDownvoteClick()
-//                if(isVote == "downvote"){
-//                    isVote = "none"
-//                }else if(isVote == "upvote" ){
-//                    upvotes--
-//                    isVote = "downvote"
-//                }else if(isVote=="none"){
-//                    isVote = "downvote"
-//                }
-//
-//            }) {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.downvote),
-//                    contentDescription = "Downvote",
-//                    modifier = Modifier.size(30.dp),
-//                    tint = if (isVote == "downvote") Color.Red else Color.Unspecified
-//                )
-//            }
-//        }
-//
-//        // Other actions
-//        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-//            IconButton(onClick = onCommentClick) {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.comment),
-//                    contentDescription = "Comment",
-//                    modifier = Modifier.size(30.dp),
-//                    tint = Color.Unspecified
-//                )
-//            }
-//            IconButton(onClick = {onBookmarkClick()
-//                //neu save post r doi icon qua chua save va nguoc lai
-//                if(isSavedPost){
-//                    isSavedPost = false
-//                }else{
-//                    isSavedPost = true
-//                }}
-//            )
-//            {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.bookmark),
-//                    contentDescription = "Bookmark",
-//                    modifier = Modifier.size(30.dp),
-//                    tint = if (isSavedPost) Color.Green else Color.Unspecified
-//                )
-//            }
-//
-//        }
-//    }
-//}
-
 @Composable
-fun SectionLikePost(
-    sizeIcon: Int,
-    spaceHor: Int,
-    totalLike: Int,
-    navHostController: NavHostController
-){
-    // Trạng thái cho icon up và down
-    var upvoted by remember { mutableStateOf(false) }
-    var downvoted by remember { mutableStateOf(false) }
-    var like = totalLike
-    if (upvoted) {
-        like += 1
-    }else if (downvoted){
-        like -= 1
-    }
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(spaceHor.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = if (upvoted) Icons.Default.ThumbUp else Icons.Default.ThumbUpOffAlt,
-            contentDescription = "Upvote",
-            modifier = Modifier.size(sizeIcon.dp)
-                .clickable {
-                    upvoted = !upvoted
-                    if (upvoted)
-                        downvoted = false  // chỉ được chọn một trong hai
-                }
-        )
-        Text(
-            text = "$like",
-            modifier = Modifier.clickable {
-                navHostController.navigate("listlike")
-            }
-        )
-        Icon(
-            imageVector = if (downvoted) Icons.Default.ThumbDown else Icons.Default.ThumbDownOffAlt,
-            contentDescription = "Upvote",
-            modifier = Modifier.size(sizeIcon.dp)
-                .clickable {
-                    downvoted = !downvoted
-                    if (downvoted) upvoted = false
-                }
-        )
-    }
-}
-
-@Composable
-fun ContentCommentPost(
-    navHostController: NavHostController
+fun VoteSection(
+    vote: GetVoteResponse?,
+    isBookMark: Boolean,
+    onUpvoteClick: (String) -> Unit,
+    onDownvoteClick: (String) -> Unit,
+    onCommentClick: () -> Unit,
+    onBookmarkClick: (Boolean) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .TopBorder()
-            .fillMaxSize()
-    ) {
-        Spacer(modifier = Modifier.height(15.dp))
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            CommentChild(Icons.Default.AccountCircle, "Onana", "Bà nói thiệt hả bà thơ", "2 phút", 10, navHostController)
-            CommentChild(Icons.Default.AccountCircle, "J97", "Thiên lý ơi em có thể ở lại đây không", "3 phút", 20, navHostController)
-            CommentChild(Icons.Default.AccountCircle, "J97", "Thiên lý ơi em có thể ở lại đây không", "4 phút", 30, navHostController)
-        }
-        WriteComment()
-    }
-}
+    var isChange by remember { mutableStateOf(false) }
+    var upvotes by remember { mutableStateOf(vote?.data?.upVoteData?.total?: 0) }
+    var isVote by remember { mutableStateOf(vote?.data?.userVote) }
+    var isSavedPost by remember { mutableStateOf(isBookMark) }
 
-@Composable
-fun CommentChild(
-    icon: ImageVector,
-    name: String,
-    content: String,
-    time: String,
-    totalLike: Int,
-    navHostController: NavHostController
-) {
+
     Row(
-        modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
-            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = "Avatar tài khoản",
-            modifier = Modifier.size(40.dp)
-        )
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier
-                    .background(
-                        color = Color(0xFFE0E0E0),
-                        shape = RoundedCornerShape(15.dp)
-                    )
-                    .padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = name,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = content,
-                    fontSize = 12.sp
+        // Upvote/Downvote
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = {
+                when (isVote) {
+                    "upvote" -> {
+                        upvotes--
+                        isVote = "none"
+                    }
+                    "downvote", "none" -> {
+                        upvotes++
+                        isVote = "upvote"
+                    }
+                }
+                onUpvoteClick(isVote.toString())
+            }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.upvote),
+                    contentDescription = "Upvote",
+                    modifier = Modifier.size(30.dp),
+                    tint = if (isVote == "upvote") Color.Green else Color.Unspecified
                 )
             }
-            ActionsComment(time, totalLike, navHostController)
-        }
-
-    }
-}
-
-@Composable
-fun ActionsComment(
-    time: String,
-    totalLike: Int,
-    navHostController: NavHostController
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Text(
-            text = time
-        )
-        SectionLikePost(17,2, totalLike, navHostController)
-        Text(
-            text = "Trả lời",
-            modifier = Modifier
-                .clickable {  }
-        )
-    }
-}
-
-@Composable
-fun WriteComment() {
-    Row(
-        modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Default.AccountCircle,
-            contentDescription = "Avatar tài khoản",
-            modifier = Modifier.size(45.dp)
-        )
-        var inputComment by remember { mutableStateOf("") }
-        TextField(
-            value = inputComment,
-            onValueChange = {inputComment = it},
-            placeholder = { Text(
-                "Viết bình luận...",
-                fontSize = 12.sp,
-                color = Color(0x4C000000)
-            ) },
-            textStyle = TextStyle(fontSize = 12.sp),
-            shape = RoundedCornerShape(15.dp),
-            modifier = Modifier.height(56.dp)
-                .fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(
-                unfocusedIndicatorColor = Color.Transparent,
-            ),
-        )
-    }
-}
-@Composable
-fun CommentConnector(
-    startOffset: Offset,
-    endOffset: Offset,
-    color: Color = Color.Red,
-    strokeWidth: Float = 4f
-) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val path = Path().apply {
-            moveTo(startOffset.x, startOffset.y)
-            quadraticBezierTo(
-                startOffset.x, (startOffset.y + endOffset.y) / 2, // control point
-                endOffset.x, endOffset.y                         // end point
+            Text(
+                text = "$upvotes",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
             )
+            IconButton(onClick = {
+                when (isVote) {
+                    "downvote" -> isVote = "none"
+                    "upvote" -> {
+                        upvotes--
+                        isVote = "downvote"
+                    }
+                    "none" -> isVote = "downvote"
+                }
+                onDownvoteClick(isVote.toString())
+            }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.downvote),
+                    contentDescription = "Downvote",
+                    modifier = Modifier.size(30.dp),
+                    tint = if (isVote == "downvote") Color.Red else Color.Unspecified
+                )
+            }
         }
 
-        drawPath(
-            path = path,
-            color = color,
-            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-        )
-    }
+        // Comment & Bookmark
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            IconButton(onClick = onCommentClick) {
+                Icon(
+                    painter = painterResource(id = R.drawable.comment),
+                    contentDescription = "Comment",
+                    modifier = Modifier.size(30.dp)
+                )
+            }
 
+            IconButton(onClick = {
+                isSavedPost = !isSavedPost
+                onBookmarkClick(isSavedPost)
+            }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.bookmark),
+                    contentDescription = "Bookmark",
+                    modifier = Modifier.size(30.dp),
+                    tint = if (isSavedPost) Color.Green else Color.Unspecified
+                )
+            }
+        }
+    }
 }

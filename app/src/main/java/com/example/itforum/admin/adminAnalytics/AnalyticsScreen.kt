@@ -2,6 +2,7 @@ package com.example.itforum.admin.adminAnalytics
 
 import android.content.SharedPreferences
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.unit.dp
+import androidx.compose.material.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun AnalyticsScreen(navController: NavHostController,
@@ -37,74 +44,64 @@ fun AnalyticsScreen(navController: NavHostController,
 
 
         LazyColumn(modifier = Modifier.padding(top = 50.dp)) {
-            // Tiêu đề bảng
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Bảng thống kê thao tác người dùng",
+                        fontSize = 20.sp
+                    )
+                }
+
+            }
+
             item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, Color.Black) // Viền tổng cho tiêu đề
+                        .border(1.dp, Color.Black)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .border(0.5.dp, Color.Gray)
-                            .padding(8.dp)
-                    ) {
-                        Text(text = "Màn hình")
-                    }
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .border(0.5.dp, Color.Gray)
-                            .padding(8.dp)
-                    ) {
-                        Text(text = "Số thao tác")
-                    }
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .border(0.5.dp, Color.Gray)
-                            .padding(8.dp)
-                    ) {
-                        Text(text = "Thời gian (giây)")
+                    listOf("Màn hình", "Số thao tác", "Thời gian (giây)").forEach {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .border(0.5.dp, Color.Gray)
+                                .padding(8.dp)
+                        ) {
+                            Text(text = it)
+                        }
                     }
                 }
             }
 
-            // Dữ liệu từng dòng
             items(events) { event ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, Color.LightGray) // Viền tổng cho từng dòng dữ liệu
+                        .border(1.dp, Color.LightGray)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .border(0.5.dp, Color.Gray)
-                            .padding(8.dp)
-                    ) {
-                        Text(text = event.screen_name ?: "Không xác định")
-                    }
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .border(0.5.dp, Color.Gray)
-                            .padding(8.dp)
-                    ) {
-                        Text(text = event.view_count.toString())
-                    }
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .border(0.5.dp, Color.Gray)
-                            .padding(8.dp)
-                    ) {
-                        Text(text = event.total_duration_seconds.toString())
+                    listOf(
+                        event.screen_name ?: "Không xác định",
+                        event.view_count.toString(),
+                        event.total_duration_seconds.toString()
+                    ).forEach {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .border(0.5.dp, Color.Gray)
+                                .padding(8.dp)
+                        ) {
+                            Text(text = it)
+                        }
                     }
                 }
             }
         }
+
 
     }
 

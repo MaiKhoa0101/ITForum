@@ -21,6 +21,9 @@ import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun AdminScreenLayout(
@@ -235,4 +238,12 @@ fun AdminScreenLayout(
             endDate = it
         }
     }
+}
+
+fun convertDateTime(input: String): String {
+    val inputFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+    val outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a", Locale.ENGLISH)
+
+    val dateTime = OffsetDateTime.parse(input, inputFormatter)
+    return dateTime.format(outputFormatter)
 }

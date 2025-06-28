@@ -1,9 +1,15 @@
 package com.example.itforum.user.post
 
-import android.R.bool
+import android.R.attr.label
 import android.content.SharedPreferences
 import android.util.Log
-import androidx.compose.foundation.background
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,13 +41,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.itforum.R
+import com.example.itforum.animation.AnimatedVoteIcon
+import com.example.itforum.animation.AnimatedVoteNumber
 import com.example.itforum.user.modelData.response.GetVoteResponse
 import com.example.itforum.user.modelData.response.PostResponse
 
@@ -59,13 +66,16 @@ fun PostCardWithVote(
     onReportClick: (String) -> Unit = {},
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences
-)
- {
+) {
     var isChange by remember { mutableStateOf(false) }
     var upvotes by remember { mutableStateOf(vote?.data?.upVoteData?.total?: 0) }
     var isVote by remember { mutableStateOf(vote?.data?.userVote) }
     var isSavedPost by remember { mutableStateOf(isBookMark) }
-    Log.d("bookmark", isSavedPost.toString())
+
+
+    var isChangeUp by remember { mutableStateOf(false) }
+    var isChangeDown by remember { mutableStateOf(false) }
+
 
     Card(
         elevation = 4.dp,
@@ -170,85 +180,93 @@ fun PostCardWithVote(
 
             // Action buttons row
             Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 // Upvote/Downvote section
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(22.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     IconButton(
+                        modifier = Modifier.size(60.dp),
                         onClick = {
-                        if(isVote == "upvote"){
-                            upvotes --
-                            isVote = "none"
-                        }else if(isVote == "downvote" || isVote == "none"){
-                            upvotes++
-                            isVote = "upvote"
+                            if (isVote == "upvote") {
+                                upvotes--
+                                isVote = "none"
+                            } else if (isVote == "downvote" || isVote == "none") {
+                                upvotes++
+                                isVote = "upvote"
+                            }
+                            onUpvoteClick(isVote)
+                            isChangeUp=true
                         }
-                        onUpvoteClick(isVote)
-                        isChange = true
-                        } )
-                    {
-                        Icon(
-                            imageVector = Icons.Default.ArrowCircleUp,
-                            contentDescription = "Upvote",
-                            modifier = Modifier.size(30.dp),
-                            tint = if (isVote == "upvote") Color.Green else MaterialTheme.colorScheme.onBackground
-                            )
+                    ){
+                        AnimatedVoteIcon(
+                            isActive = isVote == "upvote",
+                            triggerChange = isChangeUp,
+                            activeColor = Color.Green,
+                            defaultColor = MaterialTheme.colorScheme.onBackground,
+                            icon = Icons.Default.ArrowCircleUp,
+                            onAnimationEnd = { isChangeUp = false }
+                        )
                     }
-                    Text(
-                        text = "${upvotes}",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground
+                    AnimatedVoteNumber(
+                        voteCount = upvotes,
+                        textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
+                        textColor = MaterialTheme.colorScheme.onBackground
                     )
-                    IconButton(onClick = {
-                        if(isVote == "downvote"){
-                            isVote = "none"
-                        }else if(isVote == "upvote" ){
-                            upvotes--
-                            isVote = "downvote"
-                        }else if(isVote=="none"){
-                            isVote = "downvote"
-                        }
-                        onDownvoteClick(isVote)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowCircleDown,
-                            contentDescription = "Downvote",
-                            modifier = Modifier.size(30.dp),
-                            tint = if (isVote == "downvote") Color.Red else MaterialTheme.colorScheme.onBackground
+                    IconButton(
+                        modifier = Modifier.size(60.dp),
+                        onClick = {
+                            if(isVote == "downvote"){
+                                isVote = "none"
+                            }else if(isVote == "upvote" ){
+                                upvotes--
+                                isVote = "downvote"
+                            }else if(isVote=="none"){
+                                isVote = "downvote"
+                            }
+                            onDownvoteClick(isVote)
+                            isChangeDown = true
+                        })
+                    {
+                        AnimatedVoteIcon(
+                            isActive = isVote == "downvote",
+                            triggerChange = isChangeDown,
+                            activeColor = Color.Red,
+                            defaultColor = MaterialTheme.colorScheme.onBackground,
+                            icon = Icons.Default.ArrowCircleDown,
+                            onAnimationEnd = { isChangeDown = false }
                         )
                     }
                 }
-
-                // Other actions
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    IconButton(onClick = onCommentClick) {
-                        Icon(
-                            imageVector = Icons.Default.Comment,
-                            contentDescription = "Comment",
-                            modifier = Modifier.size(30.dp),
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                    IconButton(onClick = {onBookmarkClick()
-                        //neu save post r doi icon qua chua save va nguoc lai
-                        if(isSavedPost){
-                            isSavedPost = false
-                        }else{
-                            isSavedPost = true
-                        }}
+                IconButton(onClick = onCommentClick) {
+                    Icon(
+                        imageVector = Icons.Default.Comment,
+                        contentDescription = "Comment",
+                        modifier = Modifier.size(30.dp),
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
-                    {
-                        Icon(
-                            imageVector = Icons.Default.Bookmark,
-                            contentDescription = "Bookmark",
-                            modifier = Modifier.size(30.dp),
-                            tint = if (isSavedPost) Color.Green else MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-
                 }
+                IconButton(onClick = {onBookmarkClick()
+                    //neu save post r doi icon qua chua save va nguoc lai
+                    if(isSavedPost){
+                        isSavedPost = false
+                    }else{
+                        isSavedPost = true
+                    }}
+                )
+                {
+                    Icon(
+                        imageVector = Icons.Default.Bookmark,
+                        contentDescription = "Bookmark",
+                        modifier = Modifier.size(30.dp),
+                        tint = if (isSavedPost) Color.Green else MaterialTheme.colorScheme.onBackground
+                    )
+                }
+
             }
         }
     }

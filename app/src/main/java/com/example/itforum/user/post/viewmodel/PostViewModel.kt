@@ -62,14 +62,13 @@ class PostViewModel(
     val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
-    private val _selectedPost = MutableStateFlow<PostResponse?>(null)
-    val selectedPost: StateFlow<PostResponse?> = _selectedPost.asStateFlow()
+    private val _selectedPostWithVote = MutableStateFlow<PostWithVote?>(null)
+    val selectedPostWithVote: StateFlow<PostWithVote?> = _selectedPostWithVote.asStateFlow()
 
     private val _selectedVote = MutableStateFlow<GetVoteResponse?>(null)
     val selectedVote: StateFlow<GetVoteResponse?> = _selectedVote.asStateFlow()
 
     private var currentPage = 1
-    private var canLoadMore = true
 
     private val allPostsWithVotes = mutableListOf<PostWithVote>()
     private var userId = sharedPreferences.getString("userId", null)
@@ -85,6 +84,8 @@ class PostViewModel(
 
     private val _listVote = MutableStateFlow<List<Vote>>(emptyList())
     val listVote: StateFlow<List<Vote>> = _listVote
+    private val _canLoadMore = MutableStateFlow(true)
+    val canLoadMore: StateFlow<Boolean> = _canLoadMore.asStateFlow()
     private val postRepository = PostRepository()
 
     fun getAllPost() {
@@ -110,14 +111,31 @@ class PostViewModel(
     fun fetchPostById(postId: String?) {
         viewModelScope.launch {
             try {
-                val res = RetrofitInstance.postService.getPostById(postId.toString())
-                if (res.isSuccessful) {
-                    if (res.isSuccessful) {
-                        _selectedPost.value = res.body()?.post
-                        println("fetch post by id" + _selectedPost.value.toString())
-                    }
-                } else {
-                    Log.e("fetch post by id", "Error: ${res.code()} - ${res.errorBody()?.string()}")
+                val resPost = async { RetrofitInstance.postService.getPostById(postId.toString()) }
+                val resVote = async { postRepository.getVoteDataByPostId(postId, userId) }
+                val bookmarkResponse = async { postRepository.getSavePost(userId) }
+                val postResponse = resPost.await()
+                val voteData = resVote.await()
+                val bookmarkData = bookmarkResponse.await()
+
+                if (postResponse.isSuccessful && postResponse.body()?.post != null) {
+                    val post = postResponse.body()!!.post
+
+                    // Check if post is bookmarked
+                    val bookmarkedIds = bookmarkData?.postsId?.toSet() ?: emptySet()
+                    val isBookmarked = bookmarkedIds.contains(postId)
+
+                    // Create PostWithVote object
+                    val postWithVote = PostWithVote(
+                        post = post,
+                        vote = voteData,
+                        isBookMark = isBookmarked
+                    )
+
+                    // Update the state with PostWithVote
+                    _selectedPostWithVote.value = postWithVote
+
+                    Log.d("fetchPostById", "Successfully fetched post with vote: $postWithVote")
                 }
             } catch (e: IOException) {
                 Log.e("fetch post by id", "IOException: ${e.message}")
@@ -127,50 +145,63 @@ class PostViewModel(
         }
     }
 
-    @SuppressLint("SuspiciousIndentation")
-    fun fetchPosts(getPostRequest: GetPostRequest, isRefresh: Boolean = false, isLoadMore: Boolean = false) {
-        if (isRefresh) {
-            allPostsWithVotes.clear()
-            _isRefreshing.value = true
-            currentPage = 1
-            canLoadMore = true
-        } else if (isLoadMore) {
-            if (!canLoadMore || _isLoadingMore.value) return
-            _isLoadingMore.value = true
-        } else {
-            allPostsWithVotes.clear()
-            currentPage = 1
-            canLoadMore = true
-            _isLoading.value = true
-            Log.d("load state", canLoadMore.toString())
-        }
 
-        viewModelScope.launch {
-            try {
-                // fetch bookmarked post IDs
-                val bookmarkResponse = postRepository.getSavePost(userId)
-                val bookmarkedIds = bookmarkResponse?.postsId?.toSet() ?: emptySet()
 
-                // fetch post
-                val response = RetrofitInstance.postService.getPost(getPostRequest)
-                if (response.isSuccessful && response.body() != null) {
-                    val newPosts = response.body()?.posts ?: emptyList()
 
-                    val postsWithVotes = newPosts.map { post ->
-                        async {
-                            PostWithVote(
-                                post = post,
-                                vote = postRepository.getVoteDataByPostId(post.id, userId),
-                                isBookMark = bookmarkedIds.contains(post.id)
+        @SuppressLint("SuspiciousIndentation")
+        fun fetchPosts(
+            getPostRequest: GetPostRequest,
+            isRefresh: Boolean = false,
+            isLoadMore: Boolean = false
+        ) {
+            if (isRefresh) {
+                allPostsWithVotes.clear()
+                _isRefreshing.value = true
+                currentPage = 1
+                _canLoadMore.value = true
+            } else if (isLoadMore) {
+                if (!_canLoadMore.value || _isLoadingMore.value) return
+                _isLoadingMore.value = true
+            } else {
+                allPostsWithVotes.clear()
+                currentPage = 1
+                _canLoadMore.value = true
+                _isLoading.value = true
+                Log.d("load state", _canLoadMore.value.toString())
+            }
 
-                            )
-                        }
-                    }.awaitAll()
+            viewModelScope.launch {
+                try {
+                    // fetch bookmarked post IDs
+                    val bookmarkResponse = postRepository.getSavePost(userId)
+                    val bookmarkedIds = bookmarkResponse?.postsId?.toSet() ?: emptySet()
 
-                    // Pagination logic
-                    if (newPosts.size < 3) {
-                        canLoadMore = false
+                    // fetch post with current page
+                    val requestWithPage = if (isLoadMore) {
+                        getPostRequest.copy(page = currentPage)
+                    } else {
+                        getPostRequest.copy(page = 1)
                     }
+
+                    val response = RetrofitInstance.postService.getPost(requestWithPage)
+                    if (response.isSuccessful && response.body() != null) {
+                        val responseBody = response.body()!!
+                        val newPosts = responseBody.posts ?: emptyList()
+                        val totalPages = responseBody.totalPages ?: 1
+
+                        val postsWithVotes = newPosts.map { post ->
+                            async {
+                                PostWithVote(
+                                    post = post,
+                                    vote = postRepository.getVoteDataByPostId(post.id, userId),
+                                    isBookMark = bookmarkedIds.contains(post.id)
+                                )
+                            }
+                        }.awaitAll()
+
+                        // Update pagination logic based on totalPages from API response
+                        val newCanLoadMore = currentPage < totalPages
+                        _canLoadMore.value = newCanLoadMore
 
                     if (isRefresh || !isLoadMore) {
                         allPostsWithVotes.addAll(postsWithVotes)
@@ -180,57 +211,43 @@ class PostViewModel(
                         if (newPosts.isNotEmpty()) currentPage++
                     }
 
-                    // Always update posts flow
-                    _postsWithVotes.value = allPostsWithVotes
-                } else {
-                    if (isLoadMore) {
-                        canLoadMore = false
-                        logError("Load more failed: ${response.message()}")
+                        // Always update posts flow
+                        _postsWithVotes.value = allPostsWithVotes.toList()
+
+                        Log.d(
+                            "Pagination",
+                            "Current page: $currentPage, Total pages: $totalPages, Can load more: $newCanLoadMore"
+                        )
                     } else {
-                        // Optionally emit error to another error flow/UI state
-                        logError("Get post failed: ${response.message()}")
+                        if (isLoadMore) {
+                            _canLoadMore.value = false
+
+                        }
                     }
-                }
-            } catch (e: IOException) {
-                if (isLoadMore) {
-                    canLoadMore = false
-                    logError("Load more - Server unreachable: ${e.message}")
-                } else {
-                    // Optionally emit error to another error flow/UI state
-                    logError("Server unreachable: ${e.message}")
-                }
-            } catch (e: Exception) {
-                if (isLoadMore) {
-                    canLoadMore = false
-                    logError("Load more exception: ${e.localizedMessage}")
-                } else {
-                    // Optionally emit error to another error flow/UI state
-                    logError("Exception: ${e.localizedMessage}")
-                }
-            } finally {
-                if (isRefresh) {
-                    _isRefreshing.value = false
-                }
-                if (isLoadMore) {
-                    _isLoadingMore.value = false
-                }
-                if (!isRefresh && !isLoadMore) {
-                    _isLoading.value = false
+                } catch (e: IOException) {
+                    if (isLoadMore) {
+                        _canLoadMore.value = false
+
+                    }
+                } catch (e: Exception) {
+                    if (isLoadMore) {
+                        _canLoadMore.value = false
+                    }
+                } finally {
+                    if (isRefresh) {
+                        _isRefreshing.value = false
+                    }
+                    if (isLoadMore) {
+                        _isLoadingMore.value = false
+                    }
+                    if (!isRefresh && !isLoadMore) {
+                        _isLoading.value = false
+                    }
                 }
             }
         }
-    }
-    private suspend fun getVoteDataByPostId(postId: String?, userId: String?): GetVoteResponse? {
-        if (postId.isNullOrEmpty() || userId.isNullOrEmpty()) return null
-        return try {
-            val response = RetrofitInstance.postService.getVoteData(postId, userId)
-            Log.d("vote data", response.body().toString())
-            if (response.isSuccessful) response.body() else null
-        } catch (e: Exception) {
-            Log.d("Error", "Vote fetch error: ${e.message}")
-            null
-        }
-    }
+
+
     fun createPost(createPostRequest: CreatePostRequest, context: Context) {
         viewModelScope.launch {
             _uiStateCreate.value = UiState.Loading
@@ -368,41 +385,19 @@ class PostViewModel(
                 parts.add(part)
             } catch (e: Exception) {
                 Log.e("Upload", "Error preparing file part for $uri", e)
-                // Optional: continue to next URI
+
             }
         }
 
         return parts
     }
-    fun getPostById(id: String) {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitInstance.postService.getPostById(id)
-                Log.d("DETAIL", "Code: ${response.code()}, Body: ${response.body()}")
-                if (response.isSuccessful) {
-                    _post.value = response.body()?.post
-                } else {
-                    showError("Response get không hợp lệ, ${response.code()}")
-                Log.e("Post by id", "Lỗi response không thành công: ${response.message()}")
-                }
-            }
-            catch (e: IOException) {
-                showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
-            }
-            catch (e: Exception) {
-                showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
-            }
-        }
-    }
     fun loadMorePosts(getPostRequest: GetPostRequest) {
-        if (canLoadMore && !_isLoadingMore.value) {
-            val updatedRequest = getPostRequest.copy(page = currentPage)
-            fetchPosts(updatedRequest, isLoadMore = true)
+        if (_canLoadMore.value && !_isLoadingMore.value) {
+            fetchPosts(getPostRequest, isLoadMore = true)
         }
     }
     suspend fun votePost(postId: String?, type: String, index: Int): VoteResponse? {
         if (postId.isNullOrEmpty() || userId.isNullOrEmpty() || type.isEmpty()) return null
-        Log.d("Index of post", index.toString())
 
         return try {
             val voteRequest = VoteRequest(userId = userId, type = type)
@@ -489,20 +484,14 @@ class PostViewModel(
     fun fetchComment(postId: String?){
 
     }
-    fun setSelectedPost(post: PostResponse, vote: GetVoteResponse?) {
-        _selectedPost.value = post
-        _selectedVote.value = vote
-    }
 
-    fun clearSelectedPost() {
-        _selectedPost.value = null
-        _selectedVote.value = null
-    }
+
+
     fun handleUpVote(type: String, index: Int, postId: String?) {
         viewModelScope.launch {
             try {
                 val res = votePost(postId, type, index)
-                if (res != null) {
+                if (res != null && index>=0) {
                     val currentList = _postsWithVotes.value.toMutableList()
                     val currentItem = currentList[index]
 
@@ -528,7 +517,7 @@ class PostViewModel(
         viewModelScope.launch {
             try {
                 val res = votePost(postId, type, index)
-                if (res != null) {
+                if (res != null && index>=0) {
                     val currentList = _postsWithVotes.value.toMutableList()
                     val currentItem = currentList[index]
 
@@ -558,6 +547,7 @@ class PostViewModel(
         viewModelScope.launch {
             try {
                 val res = savePost(postId, userId)
+                if(index>=0){
                 val currentList = _postsWithVotes.value.toMutableList()
                 val currentItem = currentList[index]
 
@@ -567,8 +557,7 @@ class PostViewModel(
 
                 currentList[index] = updatedItem
                 _postsWithVotes.value = currentList
-
-                Log.d("Bookmark", "Bookmark toggled for post: $postId")
+                }
             } catch (e: Exception) {
                 Log.e("handleBookmark", "Bookmark error", e)
             }

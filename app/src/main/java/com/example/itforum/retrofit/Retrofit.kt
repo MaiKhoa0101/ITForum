@@ -28,6 +28,7 @@ object RetrofitInstance {
     private const val URL_Phone = "http://192.168.1.161:4000"
     //    private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
 //    private const val SECOND_URL = "https://192.168.1.216:4000"
+
     val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(60, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)

@@ -34,6 +34,7 @@ import androidx.navigation.NavHostController
 import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
 import com.example.itforum.user.modelData.request.GetPostRequest
 import com.example.itforum.user.post.PostListScreen
+import com.example.itforum.user.post.viewmodel.CommentViewModel
 import com.example.itforum.user.post.viewmodel.PostViewModel
 
 
@@ -45,6 +46,8 @@ fun BookMarkScreen(
     val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(sharedPreferences) }
     })
+    var commentViewModel : CommentViewModel =  viewModel(factory = viewModelFactory {
+        initializer { CommentViewModel(sharedPreferences) }})
     val bookmarkedPostIds = remember { mutableStateListOf<String>("") }
     val userId = sharedPreferences.getString("userId", null)
 
@@ -72,6 +75,8 @@ fun BookMarkScreen(
                 sharedPreferences = sharedPreferences,
                 navHostController = navHostController,
                 getPostRequest = GetPostRequest(postsId = bookmarkedPostIds, page = 1),
+                postViewModel = viewModel,
+                commentViewModel = commentViewModel
 
             )
         }

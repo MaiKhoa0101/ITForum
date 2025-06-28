@@ -67,6 +67,7 @@ import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
 import com.example.itforum.user.complaint.ComplaintPage
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.PostCommentScreen
+import com.example.itforum.user.post.viewmodel.CommentViewModel
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.userProfile.OtherUserProfileScreen
 import com.example.itforum.user.userProfile.UserProfileScreen
@@ -135,6 +136,8 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
     var postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(sharedPreferences) }
     })
+    var commentViewModel : CommentViewModel =  viewModel(factory = viewModelFactory {
+        initializer { CommentViewModel(sharedPreferences) }})
     NavHost(navHostController, startDestination = "splash") {
         composable ("home") {
 
@@ -150,7 +153,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 }
             }
 
-            HomePage(navHostController, modifier, sharedPreferences, postViewModel)
+            HomePage(navHostController, modifier, sharedPreferences, postViewModel,commentViewModel)
         }
 
         composable("splash") {
@@ -172,7 +175,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
                 }
             }
 
-            PostCommentScreen( postId, sharedPreferences)
+            PostCommentScreen( postId,sharedPreferences,commentViewModel)
         }
 
         composable("notification") {
@@ -350,7 +353,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
 
             val postId = backStackEntry.arguments?.getString("postId") ?: return@composable
 
-            DetailPostPage(navHostController, sharedPreferences, postId)
+            DetailPostPage(navHostController, sharedPreferences, postId,commentViewModel)
         }
 
         composable("listlike") {
@@ -708,7 +711,10 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             })
             SearchScreen(
                 modifier = modifier,
-                viewModel = viewModel
+                viewModel = viewModel,
+                postViewModel = postViewModel,
+                navHostController,
+                sharedPreferences
             )
         }
 

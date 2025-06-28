@@ -49,6 +49,7 @@ import com.example.itforum.user.effect.UiStateMessage
 import com.example.itforum.user.login.loginGoogle.GoogleSignInButton
 import com.example.itforum.user.login.loginGoogle.saveUserToFirestore
 import com.example.itforum.user.login.viewmodel.LoginViewModel
+import com.example.itforum.user.notification.subscribeToAppTopic
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 import com.google.android.gms.common.api.ApiException
@@ -90,8 +91,13 @@ fun LoginScreen(
         if (uiState is UiState.Success) {
             val role = sharedPreferences.getString("role", null)
             if (role != null) {
-                val destination = if (role == "admin") "admin_root" else "home"
-                navHostController.navigate(destination)
+                if (role == "admin") {
+                    navHostController.navigate("admin_root")
+                }
+                else {
+                    navHostController.navigate("home")
+//                    subscribeToAppTopic()
+                }
             }
         }else if(uiState is UiState.Loading){
             enable = false

@@ -34,9 +34,11 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.runtime.LaunchedEffect
 
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 
@@ -51,6 +53,11 @@ import com.example.itforum.user.modelData.request.GetPostRequest
 
 import com.example.itforum.user.modelData.response.News
 
+import com.example.itforum.user.modelData.response.PostWithVote
+import com.example.itforum.user.modelData.response.VoteResponse
+import com.example.itforum.user.news.viewmodel.NewsViewModel
+import com.example.itforum.user.post.viewmodel.CommentViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 
 
@@ -60,29 +67,32 @@ fun PostListScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
     getPostRequest: GetPostRequest,
+    postViewModel: PostViewModel,
+    commentViewModel: CommentViewModel
 ) {
 
-    val viewModel: PostViewModel = viewModel(factory = viewModelFactory {
-        initializer { PostViewModel(sharedPreferences) }
-    })
 
-    val postsWithVotes by viewModel.postsWithVotes.collectAsState()
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val isLoadingMore by viewModel.isLoadingMore.collectAsState()
+
+    val postsWithVotes by postViewModel.postsWithVotes.collectAsState()
+    val isRefreshing by postViewModel.isRefreshing.collectAsState()
+    val isLoadingMore by postViewModel.isLoadingMore.collectAsState()
+    val canLoadMore by postViewModel.canLoadMore.collectAsState()
     var showCommentDialog by remember { mutableStateOf(false) }
     var selectedPostId by remember { mutableStateOf<String?>(null) }
     var userId = sharedPreferences.getString("userId", null)
     var showReportDialog by remember { mutableStateOf(false) }
-    val isLoading by viewModel.isLoading.collectAsState()
+
+    val isLoading by postViewModel.isLoading.collectAsState()
+
     // Fetch posts when screen loads
     LaunchedEffect(Unit) {
-        viewModel.fetchPosts(getPostRequest)
+        postViewModel.fetchPosts(getPostRequest)
     }
 
     // Pull to refresh state
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
-        onRefresh = { viewModel.refreshPosts(getPostRequest) }
+        onRefresh = { postViewModel.refreshPosts(getPostRequest) }
     )
 
     Box(
@@ -106,8 +116,8 @@ fun PostListScreen(
                     )
                 }
             }
-        } else if ( postsWithVotes.isEmpty() && !isRefreshing && !isLoadingMore) {
-            // emty state
+        } else if (postsWithVotes.isEmpty() && !isRefreshing && !isLoadingMore) {
+            // Empty state
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -131,6 +141,7 @@ fun PostListScreen(
         } else {
             // Posts list with infinite scroll
             val listState = rememberLazyListState()
+
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
@@ -146,32 +157,29 @@ fun PostListScreen(
                         vote = postWithVote.vote,
                         isBookMark = postWithVote.isBookMark,
                         onUpvoteClick = { vote ->
-                            viewModel.handleUpVote(vote!!, index, postWithVote.post.id)
+                            postViewModel.handleUpVote(vote!!, index, postWithVote.post.id)
                         },
                         onDownvoteClick = { vote ->
-                            viewModel.handleDownVote(vote!!, index, postWithVote.post.id)
+                            postViewModel.handleDownVote(vote!!, index, postWithVote.post.id)
                         },
                         onCommentClick = {
                             selectedPostId = postWithVote.post.id
                             showCommentDialog = true
                         },
                         onBookmarkClick = {
-                            viewModel.handleBookmark(index, postWithVote.post.id, userId)
+                            postViewModel.handleBookmark(index, postWithVote.post.id, userId)
                         },
                         onShareClick = { },
                         onCardClick = {
                             navHostController.navigate("detail_post/${postWithVote.post.id}")
-
-
                         },
                         onReportClick = {
                             selectedPostId = postWithVote.post.id
-                            showReportDialog =  true
+                            showReportDialog = true
                         },
                         navHostController = navHostController,
                         sharedPreferences = sharedPreferences
                     )
-
 
                     // Separator between posts
                     Divider(
@@ -179,14 +187,33 @@ fun PostListScreen(
                         color = Color.Gray.copy(alpha = 0.3f),
                         thickness = 0.5.dp
                     )
-
-                    // Load more when reaching near the end
-                    if (index >= postsWithVotes.size - 3 && !isLoadingMore) {
-                        LaunchedEffect(index) {
-                            viewModel.loadMorePosts(getPostRequest)
-                        }
-                    }
                 }
+
+
+
+                    item {
+
+                        LaunchedEffect(listState) {
+                            snapshotFlow {
+                                // load more post when near bottom index 3
+                                val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                                val totalItems = listState.layoutInfo.totalItemsCount
+                                lastVisible to totalItems
+                            }.collect { (lastVisible, totalItems) ->
+                                val threshold = 3
+                                if (
+                                    lastVisible >= totalItems - threshold &&
+                                    canLoadMore && !isLoadingMore && !isRefreshing && !isLoading
+                                ) {
+                                    postViewModel.loadMorePosts(getPostRequest)
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(1.dp))
+                    }
+
+
 
                 // Load more indicator at the bottom
                 if (isLoadingMore) {
@@ -215,6 +242,25 @@ fun PostListScreen(
                         }
                     }
                 }
+
+
+                if (!canLoadMore && postsWithVotes.isNotEmpty() && !isLoadingMore) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Đã tải hết bài viết",
+                                fontSize = 14.sp,
+                                color = Color.Gray,
+                                fontStyle = FontStyle.Italic
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -232,9 +278,10 @@ fun PostListScreen(
                 onDismiss = {
                     selectedPostId = null
                     showCommentDialog = false
-                }
+                }, commentViewModel = commentViewModel
             )
         }
+
         if (showReportDialog && selectedPostId != null) {
             ReportPostDialog(
                 sharedPreferences = sharedPreferences,
