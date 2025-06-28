@@ -209,12 +209,17 @@ fun CreatePostPage(
                         .background(MaterialTheme.colorScheme.secondaryContainer),
                 ) {
                     userInfo?.let { IconWithText(avatar = it.avatar, name = it.name) }
-                    WritePost(
-                        isError = isErrorTitle,
-                    ){input ->
-                        title = input
-                        content = input
-                    }
+                    WriteTitleField(
+                        value = title,
+                        onChange = { title = it },
+                        isError = isErrorTitle
+                    )
+
+                    WriteContentField(
+                        value = content,
+                        onChange = { content = it }
+                    )
+
                     AddTagPost(){tags = it}
                     AddMedia(
                         onImageChange = { imageUrls = it },
@@ -965,9 +970,81 @@ fun VideoPlayer(
                     useController = true
                     controllerShowTimeoutMs = 2000 // tự ẩn sau 2s
                     showController() // hiện lần đầu (tuỳ chọn)
-                    controllerAutoShow = false // ⛔ KHÔNG tự hiện controller khi chưa phát
+                    controllerAutoShow = false //  KHÔNG tự hiện controller khi chưa phát
                 }
             },
         )
     }
 }
+
+@Composable
+fun WriteTitleField(
+    value: String,
+    onChange: (String) -> Unit,
+    isError: Boolean = false
+) {
+    Column(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .TopBorder()
+            .BottomBorder()
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = {
+                if (it.length <= 100) {
+                    onChange(it)
+                }
+            },
+            placeholder = { Text("Nhập tiêu đề bài viết...", fontSize = 18.sp) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            isError = isError,
+            maxLines = 2,
+            textStyle = TextStyle(fontSize = 20.sp)
+        )
+        if (isError) {
+            Text("Tiêu đề không được để trống", color = Color.Red, modifier = Modifier.padding(start = 15.dp))
+        }
+    }
+}
+
+@Composable
+fun WriteContentField(
+    value: String,
+    onChange: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .TopBorder()
+            .BottomBorder()
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = {
+                if (it.length <= 1000) {
+                    onChange(it)
+                }
+            },
+            placeholder = { Text("Nhập nội dung bài viết...", fontSize = 16.sp,
+                fontWeight = FontWeight.Normal)
+                          },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+                .heightIn(min = 200.dp),
+            maxLines = 10,
+            textStyle = TextStyle(fontSize = 18.sp)
+        )
+        Text(
+            "${value.length}/1000 ký tự",
+            modifier = Modifier
+                .padding(end = 16.dp)
+                .align(Alignment.End),
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+

@@ -2,9 +2,8 @@ package com.example.itforum.user.ReportPost.view
 
 import android.content.SharedPreferences
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material3.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -16,6 +15,7 @@ import com.example.itforum.repository.ReportPostRepository
 import com.example.itforum.retrofit.RetrofitInstance
 import com.example.itforum.ui.theme.MainTheme
 import kotlinx.coroutines.launch
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateReportPostScreen(
@@ -32,12 +32,23 @@ fun CreateReportPostScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val suggestionReasons = listOf(
+        "Nội dung không phù hợp",
+        "Spam hoặc quảng cáo",
+        "Ngôn ngữ xúc phạm",
+        "Thông tin sai sự thật",
+        "Hình ảnh nhạy cảm",
+        "Tuyên truyền thù địch",
+        "Lừa đảo hoặc gian lận",
+        "Vi phạm quy định cộng đồng"
+    )
+
     ModalBottomSheet(
         modifier = Modifier.padding(top = 50.dp),
-        onDismissRequest = { onDismiss()  },
+        onDismissRequest = { onDismiss() },
         sheetState = sheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() }
-    ){
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -45,6 +56,18 @@ fun CreateReportPostScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text("Lý do tố cáo:", style = MaterialTheme.typography.titleLarge)
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Chọn lý do có sẵn:")
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    suggestionReasons.forEach { item ->
+                        AssistChip(
+                            onClick = { reason = item },
+                            label = { Text(item) }
+                        )
+                    }
+                }
+            }
 
             OutlinedTextField(
                 value = reason,
@@ -102,6 +125,7 @@ fun CreateReportPostScreen(
         }
     }
 }
+
 @Composable
 fun ReportPostDialog(
     sharedPreferences: SharedPreferences,
@@ -110,13 +134,9 @@ fun ReportPostDialog(
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false
-        )
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             CreateReportPostScreen(
                 sharedPreferences = sharedPreferences,
                 reportedPostId = reportedPostId,

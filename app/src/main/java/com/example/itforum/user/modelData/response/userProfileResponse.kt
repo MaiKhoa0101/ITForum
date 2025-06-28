@@ -11,11 +11,12 @@ data class UserProfileResponse(
     val username: String = "",
     val introduce: String = "",
     val avatar: String = "",
-    val numberPost: Int = 0,
+    val totalPost: Int = 0,
     val numberComment: Int = 0,
     val isBanned: Boolean = false,
     val certificate: List<Certificate> = emptyList(),
-    val skill: List<String> = emptyList()
+    val skill: List<String> = emptyList(),
+    val createdAt: String = "",
 )
 
 

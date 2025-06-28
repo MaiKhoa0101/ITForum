@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +27,7 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ThumbDown
@@ -63,6 +65,8 @@ import com.example.itforum.R
 import com.example.itforum.user.modelData.response.GetVoteResponse
 import com.example.itforum.user.post.viewmodel.CommentViewModel
 import com.example.itforum.user.post.viewmodel.PostViewModel
+import com.example.itforum.user.skeleton.SkeletonBox
+import com.example.itforum.user.skeleton.SkeletonPost
 
 @Composable
 fun DetailPostPage(
@@ -83,6 +87,16 @@ fun DetailPostPage(
     LaunchedEffect(postId) {
         viewModel.fetchPostById(postId)
     }
+
+    if (post != null && post!!.isHidden == false) {
+        post?.let {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF00AEFF))
+            ) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    TopDetailPost(navHostController)
 
 
     postWithVote?.post?.let { post ->
@@ -139,6 +153,30 @@ fun DetailPostPage(
             }
         }
     }
+
+    else {
+        Column (
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Column (
+                modifier = Modifier.fillMaxSize(0.8f).padding(vertical = 80.dp),
+            ) {
+                IconButton(
+                    modifier = Modifier.size(30.dp),
+                    onClick = { navHostController.popBackStack() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBackIosNew,
+                        contentDescription = "Lùi",
+                        modifier = Modifier.size(100.dp)
+                    )
+                }
+                SkeletonPost()
+            }
+        }
+    }
 }
 
 
@@ -184,6 +222,7 @@ fun TopDetailPost(
 
 @Composable
 fun AvatarNameDetail(avatar: String, name: String, time: String) {
+
     Row(
         modifier = Modifier
             .padding(horizontal = 13.dp, vertical = 6.dp)
