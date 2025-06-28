@@ -1,8 +1,9 @@
 package com.example.itforum.user.utilities.search
 
-
 import android.content.Context
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -10,39 +11,52 @@ import kotlinx.coroutines.flow.map
 private val Context.dataStore by preferencesDataStore(name = "search_history")
 
 object SearchHistoryManager {
-    private val SEARCH_HISTORY_KEY = stringSetPreferencesKey("search_history")
-    private const val KEY_HISTORY = "search_list"
     private const val MAX_HISTORY = 50
-    private const val PREF_NAME = "search_history"
-    suspend fun addSearchQuery(context: Context, query: String) {
+
+    // Tạo key riêng cho từng user
+    private fun getKeyForUser(userId: String): Preferences.Key<Set<String>> {
+        return stringSetPreferencesKey("search_history_$userId")
+    }
+
+    suspend fun addSearchQuery(context: Context, userId: String, query: String) {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return
 
+        val key = getKeyForUser(userId)
+
         context.dataStore.edit { prefs ->
-            val current = prefs[SEARCH_HISTORY_KEY]?.toMutableSet() ?: mutableSetOf()
+            val current = prefs[key]?.toMutableSet() ?: mutableSetOf()
+            current.remove(trimmed) // nếu có rồi, đưa lên đầu
             current.add(trimmed)
-            prefs[SEARCH_HISTORY_KEY] = current
+
+            // Giới hạn độ dài
+            val newSet = current.toList().takeLast(MAX_HISTORY).toSet()
+
+            prefs[key] = newSet
         }
     }
 
-    suspend fun getSearchHistory(context: Context): List<String> {
+    suspend fun getSearchHistory(context: Context, userId: String): List<String> {
+        val key = getKeyForUser(userId)
         return context.dataStore.data
-            .map { prefs -> prefs[SEARCH_HISTORY_KEY]?.toList() ?: emptyList() }
+            .map { prefs -> prefs[key]?.toList() ?: emptyList() }
             .first()
-            .sortedByDescending { it } // optional: you can remove or modify
+            .reversed() // Mới nhất lên đầu
     }
-    suspend fun clearHistory(context: Context) {
+
+    suspend fun clearHistory(context: Context, userId: String) {
+        val key = getKeyForUser(userId)
         context.dataStore.edit { prefs ->
-            prefs.remove(SEARCH_HISTORY_KEY)
+            prefs.remove(key)
         }
     }
 
-    suspend fun removeSearchQuery(context: Context, query: String) {
+    suspend fun removeSearchQuery(context: Context, userId: String, query: String) {
+        val key = getKeyForUser(userId)
         context.dataStore.edit { prefs ->
-            val current = prefs[SEARCH_HISTORY_KEY]?.toMutableSet() ?: return@edit
+            val current = prefs[key]?.toMutableSet() ?: return@edit
             current.remove(query)
-            prefs[SEARCH_HISTORY_KEY] = current
+            prefs[key] = current
         }
-
-
-    }}
+    }
+}
