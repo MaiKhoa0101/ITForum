@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ButtonDefaults
@@ -281,64 +282,64 @@ fun EditProfileBody(modifier: Modifier, user: UserProfileResponse?, viewModel: E
                 }
             }
         )
-        HorizontalDivider(thickness = 2.dp, color = Color.Gray)
-        Title("Chứng chỉ")
-        Row (
-            modifier = Modifier.fillMaxWidth().padding(horizontal = paddingHorizontal),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            var tempCertificate by remember { mutableStateOf("") }
-            var expandedCertificateField by remember { mutableStateOf(false) }
-            var certificateFieldHasFocus by remember { mutableStateOf(false) }
-
-            FieldTagText(
-                placeHolder = "Đại học...",
-                text = tempCertificate,
-                expanded = expandedCertificateField,
-                hasFocus = certificateFieldHasFocus,
-                onFocusChange = { focus ->
-                    certificateFieldHasFocus = focus
-                    expandedCertificateField = focus
-                },
-                onDismiss = { expandedCertificateField = false },
-                onFilterChange = {
-                    DropdownMenuItem(
-                        text = { Text("Gợi ý: IELTS, TOEIC...") },
-                        onClick = {
-                            tempCertificate = "IELTS"
-                            expandedCertificateField = false
-                        }
-                    )
-                },
-                onTextChange = {
-                    tempCertificate = it
-                    expandedCertificateField = true
-                }
-            )
-
-            AddButton(
-                tempCertificate,
-                onAdd = {
-                    if (it.isNotBlank() && !viewModel.certificateInput?.contains(Certificate(name = it))!!) {
-                        viewModel.certificateInput =
-                            viewModel.certificateInput?.plus(Certificate(name = it))
-                    }
-                    println("Viewmodel: " + viewModel.certificateInput)
-
-                }
-            )
-        }
-        TagCertificate(
-            title = "Chứng chỉ bằng cấp đã thêm:",
-            tempCertificate = viewModel.certificateInput,
-            onDelete = {
-                if (it.isNotBlank() && viewModel.certificateInput?.contains(Certificate(name = it))!!) {
-                    viewModel.certificateInput =
-                        viewModel.certificateInput?.minus(Certificate(name = it))
-                }
-            }
-        )
+//        HorizontalDivider(thickness = 2.dp, color = Color.Gray)
+//        Title("Chứng chỉ")
+//        Row (
+//            modifier = Modifier.fillMaxWidth().padding(horizontal = paddingHorizontal),
+//            horizontalArrangement = Arrangement.SpaceBetween,
+//            verticalAlignment = Alignment.CenterVertically
+//        ){
+//            var tempCertificate by remember { mutableStateOf("") }
+//            var expandedCertificateField by remember { mutableStateOf(false) }
+//            var certificateFieldHasFocus by remember { mutableStateOf(false) }
+//
+//            FieldTagText(
+//                placeHolder = "Đại học...",
+//                text = tempCertificate,
+//                expanded = expandedCertificateField,
+//                hasFocus = certificateFieldHasFocus,
+//                onFocusChange = { focus ->
+//                    certificateFieldHasFocus = focus
+//                    expandedCertificateField = focus
+//                },
+//                onDismiss = { expandedCertificateField = false },
+//                onFilterChange = {
+//                    DropdownMenuItem(
+//                        text = { Text("Gợi ý: IELTS, TOEIC...") },
+//                        onClick = {
+//                            tempCertificate = "IELTS"
+//                            expandedCertificateField = false
+//                        }
+//                    )
+//                },
+//                onTextChange = {
+//                    tempCertificate = it
+//                    expandedCertificateField = true
+//                }
+//            )
+//
+//            AddButton(
+//                tempCertificate,
+//                onAdd = {
+//                    if (it.isNotBlank() && !viewModel.certificateInput?.contains(Certificate(name = it))!!) {
+//                        viewModel.certificateInput =
+//                            viewModel.certificateInput?.plus(Certificate(name = it))
+//                    }
+//                    println("Viewmodel: " + viewModel.certificateInput)
+//
+//                }
+//            )
+//        }
+//        TagCertificate(
+//            title = "Chứng chỉ bằng cấp đã thêm:",
+//            tempCertificate = viewModel.certificateInput,
+//            onDelete = {
+//                if (it.isNotBlank() && viewModel.certificateInput?.contains(Certificate(name = it))!!) {
+//                    viewModel.certificateInput =
+//                        viewModel.certificateInput?.minus(Certificate(name = it))
+//                }
+//            }
+//        )
     }
 }
 
@@ -691,11 +692,11 @@ fun EditProfile(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                 navigationIcon = {
                     Icon(
-                        imageVector = Icons.Default.ArrowBackIosNew,
+                        imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Back",
                         tint = Color.White,
                         modifier = Modifier
-                            .size(50.dp)
+                            .size(35.dp)
                             .clickable { navHostController.popBackStack() }
                     )
                 },

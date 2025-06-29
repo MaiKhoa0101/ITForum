@@ -48,7 +48,7 @@ fun TopBarRoot(
     onMenuClick: () -> Unit
 ) {
     var selectedTabIndex by remember { mutableStateOf(0) }
-    val roles = listOf("My feed", "Tag", "Follow", "Bookmark")
+    val roles = listOf("Trang chủ", "Tag", "Người theo dõi", "Lưu bài viết")
 
     Column(
         modifier = Modifier
@@ -62,7 +62,7 @@ fun TopBarRoot(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -79,7 +79,7 @@ fun TopBarRoot(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.primaryContainer)
-                        .padding(top = 0.dp, bottom = 0.dp), // nền xanh dương của bạn
+                        .padding(top = 0.dp, bottom = 0.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(

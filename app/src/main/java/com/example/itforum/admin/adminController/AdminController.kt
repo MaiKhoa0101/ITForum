@@ -348,7 +348,8 @@ fun NotificationCard(
             text = "Thông báo",
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp,
-            color = Color.Gray
+            color = Color.Gray,
+            modifier = Modifier.padding(bottom = 8.dp)
         )
 
         Spacer(modifier = Modifier.height(12.dp))

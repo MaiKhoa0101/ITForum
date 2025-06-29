@@ -37,7 +37,7 @@ fun TagScreen(tagViewModel: TagViewModel ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 30.dp, vertical = 50.dp)
+            .padding( top = 70.dp)
     ) {
         item { Spacer(Modifier.height(110.dp)) }
         item {

@@ -69,12 +69,12 @@ fun FollowScreen(
         viewModel.loadRandomUsers(currentUserId, "10")
     }
 
-    LazyColumn {
+    LazyColumn (modifier = Modifier.padding(top = 40.dp)){
 
         item {
             Spacer(Modifier.height(160.dp))
             Text(
-                "Following",
+                "Người đang theo dõi",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(8.dp)
@@ -120,7 +120,7 @@ fun FollowScreen(
                 }
                 else -> {
                     Text(
-                        text = "No followers found",
+                        text = "Không có người theo dõi",
                         modifier = Modifier.padding(8.dp),
                         color = Color.Gray
                     )
@@ -131,7 +131,7 @@ fun FollowScreen(
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                "Suggestions",
+                "Gợi ý",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(8.dp)
@@ -185,16 +185,16 @@ fun FollowScreen(
             }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                "Posts from your following",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(8.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+//        item {
+//            Spacer(modifier = Modifier.height(16.dp))
+//            Text(
+//                "Posts from your following",
+//                fontSize = 20.sp,
+//                fontWeight = FontWeight.Bold,
+//                modifier = Modifier.padding(8.dp)
+//            )
+//            Spacer(modifier = Modifier.height(16.dp))
+//        }
     }
 }
 

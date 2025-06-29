@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Divider
@@ -78,15 +79,15 @@ fun OtherUserProfileScreen(
     }
 
     Scaffold(
-        modifier = modifier
-            .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+//        modifier = modifier
+////            .fillMaxSize()
+////            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
                 title = {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
+//                        modifier = Modifier
+//                            .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(
@@ -101,7 +102,7 @@ fun OtherUserProfileScreen(
                 },
                 navigationIcon = {
                     Icon(
-                        imageVector = Icons.Default.ArrowBackIosNew,
+                        imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Back",
                         tint = Color.White,
                         modifier = Modifier
