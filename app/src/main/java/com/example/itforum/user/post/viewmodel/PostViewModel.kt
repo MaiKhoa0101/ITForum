@@ -256,6 +256,7 @@ class PostViewModel(
                 Log.d("PostViewModel", "Request: $createPostRequest")
                 var uploadedFilesRef = AtomicInteger(0)
                 val totalFiles = (createPostRequest.imageUrls?.size ?: 0) + (createPostRequest.videoUrls?.size ?: 0)
+
                 val imageUrls: List<MultipartBody.Part>
                 val videoUrls: List<MultipartBody.Part>
                 withContext(Dispatchers.IO) {
@@ -275,6 +276,7 @@ class PostViewModel(
                         uploadedFilesRef
                     )
                 }
+
 
                 // Chỉ tạo MultipartBody.Part cho các trường không null
                 val userId = createPostRequest.userId?.let {
@@ -558,6 +560,16 @@ class PostViewModel(
                 }
             } catch (e: Exception) {
                 Log.e("handleBookmark", "Bookmark error", e)
+            }
+        }
+    }
+    fun handleHidePost(postId: String?){
+        viewModelScope.launch {
+            val res = RetrofitInstance.postService.hidePost(postId.toString())
+            if (res.isSuccessful){
+                val currentList = _postsWithVotes.value.toMutableList()
+                currentList.removeAll { it.post.id == postId }
+                _postsWithVotes.value = currentList
             }
         }
     }

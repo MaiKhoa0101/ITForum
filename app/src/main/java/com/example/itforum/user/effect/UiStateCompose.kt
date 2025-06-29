@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.itforum.user.effect.model.UiState
+import com.example.itforum.user.skeleton.SkeletonPost
 
 @Composable
 fun UiStateMessage(uiState: UiState, canSubmit: Boolean) {
@@ -15,7 +16,7 @@ fun UiStateMessage(uiState: UiState, canSubmit: Boolean) {
 
     when (uiState) {
         is UiState.Loading -> {
-            CircularProgressIndicator()
+            SkeletonPost()
         }
 
         is UiState.Error -> {

@@ -92,12 +92,12 @@ fun AnimatedVoteNumber(
         transitionSpec = {
             if (targetState > initialState) {
                 // Tăng số → lăn lên
-                slideInVertically { height -> height } + fadeIn() with
-                        slideOutVertically { height -> -height } + fadeOut()
-            } else {
-                // Giảm số → lăn xuống
                 slideInVertically { height -> -height } + fadeIn() with
                         slideOutVertically { height -> height } + fadeOut()
+            } else {
+                // Giảm số → lăn xuống
+                slideInVertically { height -> height } + fadeIn() with
+                        slideOutVertically { height -> - height } + fadeOut()
             }.using(SizeTransform(clip = false))
         },
         modifier = modifier

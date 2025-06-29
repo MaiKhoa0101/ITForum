@@ -20,9 +20,14 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
@@ -597,6 +602,100 @@ fun PostMediaSection(
             mediaItems = mediaItems,
             initialIndex = selectedMediaIndex,
             onDismiss = { showMediaDetail = false }
+        )
+    }
+}
+// Option Dialog
+// Option Dialog
+@Composable
+fun OptionDialog(
+    showDialog: Boolean,
+    onDismiss: () -> Unit,
+    onShowReport: () -> Unit,
+    onEditPost: () -> Unit,
+    onDeletePost: () -> Unit,
+    isMyPost: Boolean = false
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Options") },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = onShowReport,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Tố cáo")
+                    }
+                    Button(
+                        onClick = onEditPost,
+                        enabled = isMyPost,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            Color.Yellow
+                        )
+                    ) {
+                        Text("Sửa bài viết")
+                    }
+                    Button(
+                        onClick = onDeletePost,
+                        enabled = isMyPost,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                           Color.Red
+                        )
+                    ) {
+                        Text("Xóa")
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+// Confirm Delete Dialog
+@Composable
+fun ConfirmDeleteDialog(
+    showDialog: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Delete Post") },
+            text = {
+                Text(
+                    "Are you sure you want to delete this post?",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = onConfirm,
+                    colors = ButtonDefaults.buttonColors(
+                        Color.Red
+                    )
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 }

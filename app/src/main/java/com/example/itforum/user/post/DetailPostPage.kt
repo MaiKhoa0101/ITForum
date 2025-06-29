@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -28,12 +29,18 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.ArrowCircleDown
+import androidx.compose.material.icons.filled.ArrowCircleUp
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbDownOffAlt
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.ThumbUpOffAlt
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -43,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -61,6 +69,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.itforum.R
+import com.example.itforum.animation.AnimatedVoteIcon
+import com.example.itforum.animation.AnimatedVoteNumber
 
 import com.example.itforum.user.modelData.response.GetVoteResponse
 import com.example.itforum.user.post.viewmodel.CommentViewModel
@@ -73,7 +83,11 @@ fun DetailPostPage(
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences,
     postId: String,
-    commentViewModel: CommentViewModel
+    commentViewModel: CommentViewModel,
+    onUpvoteClick: (String?) -> Unit = {},
+    onDownvoteClick: (String?) -> Unit = {},
+    onBookmarkClick: () -> Unit = {},
+    onReportClick: (String) -> Unit = {}
 ) {
 
 
@@ -81,98 +95,234 @@ fun DetailPostPage(
         initializer { PostViewModel(sharedPreferences) }
     })
 
-    var userId = sharedPreferences.getString("userId", null)
     val postWithVote by viewModel.selectedPostWithVote.collectAsState()
-    val post by viewModel.post.collectAsState()
+
+    var upvotes by remember { mutableStateOf(postWithVote?.vote?.data?.upVoteData?.total?: 0) }
+    var isSavedPost by remember { mutableStateOf(postWithVote?.isBookMark) }
+
+    var isVote by remember { mutableStateOf(postWithVote?.vote?.data?.userVote) }
+
+    var isChangeUp by remember { mutableStateOf(false) }
+    var isChangeDown by remember { mutableStateOf(false) }
+
     LaunchedEffect(postId) {
         viewModel.fetchPostById(postId)
     }
 
-    if (post != null && post!!.isHidden == false) {
-            Box(
+    if (postWithVote != null && postWithVote!!.post.isHidden == false) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primaryContainer)
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFF00AEFF))
             ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    TopDetailPost(navHostController)
-
-
-                    postWithVote?.post?.let { post ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(0xFF00AEFF))
-                        ) {
-                            Column(modifier = Modifier.fillMaxSize()) {
-                                TopDetailPost(navHostController)
-
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.White)
+                TopDetailPost(navHostController)
+                postWithVote?.post?.let { post ->
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight()
+                            .background( MaterialTheme.colorScheme.secondaryContainer)
+                    ) {
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .padding(20.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    AvatarNameDetail(
-                                        avatar = post.avatar.orEmpty(),
-                                        name = post.userName ?: "unknown",
-                                        time = post.createdAt ?: ""
-                                    )
+                                    // Avatar and author
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        AsyncImage(
+                                            model = post.avatar,
+                                            contentDescription = "avatar",
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .clip(RoundedCornerShape(20.dp))
+                                                .clickable {
+                                                    val myUserId =
+                                                        sharedPreferences.getString("userId", null)
+                                                    if (post.userId == myUserId)
+                                                        navHostController.navigate("personal")
+                                                    else navHostController.navigate("otherprofile/${post.userId}")
+                                                }
+                                        )
+                                        Spacer(modifier = Modifier.width(12.dp))
 
-                                    ContentPost(
-                                        title = post.title.orEmpty(),
-                                        content = post.content.orEmpty(),
-                                        tags = post.tags ?: emptyList()
-                                    )
-
-                                    Spacer(modifier = Modifier.height(12.dp))
-
-                                    Log.d("imgs", post.imageUrls.toString())
-
-                                    PostMediaSection(
-                                        imageUrls = post.imageUrls ?: emptyList(),
-                                        videoUrls = post.videoUrls ?: emptyList()
-                                    )
-
-                                    VoteSection(
-                                        vote = postWithVote?.vote,
-                                        isBookMark = postWithVote?.isBookMark ?: false,
-                                        onUpvoteClick = {
-                                            viewModel.handleUpVote(
-                                                "upvote",
-                                                -1,
-                                                postId
+                                        Column {
+                                            Text(
+                                                text = post.userName ?: "Unknown User",
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.onBackground,
+                                                modifier = Modifier
+                                                    .clickable {
+                                                        val myUserId = sharedPreferences.getString(
+                                                            "userId",
+                                                            null
+                                                        )
+                                                        if (post.userId == myUserId)
+                                                            navHostController.navigate("personal")
+                                                        else navHostController.navigate("otherprofile/${post.userId}")
+                                                    }
                                             )
-                                        },
-                                        onCommentClick = {},
-                                        onBookmarkClick = {
-                                            viewModel.handleBookmark(
-                                                -1,
-                                                postId,
-                                                userId
-                                            )
-                                        },
-                                        onDownvoteClick = {
-                                            viewModel.handleDownVote(
-                                                "downvote",
-                                                -1,
-                                                postId
+                                            Text(
+                                                text = "${getTimeAgo(post.createdAt ?: "")} • ${""}",
+                                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                fontSize = 11.sp
                                             )
                                         }
-                                    )
+                                    }
 
-                                    PostCommentScreen(
-                                        postId = post.id.toString(),
-                                        sharedPreferences = sharedPreferences,
-                                        commentViewModel = commentViewModel,
-
-                                        )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        IconButton(onClick = {
+                                            post.id?.let { onReportClick(postWithVote!!.post.userId.toString()) }
+                                        }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.MoreHoriz,
+                                                contentDescription = "more",
+                                                modifier = Modifier
+                                                    .size(21.dp),
+                                                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                            )
+                                        }
+                                    }
                                 }
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // Post title
+                                Text(
+                                    text = post.title ?: "",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                // Post content
+                                Text(
+                                    text = post.content ?: "",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // media section
+                                PostMediaSection(post.imageUrls, post.videoUrls)
+
+                                // Action buttons row
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceAround,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    // Upvote/Downvote section
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(22.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        IconButton(
+                                            modifier = Modifier.size(60.dp),
+                                            onClick = {
+                                                if (isVote == "upvote") {
+                                                    upvotes--
+                                                    isVote = "none"
+                                                } else if (isVote == "downvote" || isVote == "none") {
+                                                    upvotes++
+                                                    isVote = "upvote"
+                                                }
+                                                onUpvoteClick(isVote)
+                                                isChangeUp = true
+                                            }
+                                        ) {
+                                            AnimatedVoteIcon(
+                                                isActive = isVote == "upvote",
+                                                triggerChange = isChangeUp,
+                                                activeColor = Color.Green,
+                                                defaultColor = MaterialTheme.colorScheme.onBackground,
+                                                icon = Icons.Default.ArrowCircleUp,
+                                                onAnimationEnd = { isChangeUp = false }
+                                            )
+                                        }
+                                        AnimatedVoteNumber(
+                                            voteCount = upvotes,
+                                            textStyle = TextStyle(
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.SemiBold
+                                            ),
+                                            textColor = MaterialTheme.colorScheme.onBackground
+                                        )
+                                        IconButton(
+                                            modifier = Modifier.size(60.dp),
+                                            onClick = {
+                                                if (isVote == "downvote") {
+                                                    isVote = "none"
+                                                } else if (isVote == "upvote") {
+                                                    upvotes--
+                                                    isVote = "downvote"
+                                                } else if (isVote == "none") {
+                                                    isVote = "downvote"
+                                                }
+                                                onDownvoteClick(isVote)
+                                                isChangeDown = true
+                                            })
+                                        {
+                                            AnimatedVoteIcon(
+                                                isActive = isVote == "downvote",
+                                                triggerChange = isChangeDown,
+                                                activeColor = Color.Red,
+                                                defaultColor = MaterialTheme.colorScheme.onBackground,
+                                                icon = Icons.Default.ArrowCircleDown,
+                                                onAnimationEnd = { isChangeDown = false }
+                                            )
+                                        }
+                                    }
+
+                                    IconButton(onClick = {
+                                        onBookmarkClick()
+                                        //neu save post r doi icon qua chua save va nguoc lai
+                                        if (isSavedPost == true) {
+                                            isSavedPost = false
+                                        } else {
+                                            isSavedPost = true
+                                        }
+                                    }
+                                    )
+                                    {
+                                        Icon(
+                                            imageVector = Icons.Default.Bookmark,
+                                            contentDescription = "Đánh dấu",
+                                            modifier = Modifier.size(30.dp),
+                                            tint = if (isSavedPost == true) Color.Green else MaterialTheme.colorScheme.onBackground
+                                        )
+                                    }
+                                }
+                                PostCommentScreen(
+                                    postId = post.id.toString(),
+                                    sharedPreferences = sharedPreferences,
+                                    commentViewModel = commentViewModel,
+                                )
                             }
                         }
                     }
                 }
             }
         }
+    }
     else {
         Column (
             modifier = Modifier.fillMaxSize(),

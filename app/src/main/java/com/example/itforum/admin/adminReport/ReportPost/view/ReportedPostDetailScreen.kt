@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.net.toUri
+import com.example.itforum.user.skeleton.SkeletonBox
 
 @Composable
 fun ReportedPostDetailScreen(
@@ -114,6 +115,17 @@ fun ReportedPostDetailScreen(
                 Text("Lý do tố cáo:", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(8.dp))
                 DetailItem(label = "•", value = data!!.reason, divider = false)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Kết quả phân tích AI:", style = MaterialTheme.typography.titleMedium)
+
+                val ai = data!!.aiAnalysis
+                if (ai != null) {
+                    DetailItem("Mức độ vi phạm (%)", "${ai.violationPercentage}")
+                    DetailItem("Giải thích", ai.reason)
+                    DetailItem("Có nên khóa bài viết?", if (ai.shouldBan) "✅ Có" else "❌ Không")
+                } else {
+                    Text("⏳ Đang phân tích AI hoặc chưa có kết quả.")
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
                 val scope = rememberCoroutineScope()
@@ -152,7 +164,7 @@ fun ReportedPostDetailScreen(
     else {
             Box(modifier = Modifier.padding(16.dp)) {
                 Column {
-                    CircularProgressIndicator()
+                    SkeletonBox()
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Đang tải dữ liệu bài viết...")
                 }

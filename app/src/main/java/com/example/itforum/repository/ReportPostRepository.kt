@@ -26,8 +26,6 @@ class ReportPostRepository(private val service: ReportPostService) {
         )
         return service.createReportPost(body)
     }
-    suspend fun hidePost(postId: String): Response<Unit> {
-        return RetrofitInstance.postService.hidePost(postId)
-    }
+
 
 }

@@ -30,6 +30,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.example.itforum.user.FilterWords.ToastHelper
 import com.example.itforum.user.FilterWords.WordFilter
+import com.example.itforum.user.home.tag.ViewModel.TagViewModel
 import com.example.itforum.user.modelData.request.CreatePostRequest
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.userProfile.viewmodel.UserViewModel
@@ -40,13 +41,14 @@ fun EditPostPage(
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences,
     postId: String,
-    postViewModel: PostViewModel
+    postViewModel: PostViewModel,
+    tagViewModel: TagViewModel
 ) {
     val context = LocalContext.current
     val userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
     })
-
+    Log.d("postId edit", postId)
     val userId = sharedPreferences.getString("userId", null)
     val userInfo by userViewModel.user.collectAsState()
     val progress by postViewModel.uploadProgress.collectAsState()
@@ -153,7 +155,10 @@ fun EditPostPage(
                         onChange = { content = it }
                     )
 
-                    AddTagPost(tags = tags)
+                    AddTagPost(
+                        tagViewModel = tagViewModel,
+                        tags = tags
+                    )
                     AddMedia(
                         imageUris = imageUrls,
                         videoUris = videoUrls,

@@ -54,6 +54,8 @@ import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -91,6 +93,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -107,8 +110,12 @@ import com.example.itforum.user.FilterWords.WordFilter
 import com.example.itforum.user.effect.UiStateMessage
 
 import com.example.itforum.user.effect.model.UiState
+import com.example.itforum.user.home.tag.ViewModel.TagViewModel
 import com.example.itforum.user.modelData.request.CreatePostRequest
 import com.example.itforum.user.post.viewmodel.PostViewModel
+import com.example.itforum.user.skeleton.SkeletonPost
+import com.example.itforum.user.userProfile.AddButton
+import com.example.itforum.user.userProfile.FieldTagText
 import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 
 data class icontext(
@@ -122,7 +129,8 @@ fun CreatePostPage(
     modifier: Modifier,
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences,
-    postViewModel: PostViewModel
+    postViewModel: PostViewModel,
+    tagViewModel: TagViewModel
 ) {
     val context = LocalContext.current
     var userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
@@ -188,17 +196,23 @@ fun CreatePostPage(
                     }
                 }
             }
-            item{
+            item {
                 if (progress in 0f..1f && progress != 0f) {
                     Column(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
                     ) {
-                        CircularProgressIndicator(progress = progress)
-                        Text("Đang đăng bài: ${(progress * 100).toInt()}%")
+                        Text(
+                            text = "Đang đăng bài: ${(progress * 100).toInt()}%",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SkeletonPost() // mô phỏng một bài viết đang được tải lên
                     }
                 }
-
             }
+
             item {  3
                 Column(
                     modifier = Modifier
@@ -222,7 +236,10 @@ fun CreatePostPage(
                         onChange = { content = it }
                     )
 
-                    AddTagPost(tags = tags)
+                    AddTagPost(
+                        tagViewModel = tagViewModel,
+                        tags = tags
+                    )
                     AddMedia(
                         imageUris = imageUrls,
                         videoUris = videoUrls,
@@ -401,6 +418,7 @@ fun WritePost(
 
 @Composable
 fun AddTagPost(
+    tagViewModel: TagViewModel,
     tags: MutableState<List<String>?>,
 ) {
 
@@ -410,66 +428,137 @@ fun AddTagPost(
             .padding(10.dp)
             .clip(RoundedCornerShape(10.dp))
     ) {
-//        var items by remember { mutableStateOf(listOf<String?>(null)) }
         var textTag by remember { mutableStateOf("") }
         var isError by remember { mutableStateOf(false) }
         var isFocused by remember { mutableStateOf(false) }
+
+
+        var expandedFilterField by remember { mutableStateOf(false) }
+        var hasFocus by remember { mutableStateOf(false) }
+        val listTag by tagViewModel.tagList.collectAsState()
+
+        LaunchedEffect(listTag) {
+            tagViewModel.getAllTags()
+        }
+
+        val filterOptions = listTag.filter { it.name.contains(textTag, ignoreCase = true) }
         Row(
             modifier = Modifier
                 .height(130.dp)
                 .background(MaterialTheme.colorScheme.background),
             verticalAlignment = Alignment.CenterVertically
         ){
-            OutlinedTextField(
-                value = textTag,
-                onValueChange = {
-                    textTag = it
-                    isError = it.trim().isEmpty()
-                },
-                placeholder = { Text("Nhập tag", color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp) },
+            FieldTagText(
+                placeHolder = "Nhập tag",
+                text = textTag,
                 shape = RoundedCornerShape(7.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer
                 ),
                 textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground),
-                modifier = Modifier
-                    .weight(3f)
-                    .padding(horizontal = 10.dp)
-                    .onFocusChanged { focusState ->
-                        isFocused = focusState.isFocused
-                        // Khi mất focus, reset lỗi
-                        if (!focusState.isFocused) {
-                            isError = false
-                        }
-                    }
-            )
-            IconButton(
-                onClick = {
-                    if(textTag.trim().isNotEmpty()) {
-                        tags.value = tags.value?.plus(textTag)
-                        textTag = ""
-                    }
-                    else
-                        isError = true
+                expanded = expandedFilterField,
+                hasFocus = hasFocus,
+                onFocusChange = { focus ->
+                    hasFocus = focus
+                    expandedFilterField = focus
                 },
-                modifier = Modifier
-                    .padding(horizontal = 10.dp)
-                    .size(54.dp)
-                    .weight(1f)
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        shape = RoundedCornerShape(7.dp)
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Nút add tag",
-                    modifier = Modifier
-                        .size(40.dp),
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-            }
+                onDismiss = { expandedFilterField = false },
+                onFilterChange = {
+                    if(filterOptions.isNotEmpty()) {
+                        filterOptions.forEach { tag ->
+                            DropdownMenuItem(
+                                text = { tag.name.let { Text(it, color = MaterialTheme.colorScheme.onBackground) } },
+                                onClick = {
+                                    textTag = tag.name
+                                    expandedFilterField = false
+                                }
+                            )
+                        }
+                    } else{
+                        DropdownMenuItem(
+                            text = { androidx.compose.material3.Text("Không có dữ liệu") },
+                            onClick = {}
+                        )
+                    }
+                },
+                onTextChange = { newText ->
+                    textTag = newText
+                    expandedFilterField = true // Mỗi lần gõ thì mở dropdown nếu đang focus
+                }
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            AddButton(
+                textTag,
+                onAdd = {
+                    if (it.isNotBlank()) {
+                        if(!tags.value?.contains(it)!!) {
+                            if( !listTag.any {tag -> tag.name.equals(it, ignoreCase = true) }) tagViewModel.createTag(it)
+                            tags.value = tags.value?.plus(it)
+                            textTag = ""
+                        }
+                    } else{
+                        isError = true
+                    }
+                    println("Viewmodel: " + tags.value)
+                }
+            )
+//            Box{
+//            OutlinedTextField(
+//                value = textTag,
+//                onValueChange = {
+//                    textTag = it
+//                    isError = it.trim().isEmpty()
+//                },
+//                placeholder = { Text("Nhập tag", color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp) },
+//                shape = RoundedCornerShape(7.dp),
+//                colors = OutlinedTextFieldDefaults.colors(
+//                    unfocusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer
+//                ),
+//                textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground),
+//                modifier = Modifier
+//                    .weight(3f)
+//                    .padding(horizontal = 10.dp)
+//                    .onFocusChanged { focusState ->
+//                        isFocused = focusState.isFocused
+//                        // Khi mất focus, reset lỗi
+//                        if (!focusState.isFocused) {
+//                            isError = false
+//                        }
+//                    }
+//            )
+//            DropdownMenu(
+//                expanded = expanded,
+//                onDismissRequest = onDismiss,
+//                properties = PopupProperties(focusable = !hasFocus),
+//                modifier = Modifier.heightIn(max = 230.dp)
+//            ) {onFilterChange()}
+//            IconButton(
+//                onClick = {
+//                    if(textTag.trim().isNotEmpty()) {
+//                        tags.value = tags.value?.plus(textTag)
+//                        textTag = ""
+//                    }
+//                    else
+//                        isError = true
+//                },
+//                modifier = Modifier
+//                    .padding(horizontal = 10.dp)
+//                    .size(54.dp)
+//                    .weight(1f)
+//                    .border(
+//                        width = 1.dp,
+//                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+//                        shape = RoundedCornerShape(7.dp)
+//                    )
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Default.Add,
+//                    contentDescription = "Nút add tag",
+//                    modifier = Modifier
+//                        .size(40.dp),
+//                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+//                )
+//            }
         }
         if (isError) {
             Text(
@@ -716,8 +805,8 @@ fun AddMedia(
 }
 
 @Composable
-fun ImgOrVdMedia(type: String, index: Int = 0, uri: Uri, ListUri: List<Uri>, removeUri: (List<Uri>) -> Unit) {
-    val pxValue = with(LocalDensity.current) { (70.dp * (ListUri.size-1-index)).roundToPx() }
+fun ImgOrVdMedia(type: String, index: Int = 0, uri: Uri, listUri: List<Uri>, removeUri: (List<Uri>) -> Unit) {
+    val pxValue = with(LocalDensity.current) { (70.dp * (listUri.size-1-index)).roundToPx() }
     Box(
         modifier = Modifier
             .offset { IntOffset(pxValue, 0) }
@@ -727,14 +816,26 @@ fun ImgOrVdMedia(type: String, index: Int = 0, uri: Uri, ListUri: List<Uri>, rem
         if (type == "video") {
             VideoPlayer(uri)
         }else {
-            Image(
-                painter = rememberAsyncImagePainter(uri),
-                contentDescription = "",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .padding(3.dp)
-                    .size(150.dp)
-            )
+            if(uri.scheme == "http" || uri.scheme == "https"){
+                AsyncImage(
+                    model = uri,
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .padding(3.dp)
+                        .size(150.dp)
+                )
+            } else{
+                Image(
+                    painter = rememberAsyncImagePainter(uri),
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .padding(3.dp)
+                        .size(150.dp)
+                )
+            }
+
         }
         Icon(
             imageVector = Icons.Default.Close,
@@ -743,7 +844,7 @@ fun ImgOrVdMedia(type: String, index: Int = 0, uri: Uri, ListUri: List<Uri>, rem
                 .padding(5.dp)
                 .align(Alignment.TopEnd)
                 .clickable {
-                    var newList = ListUri - uri
+                    var newList = listUri - uri
                     removeUri(newList)
                 }
         )

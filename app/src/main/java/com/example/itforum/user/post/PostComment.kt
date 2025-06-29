@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,7 +30,8 @@ import com.example.itforum.user.effect.model.UiStateComment
 import com.example.itforum.user.modelData.response.Comment
 import com.example.itforum.user.modelData.response.Reply
 import com.example.itforum.user.post.viewmodel.CommentViewModel
-
+import com.example.itforum.user.skeleton.SkeletonBox
+import com.example.itforum.user.skeleton.SkeletonPost
 
 
 @Composable
@@ -57,8 +59,9 @@ fun PostCommentScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF0F2F5))
+            .background(MaterialTheme.colorScheme.secondaryContainer)
     ) {
+        Divider()
         Text(
             text = "Comments",
             modifier = Modifier.padding(16.dp),
@@ -69,14 +72,17 @@ fun PostCommentScreen(
 
         when (uiState) {
             is UiStateComment.Loading -> {
+                println("Loading Comment")
                 Box(
                     modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    SkeletonBox()
                 }
             }
+
             is UiStateComment.Error -> {
+                println("Binh luan bi loi")
                 Box(
                     modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
@@ -87,12 +93,26 @@ fun PostCommentScreen(
                     )
                 }
             }
+
             else -> {
+                println("Co binh luan")
                 // Comments list takes available space
-                LazyColumn(
-                    modifier = Modifier.weight(1f)
+                Column(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(comments, key = { it.id }) { comment ->
+                    // Comment input section at the bottom
+                    CommentInputSection(
+                        onSubmitComment = { commentText ->
+                            isSubmittingComment = true
+                            commentViewModel.postComment(postId, commentText) { newComment ->
+                                comments = listOf(newComment) + comments
+                                isSubmittingComment = false
+                            }
+                        },
+                        isLoading = isSubmittingComment,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    for (comment in comments) {
                         CommentCard(
                             comment = comment,
                             fetchReply = { commentId, onLoaded ->
@@ -106,25 +126,8 @@ fun PostCommentScreen(
                         )
                         Divider()
                     }
-
-
-                    item {
-                        Spacer(modifier = Modifier.height(80.dp))
-                    }
                 }
 
-                // Comment input section at the bottom
-                CommentInputSection(
-                    onSubmitComment = { commentText ->
-                        isSubmittingComment = true
-                        commentViewModel.postComment(postId, commentText) { newComment ->
-                            comments = listOf(newComment) + comments
-                            isSubmittingComment = false
-                        }
-                    },
-                    isLoading = isSubmittingComment,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
         }
     }
@@ -258,9 +261,9 @@ fun CommentCard(
             Spacer(Modifier.width(8.dp))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(comment.userName.toString(), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.body2)
+                    Text(comment.userName.toString(), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                     Spacer(Modifier.width(6.dp))
-                    Text("· ${getTimeAgo(comment.time)}", style = MaterialTheme.typography.caption, color = Color(0xFF65676B))
+                    Text("· ${getTimeAgo(comment.time)}", color = MaterialTheme.colorScheme.onSecondaryContainer)
                 }
                 Box(
                     modifier = Modifier
@@ -268,7 +271,7 @@ fun CommentCard(
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                         .fillMaxWidth()
                 ) {
-                    Text(comment.content, style = MaterialTheme.typography.body1, color = Color(0xFF050505))
+                    Text(comment.content,  color = MaterialTheme.colorScheme.onBackground)
                 }
 
                 // Action buttons row
@@ -276,11 +279,10 @@ fun CommentCard(
                     modifier = Modifier.padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (comment.totalReply != null && comment.totalReply > 0) {
+                    if ( comment.totalReply > 0) {
                         Text(
                             text = if (!showReplies) "see more ${comment.totalReply} reply" else "hide reply",
-                            style = MaterialTheme.typography.body2,
-                            color = Color(0xFF1877F2),
+                            color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.clickable {
                                 if (!showReplies) {
                                     isLoadingReplies = true
@@ -299,8 +301,7 @@ fun CommentCard(
 
                     Text(
                         text = "Reply",
-                        style = MaterialTheme.typography.body2,
-                        color = Color(0xFF1877F2),
+                        color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.clickable {
                             showReplyInput = !showReplyInput
                         }
@@ -310,9 +311,9 @@ fun CommentCard(
                 if (showReplies) {
                     if (isLoadingReplies) {
                         Row(Modifier.padding(start = 40.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                            SkeletonBox(Modifier.size(16.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text("Loading replies...", style = MaterialTheme.typography.body2)
+                            Text("Loading replies...")
                         }
                     } else {
                         replies.forEach { reply ->
@@ -365,16 +366,16 @@ fun ReplyCard(reply: Reply, modifier: Modifier = Modifier) {
         Spacer(Modifier.width(8.dp))
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(reply.userName.toString(), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.body2, color = Color(0xFF050505))
+                Text(reply.userName.toString(), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.width(6.dp))
-                Text("· ${getTimeAgo(reply.time)}", style = MaterialTheme.typography.caption, color = Color(0xFF65676B))
+                Text("· ${getTimeAgo(reply.time)}", color = MaterialTheme.colorScheme.onSecondaryContainer)
             }
             Box(
                 modifier = Modifier
                     .background(Color(0xFFF0F2F5), shape = MaterialTheme.shapes.medium)
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
-                Text(reply.content, style = MaterialTheme.typography.body2, color = Color(0xFF050505))
+                Text(reply.content,  color = MaterialTheme.colorScheme.onBackground)
             }
         }
     }
@@ -388,16 +389,17 @@ fun CommentInputSection(
 ) {
     var commentText by remember { mutableStateOf("") }
 
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = Color.White,
-        elevation = 4.dp
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.secondaryContainer),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             // User avatar placeholder
             Icon(
@@ -409,6 +411,7 @@ fun CommentInputSection(
 
             Spacer(modifier = Modifier.width(8.dp))
 
+
             Column(modifier = Modifier.weight(1f)) {
                 OutlinedTextField(
                     value = commentText,
@@ -417,7 +420,7 @@ fun CommentInputSection(
                         Text(
                             "Write a comment...",
                             color = Color(0xFF65676B),
-                            style = MaterialTheme.typography.body1
+                            style = MaterialTheme.typography.bodyLarge
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -428,7 +431,7 @@ fun CommentInputSection(
                     ),
                     shape = MaterialTheme.shapes.medium,
                     maxLines = 4,
-                    textStyle = MaterialTheme.typography.body1.copy(color = Color(0xFF050505))
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF050505))
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -454,20 +457,61 @@ fun CommentInputSection(
                         modifier = Modifier.height(36.dp)
                     ) {
                         if (isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp,
-                                color = Color.White
-                            )
+                            SkeletonBox()
                         } else {
-                            Text("Post", style = MaterialTheme.typography.button)
+                            Text("Post", style = MaterialTheme.typography.labelLarge)
                         }
+
+            OutlinedTextField(
+                value = commentText,
+                onValueChange = { commentText = it },
+                placeholder = {
+                    Text(
+                        "Write a comment...",
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(0.7f),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    backgroundColor = Color(0xFFF0F2F5),
+                    focusedBorderColor = Color(0xFF1877F2),
+                    unfocusedBorderColor = Color(0xFFDDDDDD)
+                ),
+                shape = MaterialTheme.shapes.medium,
+                maxLines = 4,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = {
+                    if (commentText.isNotBlank()) {
+                        onSubmitComment(commentText.trim())
+                        commentText = ""
+
                     }
+                },
+                enabled = commentText.isNotBlank() && !isLoading,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color(0xFF1877F2),
+                    contentColor = Color.White,
+                    disabledBackgroundColor = Color(0xFFE4E6EA)
+                ),
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.height(36.dp)
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = Color.White
+                    )
+                } else {
+                    Text("Post", color = MaterialTheme.colorScheme.onBackground)
                 }
             }
         }
+        Divider()
     }
-}
+}}}}
 
 @Composable
 fun ReplyInputSection(
@@ -509,19 +553,15 @@ fun ReplyInputSection(
                         placeholder = {
                             Text(
                                 "Write a reply...",
-                                color = Color(0xFF65676B),
-                                style = MaterialTheme.typography.body2
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            backgroundColor = Color.White,
-                            focusedBorderColor = Color(0xFF1877F2),
-                            unfocusedBorderColor = Color(0xFFDDDDDD)
+                            backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
                         ),
                         shape = MaterialTheme.shapes.medium,
                         maxLines = 3,
-                        textStyle = MaterialTheme.typography.body2.copy(color = Color(0xFF050505))
                     )
                 }
             }
@@ -541,7 +581,7 @@ fun ReplyInputSection(
                     ),
                     modifier = Modifier.height(32.dp) // Ensure same height as Reply button
                 ) {
-                    Text("Cancel", style = MaterialTheme.typography.button.copy(fontSize = 12.sp))
+                    Text("Cancel", color = MaterialTheme.colorScheme.onBackground)
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -563,17 +603,12 @@ fun ReplyInputSection(
                     modifier = Modifier.height(32.dp)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(14.dp),
-                            strokeWidth = 2.dp,
-                            color = Color.White
-                        )
+                        SkeletonBox()
                     } else {
-                        Text("Reply", style = MaterialTheme.typography.button.copy(fontSize = 12.sp))
+                        Text("Reply", color = MaterialTheme.colorScheme.onBackground)
                     }
                 }
             }
         }
-    }
-}
+    }}
 

@@ -322,14 +322,6 @@ fun UserInfoDetail(user: UserProfileResponse?, modifier: Modifier) {
         item { Spacer(modifier = Modifier.height(16.dp))}
 
         item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
-        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
-        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
-        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
-        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
-        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
-        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
-        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
-        item { TagSkillSection(title = "Ngôn ngữ sử dụng:", tags = user?.skill)}
     }
 }
 

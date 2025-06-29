@@ -16,6 +16,7 @@ interface ReportPostService {
 
     @GET("report-post/{id}")
     suspend fun getPostDetailByReportId(@Path("id") id: String): Response<ReportedPostDetailResponse>
+
     @POST("report-post")
     suspend fun createReportPost(
         @Body body: Map<String, @JvmSuppressWildcards Any>

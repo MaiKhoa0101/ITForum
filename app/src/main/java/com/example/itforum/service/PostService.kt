@@ -11,6 +11,7 @@ import com.example.itforum.user.modelData.response.CommentResponse
 import com.example.itforum.user.modelData.response.CreatePostResponse
 import com.example.itforum.user.modelData.response.GetBookMarkResponse
 import com.example.itforum.user.modelData.response.GetVoteResponse
+import com.example.itforum.user.modelData.response.HideResponse
 import com.example.itforum.user.modelData.response.Post
 import com.example.itforum.user.modelData.response.PostCommentResponse
 import com.example.itforum.user.modelData.response.PostListResponse
@@ -82,7 +83,7 @@ interface PostService {
     @POST("comments/reply")
     suspend fun postReply(@Body postReply : PostReply): Response<PostReplyResponse>
     @PATCH("posts/hide/{id}")
-    suspend fun hidePost(@Path("id") postId: String): Response<Unit>
+    suspend fun hidePost(@Path("id") postId: String): Response<HideResponse>
     @POST("posts/bookmarks/{postId}/{userId}")
     suspend fun savedPost(@Path("postId")postId: String,@Path("userId")userId: String) : Response<BookMarkResponse>
     @GET("posts/bookmarks/{userId}")

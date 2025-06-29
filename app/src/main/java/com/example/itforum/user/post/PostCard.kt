@@ -67,10 +67,10 @@ fun PostCardWithVote(
     navHostController: NavHostController,
     sharedPreferences: SharedPreferences
 ) {
-    var isChange by remember { mutableStateOf(false) }
     var upvotes by remember { mutableStateOf(vote?.data?.upVoteData?.total?: 0) }
-    var isVote by remember { mutableStateOf(vote?.data?.userVote) }
     var isSavedPost by remember { mutableStateOf(isBookMark) }
+
+    var isVote by remember { mutableStateOf(vote?.data?.userVote) }
 
 
     var isChangeUp by remember { mutableStateOf(false) }
@@ -139,8 +139,8 @@ fun PostCardWithVote(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = {
-//                        post.id?.let { onReportClick(it) }
-                        navHostController.navigate("edit_post/${post.id}")
+                        post.id?.let { onReportClick(it) }
+//                        navHostController.navigate("edit_post/${post.id}")
                     }
                     ) {
                         Icon(
@@ -262,12 +262,11 @@ fun PostCardWithVote(
                 {
                     Icon(
                         imageVector = Icons.Default.Bookmark,
-                        contentDescription = "Bookmark",
+                        contentDescription = "Đánh dấu",
                         modifier = Modifier.size(30.dp),
                         tint = if (isSavedPost) Color.Green else MaterialTheme.colorScheme.onBackground
                     )
                 }
-
             }
         }
     }

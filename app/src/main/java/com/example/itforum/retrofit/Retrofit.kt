@@ -19,9 +19,8 @@ import com.example.itforum.service.NotificationService
 import com.example.itforum.service.PostService
 import com.example.itforum.service.ReportAccountService
 import com.example.itforum.service.SkillService
+import com.example.itforum.service.TagService
 import com.example.itforum.user.login.otp.AuthService
-
-//import com.example.itforum.service.AuthApi
 
 object RetrofitInstance {
     private const val SECOND_URL  = "http://192.168.1.216:4000"
@@ -30,9 +29,9 @@ object RetrofitInstance {
 //    private const val SECOND_URL = "https://192.168.1.216:4000"
 
     val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(60, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
         .build()
 
     val retrofit = Retrofit.Builder()
@@ -63,5 +62,5 @@ object RetrofitInstance {
 
 val followService: FollowService by lazy { retrofit.create(FollowService::class.java) }
     val authService: AuthService by lazy { retrofit.create(AuthService::class.java) }
-
+    val tagService: TagService by lazy { retrofit.create(TagService::class.java) }
 }
