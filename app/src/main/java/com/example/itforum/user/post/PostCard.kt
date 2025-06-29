@@ -139,7 +139,8 @@ fun PostCardWithVote(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = {
-                        post.id?.let { onReportClick(it) }
+//                        post.id?.let { onReportClick(it) }
+                        navHostController.navigate("edit_post/${post.id}")
                     }
                     ) {
                         Icon(

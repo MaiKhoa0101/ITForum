@@ -3,6 +3,7 @@ package com.example.itforum.user.post
 import android.content.SharedPreferences
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -61,6 +62,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -135,12 +137,12 @@ fun CreatePostPage(
         userViewModel.getUser()
     }
 
-    var imageUrls by remember  { mutableStateOf<List<Uri>?>(emptyList()) }
-    var videoUrls by remember  { mutableStateOf<List<Uri>?>(emptyList()) }
-    var applicationUrls by remember  { mutableStateOf<List<Uri>?>(emptyList()) }
+    var imageUrls = remember  { mutableStateOf<List<Uri>?>(emptyList()) }
+    var videoUrls = remember  { mutableStateOf<List<Uri>?>(emptyList()) }
+    var applicationUrls = remember  { mutableStateOf<List<Uri>?>(emptyList()) }
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
-    var tags by remember { mutableStateOf<List<String?>?>(emptyList()) }
+    var tags = remember { mutableStateOf<List<String>?>(emptyList()) }
     var isPublished by remember { mutableStateOf("public") }
     val focusManager = LocalFocusManager.current
 
@@ -172,12 +174,12 @@ fun CreatePostPage(
                     else {
                         postViewModel.createPost(
                             CreatePostRequest(
-                                imageUrls = imageUrls,
-                                videoUrls = videoUrls,
+                                imageUrls = imageUrls.value,
+                                videoUrls = videoUrls.value,
                                 userId = userInfo?.id ?: "",
                                 title = title,
                                 content = content,
-                                tags = tags,
+                                tags = tags.value,
                                 isPublished = isPublished
                             ),
                             context
@@ -220,11 +222,11 @@ fun CreatePostPage(
                         onChange = { content = it }
                     )
 
-                    AddTagPost(){tags = it}
+                    AddTagPost(tags = tags)
                     AddMedia(
-                        onImageChange = { imageUrls = it },
-                        onVideoChange = { videoUrls = it },
-                        onApplicationChange = { applicationUrls = it }
+                        imageUris = imageUrls,
+                        videoUris = videoUrls,
+                        applicationUris = applicationUrls
                     )
                     CustomPost()
                 }
@@ -399,7 +401,7 @@ fun WritePost(
 
 @Composable
 fun AddTagPost(
-    onChange: (List<String?>?) -> Unit
+    tags: MutableState<List<String>?>,
 ) {
 
     Column(
@@ -408,7 +410,7 @@ fun AddTagPost(
             .padding(10.dp)
             .clip(RoundedCornerShape(10.dp))
     ) {
-        var items by remember { mutableStateOf(listOf<String?>(null)) }
+//        var items by remember { mutableStateOf(listOf<String?>(null)) }
         var textTag by remember { mutableStateOf("") }
         var isError by remember { mutableStateOf(false) }
         var isFocused by remember { mutableStateOf(false) }
@@ -444,8 +446,7 @@ fun AddTagPost(
             IconButton(
                 onClick = {
                     if(textTag.trim().isNotEmpty()) {
-                        items = items + textTag
-                        onChange(items)
+                        tags.value = tags.value?.plus(textTag)
                         textTag = ""
                     }
                     else
@@ -481,15 +482,12 @@ fun AddTagPost(
             maxItemsInEachRow = 3,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ){
-            items.forEach { item ->
-                if (item != null) {
-                    TagChild(
-                        item,items
-                    )
-                    {newList->
-                        items = newList
-                        onChange(items)
-                    }
+            tags.value?.forEach { item ->
+                TagChild(
+                    item, tags.value!!
+                )
+                {newList->
+                    tags.value = newList
                 }
             }
         }
@@ -548,56 +546,52 @@ fun TagChild(
 
 @Composable
 fun AddMedia(
-    onImageChange: (List<Uri>) -> Unit = {},
-    onVideoChange: (List<Uri>) -> Unit = {},
-    onApplicationChange: (List<Uri>) -> Unit = {}
+    imageUris: MutableState<List<Uri>?>,
+    videoUris: MutableState<List<Uri>?>,
+    applicationUris: MutableState<List<Uri>?>,
 ) {
     val context = LocalContext.current
     val MAX_TOTAL_SIZE = 100 * 1024 * 1024L // 100MB
-    var imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
-    var videoUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
-    var applicationUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var mediaUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var mediaTypes by remember { mutableStateOf<List<String>>(emptyList()) }
-    var totalUsedMB = remember(mediaUris) {
-        mediaUris.sumOf {
-            context.contentResolver.openAssetFileDescriptor(it, "r")?.length ?: 0L
-        } / (1024 * 1024.0)
-    }
-    LaunchedEffect(imageUris, videoUris, applicationUris) {
-        mediaUris = imageUris + videoUris + applicationUris
+//    var totalUsedMB = remember(mediaUris) {
+//        mediaUris.sumOf {
+//            context.contentResolver.openAssetFileDescriptor(it, "r")?.length ?: 0L
+//        } / (1024 * 1024.0)
+//    }
+    LaunchedEffect(imageUris, videoUris, applicationUris, Unit) {
+        mediaUris = (imageUris.value ?: emptyList()) +
+                (videoUris.value ?: emptyList()) +
+                (applicationUris.value ?: emptyList())
     }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenMultipleDocuments()
     ) { uris: List<Uri> ->
         uris.forEach{uri ->
-            val size = context.contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: 0L
-            totalUsedMB += size/ (1024 * 1024.0)
-            if (totalUsedMB > (MAX_TOTAL_SIZE/ (1024 * 1024.0))) {
-                Toast.makeText(context, "Vượt quá dung lượng cho phép (100MB)", Toast.LENGTH_SHORT).show()
-                return@forEach
-            }
+//            val size = context.contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: 0L
+//            totalUsedMB += size/ (1024 * 1024.0)
+//            if (totalUsedMB > (MAX_TOTAL_SIZE/ (1024 * 1024.0))) {
+//                Toast.makeText(context, "Vượt quá dung lượng cho phép (100MB)", Toast.LENGTH_SHORT).show()
+//                return@forEach
+//            }
 
             val type =context.contentResolver.getType(uri) ?:""
             when{
                 type.startsWith("image") -> {
-                    imageUris = imageUris + uri
-
+                    imageUris.value = imageUris.value?.plus(uri)
                 }
                 type.startsWith("video") -> {
-                    videoUris = videoUris + uri
+                    videoUris.value = videoUris.value?.plus(uri)
                 }
                 type.startsWith("application") -> {
-                    applicationUris = applicationUris + uri
+                    applicationUris.value = applicationUris.value?.plus(uri)
                 }
             }
         }
 
-        onImageChange(imageUris)
-        onVideoChange(videoUris)
-        onApplicationChange(applicationUris)
-
-        mediaUris = imageUris + videoUris + applicationUris  // Nối list cũ với list mới
+        mediaUris = (imageUris.value ?: emptyList()) +
+                (videoUris.value ?: emptyList()) +
+                (applicationUris.value ?: emptyList())  // Nối list cũ với list mới
         mediaTypes = mediaUris.map { uri ->
             context.contentResolver.getType(uri) ?: "unknown"
         }
@@ -612,16 +606,16 @@ fun AddMedia(
             .BottomBorder()
     ) {
 
-        Text(
-            text = "Đã sử dụng: %.2f/100 MB".format(totalUsedMB),
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .padding(end = 10.dp)
-                .align(Alignment.End)
-        )
-        if(imageUris.isEmpty() && videoUris.isEmpty() && applicationUris.isEmpty()){
+//        Text(
+//            text = "Đã sử dụng: %.2f/100 MB".format(totalUsedMB),
+//            color = MaterialTheme.colorScheme.onBackground,
+//            fontSize = 16.sp,
+//            fontWeight = FontWeight.Bold,
+//            modifier = Modifier
+//                .padding(end = 10.dp)
+//                .align(Alignment.End)
+//        )
+        if(imageUris.value!!.isEmpty() && videoUris.value!!.isEmpty() && applicationUris.value!!.isEmpty()){
             IconButton(
                 onClick = {
                     launcher.launch(arrayOf("*/*"))  //Chọn tệp bất kì
@@ -652,32 +646,30 @@ fun AddMedia(
             }
         }else {
             Box(modifier = Modifier.fillMaxWidth()) {
-                if (imageUris.isNotEmpty()){
-                    imageUris.forEachIndexed(){index, uri ->
-                        ImgOrVdMedia("image",index, uri, imageUris, removeUri = {newList->
-                            imageUris = newList
-                            onImageChange(imageUris)
+                if (imageUris.value!!.isNotEmpty()){
+                    imageUris.value!!.forEachIndexed(){index, uri ->
+                        ImgOrVdMedia("image",index, uri, imageUris.value!!, removeUri = {newList->
+                            imageUris.value = newList
                         })
                     }
                 }
             }
             Box(modifier = Modifier.fillMaxWidth()) {
-                if (videoUris.isNotEmpty()) {
-                    videoUris.forEachIndexed() { index, uri ->
-                        ImgOrVdMedia("video", index, uri, videoUris, removeUri = {newList->
-                            videoUris = newList
-                            onVideoChange(videoUris)
+                if (videoUris.value!!.isNotEmpty()) {
+                    videoUris.value!!.forEachIndexed() { index, uri ->
+                        ImgOrVdMedia("video", index, uri, videoUris.value!!, removeUri = {newList->
+                            videoUris.value = newList
                         })
                     }
                 }
             }
-            if (applicationUris.isNotEmpty()){
+            if (applicationUris.value!!.isNotEmpty()){
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     maxItemsInEachRow = 3,
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ){
-                    applicationUris.forEach{ uri ->
+                    applicationUris.value!!.forEach{ uri ->
                         val name = context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                             if (cursor.moveToFirst()) {
                                 val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
@@ -685,9 +677,8 @@ fun AddMedia(
                             } else "kocoten"
                         }
                         if (name != null) {
-                            TagFile(name, applicationUris, Icons.Default.AttachFile, uri, removeTag = {newList ->
-                                applicationUris = newList as List<Uri>
-                                onApplicationChange(applicationUris)
+                            TagFile(name, applicationUris.value!!, Icons.Default.AttachFile, uri, removeTag = {newList ->
+                                applicationUris.value = newList as List<Uri>
                             })
                         }
                     }
@@ -734,31 +725,6 @@ fun ImgOrVdMedia(type: String, index: Int = 0, uri: Uri, ListUri: List<Uri>, rem
             .background(MaterialTheme.colorScheme.background)
     ) {
         if (type == "video") {
-//            val context = LocalContext.current
-//            val bitmap = remember(uri) {
-//                val retriever = MediaMetadataRetriever()
-//                try {
-//                    retriever.setDataSource(context, uri)
-//                    retriever.frameAtTime
-//                } catch (e: Exception) {
-//                    null
-//                } finally {
-//                    retriever.release()
-//                }
-//            }
-//            bitmap?.let {
-//                var painter = remember(it) {
-//                    BitmapPainter(it.asImageBitmap())
-//                }
-//                Image(
-//                    painter = painter,
-//                    contentDescription = "",
-//                    contentScale = ContentScale.Crop,
-//                    modifier = Modifier
-//                        .padding(3.dp)
-//                        .size(150.dp)
-//                )
-//            }
             VideoPlayer(uri)
         }else {
             Image(

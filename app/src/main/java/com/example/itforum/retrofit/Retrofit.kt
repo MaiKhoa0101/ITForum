@@ -25,7 +25,7 @@ import com.example.itforum.user.login.otp.AuthService
 
 object RetrofitInstance {
     private const val SECOND_URL  = "http://192.168.1.216:4000"
-    private const val URL_Phone = "http://192.168.1.170:4000"
+    private const val URL_Phone = "http://192.168.1.172:4000"
     //    private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
 //    private const val SECOND_URL = "https://192.168.1.216:4000"
 

@@ -66,6 +66,7 @@ import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
 
 import com.example.itforum.user.complaint.ComplaintPage
 import com.example.itforum.user.news.DetailNewsPage
+import com.example.itforum.user.post.EditPostPage
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.post.viewmodel.CommentViewModel
 import com.example.itforum.user.post.viewmodel.PostViewModel
@@ -104,6 +105,7 @@ fun SplashScreen(
     LaunchedEffect(Unit) {
         val token = sharedPreferences.getString("access_token", null)
         val role = sharedPreferences.getString("role", null)
+        role?.let { Log.d("splash", it) }
         var destination = "login"
         if (token != null && !isTokenExpired(token)) {
             if (role != null) {
@@ -133,10 +135,10 @@ fun SplashScreen(
 }
 @Composable
 fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostController, modifier: Modifier, onToggleTheme: () -> Unit, darkTheme: Boolean = false){
-    var postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
+    val postViewModel: PostViewModel = viewModel(factory = viewModelFactory {
         initializer { PostViewModel(sharedPreferences) }
     })
-    var commentViewModel : CommentViewModel =  viewModel(factory = viewModelFactory {
+    val commentViewModel : CommentViewModel =  viewModel(factory = viewModelFactory {
         initializer { CommentViewModel(sharedPreferences) }})
     NavHost(navHostController, startDestination = "splash") {
         composable ("home") {
@@ -336,6 +338,23 @@ fun BodyRoot(sharedPreferences: SharedPreferences, navHostController: NavHostCon
             }
 
             CreatePostPage(modifier, navHostController, sharedPreferences, postViewModel)
+        }
+
+        composable("edit_post/{postId}") { backStackEntry ->
+            val postId = backStackEntry.arguments?.getString("postId")
+            val context = LocalContext.current
+            if (postId != null) {
+                LaunchedEffect(postId) {
+                    logScreenEnter(context, "edit_post_$postId") // Ghi nhận screen_view
+                }
+
+                DisposableEffect(postId) {
+                    onDispose {
+                        logScreenExit(context, "edit_post_$postId") // Ghi nhận thời gian ở lại
+                    }
+                }
+                EditPostPage(modifier, navHostController, sharedPreferences, postId, postViewModel)
+            }
         }
 
         composable("detail_post/{postId}") { backStackEntry ->
