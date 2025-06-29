@@ -491,7 +491,6 @@ class PostViewModel(
         viewModelScope.launch {
             try {
                 val res = votePost(postId, type, index)
-                Log.d("index",index.toString())
                 if (res != null && index>=0) {
                     val currentList = _postsWithVotes.value.toMutableList()
                     val currentItem = currentList[index]
@@ -571,6 +570,130 @@ class PostViewModel(
                 val currentList = _postsWithVotes.value.toMutableList()
                 currentList.removeAll { it.post.id == postId }
                 _postsWithVotes.value = currentList
+            }
+        }
+    }
+
+    fun updatePost(postId: String, createPostRequest: CreatePostRequest, context: Context){
+        viewModelScope.launch {
+            _uiStateCreate.value = UiState.Loading
+            _uploadProgress.value = 0f
+            try {
+                Log.d("PostViewModel", "Request: $createPostRequest")
+                var uploadedFilesRef = AtomicInteger(0)
+                val totalFiles = (createPostRequest.imageUrls?.size ?: 0) + (createPostRequest.videoUrls?.size ?: 0)
+                Log.d("totalFiles", totalFiles.toString())
+                val oldImageUrlss: List<Uri> = createPostRequest.imageUrls?.mapNotNull {
+                    if (it.scheme == "http" || it.scheme == "https") it else null
+                } ?: emptyList()
+                val newImageUrlss: List<Uri> = createPostRequest.imageUrls?.mapNotNull {
+                    if (it.scheme != "http" && it.scheme != "https") it else null
+                } ?: emptyList()
+                Log.d("newImageUrlss", newImageUrlss.toString())
+                val oldVideoUrlss: List<Uri> = createPostRequest.videoUrls?.mapNotNull {
+                    if (it.scheme == "http" || it.scheme == "https") it else null
+                } ?: emptyList()
+                val newVideoUrlss: List<Uri> = createPostRequest.videoUrls?.mapNotNull {
+                    if (it.scheme != "http" && it.scheme != "https") it else null
+                } ?: emptyList()
+                Log.d("newImageUrlss", newVideoUrlss.toString())
+
+                val newImageUrls: List<MultipartBody.Part>
+                val newVideoUrls: List<MultipartBody.Part>
+                withContext(Dispatchers.IO) {
+                    newImageUrls = prepareAndUploadFiles(
+                        context,
+                        newImageUrlss,
+                        "newImageUrls",
+                        totalFiles,
+                        uploadedFilesRef
+                    )
+
+                    newVideoUrls = prepareAndUploadFiles(
+                        context,
+                        newVideoUrlss,
+                        "newVideoUrls",
+                        totalFiles,
+                        uploadedFilesRef
+                    )
+                }
+
+                // Chỉ tạo MultipartBody.Part cho các trường không null
+                val title = createPostRequest.title?.let {
+                    MultipartBody.Part.createFormData("title", it)
+                }
+                val content = createPostRequest.content?.let {
+                    MultipartBody.Part.createFormData("content", it)
+                }
+                val isPublished = createPostRequest.isPublished?.let {
+                    MultipartBody.Part.createFormData("isPublished", it)
+                }
+                val tags = createPostRequest.tags?.mapNotNull  {
+                    it?.let { it1 -> MultipartBody.Part.createFormData("tags", it1) }
+                }
+                val oldImageUrlss1 = oldImageUrlss.map {
+                    it.let { it1 -> MultipartBody.Part.createFormData("imageUrls", it1.toString()) }
+                }
+                val oldVideoUrlss1 = oldVideoUrlss.map {
+                    it.let { it1 -> MultipartBody.Part.createFormData("videoUrls", it1.toString()) }
+                }
+
+                val response =
+                    newVideoUrls.let {
+                        newImageUrls.let { it1 ->
+                            tags?.let { it2 ->
+                                RetrofitInstance.postService.updatePost(
+                                    postId = postId,
+                                    title = title,
+                                    content = content,
+                                    tags = it2,
+                                    isPublished = isPublished,
+                                    imageUrls = oldImageUrlss1,
+                                    videoUrls = oldVideoUrlss1,
+                                    newImageUrls = it1,
+                                    newVideoUrls = it
+                                )
+                            }
+                        }
+                    }
+
+
+                if (response != null) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body()
+                        Log.d("PostViewModel", "Success Response: $responseBody")
+                        _uiStateCreate.value = UiState.Success(
+                            "Sửa bài thành công"
+                        )
+                        _uploadProgress.value = 0f
+                        delay(500) // Cho Compose thời gian phản ứng trước khi đổi trạng thái
+                        _uiStateCreate.value = UiState.Idle
+                    } else {
+                        // Get error details from response body
+                        val errorBody = response.errorBody()?.string()
+                        Log.e("PostViewModel", "Error Response Body: $errorBody")
+
+                        val errorMessage = when (response.code()) {
+                            400 -> "Dữ liệu không hợp lệ: $errorBody"
+                            404 -> "Không tìm thấy người dùng"
+                            500 -> "Lỗi server: $errorBody"
+                            else -> "Lỗi không xác định (${response.code()}): $errorBody"
+                        }
+
+                        showError(errorMessage)
+                        _uiStateCreate.value = UiState.Error(errorMessage)
+                    }
+                }
+            } catch (e: IOException) {
+                val errorMsg = "Lỗi kết nối mạng: ${e.localizedMessage}"
+                Log.e("PostViewModel", errorMsg, e)
+                _uiStateCreate.value = UiState.Error(errorMsg)
+                showError("Không thể kết nối máy chú, vui lòng kiểm tra mạng.")
+            } catch (e: Exception) {
+                val errorMsg = "Lỗi hệ thống: ${e.message ?: e.localizedMessage}"
+                Log.e("PostViewModel", errorMsg, e)
+                _uiStateCreate.value = UiState.Error(errorMsg)
+                showError("Lỗi bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
             }
         }
     }

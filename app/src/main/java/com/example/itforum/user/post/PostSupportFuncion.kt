@@ -612,6 +612,7 @@ fun OptionDialog(
     showDialog: Boolean,
     onDismiss: () -> Unit,
     onShowReport: () -> Unit,
+    onEditPost: () -> Unit,
     onDeletePost: () -> Unit,
     isMyPost: Boolean = false
 ) {
@@ -628,9 +629,18 @@ fun OptionDialog(
                         onClick = onShowReport,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Report")
+                        Text("Tố cáo")
                     }
-
+                    Button(
+                        onClick = onEditPost,
+                        enabled = isMyPost,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            Color.Yellow
+                        )
+                    ) {
+                        Text("Sửa bài viết")
+                    }
                     Button(
                         onClick = onDeletePost,
                         enabled = isMyPost,
@@ -639,7 +649,7 @@ fun OptionDialog(
                            Color.Red
                         )
                     ) {
-                        Text("Delete")
+                        Text("Xóa")
                     }
                 }
             },

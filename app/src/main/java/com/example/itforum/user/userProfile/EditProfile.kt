@@ -41,11 +41,17 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -60,12 +66,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -229,6 +237,11 @@ fun EditProfileBody(modifier: Modifier, user: UserProfileResponse?, viewModel: E
             FieldTagText(
                 placeHolder = "C++",
                 text = tempSkills,
+                shape = RoundedCornerShape(7.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer
+                ),
+                textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground),
                 expanded = expandedFilterField,
                 hasFocus = hasFocus,
                 onFocusChange = { focus ->
@@ -240,7 +253,7 @@ fun EditProfileBody(modifier: Modifier, user: UserProfileResponse?, viewModel: E
                     if(filterOptions.isNotEmpty()) {
                         filterOptions.forEach { skill ->
                             DropdownMenuItem(
-                                text = { skill.name?.let { Text(it) } },
+                                text = { skill.name?.let { Text(it, color = MaterialTheme.colorScheme.onBackground) } },
                                 onClick = {
                                     tempSkills = skill.name!!
                                     expandedFilterField = false
@@ -360,16 +373,25 @@ fun Title(title: String) {
 
 @Composable
 fun AddButton(tempSkills: String, onAdd: (String) -> Unit){
-    Icon(
-        imageVector = Icons.Default.Add,
-        contentDescription = "Add Skill",
+    IconButton(
+        onClick = {onAdd(tempSkills)},
         modifier = Modifier
-            .size(50.dp)
-            .background(Color.Gray)
-            .clickable{
-            onAdd(tempSkills)
-        }
-    )
+            .padding(horizontal = 10.dp)
+            .size(54.dp)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                shape = RoundedCornerShape(7.dp)
+            )
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Nút add tag",
+            modifier = Modifier
+                .size(40.dp),
+            tint = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    }
 }
 
 
@@ -581,6 +603,9 @@ fun FieldText(
 fun FieldTagText(
     placeHolder: String,
     text: String,
+    shape: Shape = TextFieldDefaults.shape,
+    colors: TextFieldColors = TextFieldDefaults.colors(),
+    textStyle: TextStyle = LocalTextStyle.current,
     expanded: Boolean,
     hasFocus: Boolean,
     onFilterChange: @Composable () -> Unit,
@@ -588,12 +613,14 @@ fun FieldTagText(
     onDismiss: () -> Unit,
     onTextChange: (String) -> Unit
 ) {
-
     Box {
-        TextField(
+        OutlinedTextField(
             value = text,
-            placeholder = { Text(text = placeHolder) },
+            placeholder = { Text(placeHolder, color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp) },
             onValueChange = onTextChange,
+            shape = shape,
+            colors = colors,
+            textStyle = textStyle,
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .onFocusChanged { focusState ->

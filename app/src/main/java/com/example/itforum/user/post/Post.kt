@@ -294,6 +294,10 @@ fun PostListScreen(
                     showReportDialog = true
                     showOptionDialog = false
                 },
+                onEditPost = {
+                    showOptionDialog = false
+                    navHostController.navigate("edit_post/${selectedPostId}")
+                },
                 onDeletePost = {
                     showDeleteDialog = true
                     showOptionDialog =  false

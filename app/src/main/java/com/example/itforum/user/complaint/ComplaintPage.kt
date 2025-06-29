@@ -238,7 +238,7 @@ fun AddImage(
                     type = "image",
                     index = 0,
                     uri = imageUri!!,
-                    ListUri = listOf(imageUri!!),
+                    listUri = listOf(imageUri!!),
                     removeUri = {
                         imageUri = null
                     }

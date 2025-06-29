@@ -73,6 +73,7 @@ import com.example.itforum.user.home.tag.ViewModel.TagViewModel
 import com.example.itforum.user.news.DetailNewsPage
 import com.example.itforum.user.post.CommentDialogWrapper
 import com.example.itforum.user.post.ConfirmDeleteDialog
+import com.example.itforum.user.post.EditPostPage
 import com.example.itforum.user.post.OptionDialog
 import com.example.itforum.user.post.PostCommentScreen
 import com.example.itforum.user.post.viewmodel.CommentViewModel
@@ -347,7 +348,6 @@ fun StartRoot(navHostController: NavHostController, sharedPreferences: SharedPre
                     }
                 }
             )
-
         }
 
         composable("register") {
@@ -476,7 +476,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
         }
 
         composable("tag") {
-            TagScreen(tagViewModel)
+            TagScreen(tagViewModel, modifier)
         }
         composable("login"){
             return@composable
@@ -659,6 +659,25 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
             CreatePostPage(modifier, navHostController, sharedPreferences, postViewModel,tagViewModel)
         }
 
+        composable("edit_post/{postId}") { backStackEntry ->
+            val postId = backStackEntry.arguments?.getString("postId")
+            val context = LocalContext.current
+
+            if (postId != null) {
+                LaunchedEffect(postId) {
+                    logScreenEnter(context, "detail_news_$postId") // Ghi nhận screen_view
+                }
+
+                DisposableEffect(postId) {
+                    onDispose {
+                        logScreenExit(context, "detail_news_$postId") // Ghi nhận thời gian ở lại
+                    }
+                }
+
+                EditPostPage(modifier, navHostController, sharedPreferences, postId, postViewModel, tagViewModel )
+            }
+        }
+
         composable("detail_post/{postId}") { backStackEntry ->
             val context = LocalContext.current
 
@@ -722,6 +741,10 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
                     onShowReport = {
                         showReportDialog = true
                         showOptionDialog = false
+                    },
+                    onEditPost = {
+                        showOptionDialog = false
+                        navHostController.navigate("edit_post/${selectedPostId}")
                     },
                     onDeletePost = {
                         showDeleteDialog = true

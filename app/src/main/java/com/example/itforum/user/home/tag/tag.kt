@@ -28,18 +28,20 @@ import androidx.compose.runtime.getValue
 import com.example.itforum.user.modelData.response.TagItem
 
 @Composable
-fun TagScreen(tagViewModel: TagViewModel ) {
+fun TagScreen(
+    tagViewModel: TagViewModel,
+    modifier: Modifier
+) {
     val tagList by tagViewModel.tagList.collectAsState()
 
     LaunchedEffect(Unit) {
         tagViewModel.getAllTags()
     }
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding( top = 70.dp)
     ) {
-        item { Spacer(Modifier.height(110.dp)) }
         item {
             Spacer(Modifier.height(10.dp))
             Text(text = "Trending Tags", fontWeight = FontWeight.Bold, fontSize = 30.sp)

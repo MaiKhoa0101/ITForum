@@ -140,6 +140,7 @@ fun PostCardWithVote(
                 ) {
                     IconButton(onClick = {
                         post.id?.let { onReportClick(it) }
+//                        navHostController.navigate("edit_post/${post.id}")
                     }
                     ) {
                         Icon(
