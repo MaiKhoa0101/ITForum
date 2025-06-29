@@ -80,8 +80,9 @@ fun PostCommentScreen(
                     SkeletonBox()
                 }
             }
+
             is UiStateComment.Error -> {
-                println ("Binh luan bi loi")
+                println("Binh luan bi loi")
                 Box(
                     modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
@@ -92,6 +93,7 @@ fun PostCommentScreen(
                     )
                 }
             }
+
             else -> {
                 println("Co binh luan")
                 // Comments list takes available space
@@ -418,7 +420,7 @@ fun CommentInputSection(
                         Text(
                             "Write a comment...",
                             color = Color(0xFF65676B),
-                            style = MaterialTheme.typography.body1
+                            style = MaterialTheme.typography.bodyLarge
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -429,7 +431,7 @@ fun CommentInputSection(
                     ),
                     shape = MaterialTheme.shapes.medium,
                     maxLines = 4,
-                    textStyle = MaterialTheme.typography.body1.copy(color = Color(0xFF050505))
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF050505))
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -457,7 +459,7 @@ fun CommentInputSection(
                         if (isLoading) {
                             SkeletonBox()
                         } else {
-                            Text("Post", style = MaterialTheme.typography.button)
+                            Text("Post", style = MaterialTheme.typography.labelLarge)
                         }
 
             OutlinedTextField(
@@ -509,7 +511,7 @@ fun CommentInputSection(
         }
         Divider()
     }
-}
+}}}}
 
 @Composable
 fun ReplyInputSection(
@@ -608,6 +610,5 @@ fun ReplyInputSection(
                 }
             }
         }
-    }
-}
+    }}
 

@@ -134,6 +134,30 @@ fun SplashScreen(
             else popUpTo("splash") { inclusive = true }
         }
     }
+//    LaunchedEffect(Unit) {
+//        val token = sharedPreferences.getString("access_token", null)
+//        val role = sharedPreferences.getString("role", null)
+//
+//        val destination = if (token != null && !isTokenExpired(token)) {
+//            Log.d("Splash", "Role = $role")
+//            if (role == "admin") "admin_root" else "home"
+//        } else {
+//            // Xóa token nếu đã hết hạn
+//            sharedPreferences.edit().remove("access_token").apply()
+//            "login"
+//        }
+//
+//        Log.d("Splash", "Role = $role → Chuyển đến $destination")
+//
+//        navController.navigate(destination) {
+//            if (destination == "login") {
+//                popUpTo(0) { inclusive = true } // clear all
+//                launchSingleTop = true
+//            } else {
+//                popUpTo("splash") { inclusive = true }
+//            }
+//        }
+//    }
 
     // Giao diện loading đơn giản
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -419,16 +443,17 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
         initializer { CommentViewModel(sharedPreferences) }})
     var tagViewModel : TagViewModel = viewModel(factory = viewModelFactory {
         initializer { TagViewModel() }})
-    NavHost(navHostController, startDestination = "home") {
     val startDestination = if (role == "admin") {
         "admin_root"
     } else {
         "home"
     }
+    NavHost(navHostController, startDestination = startDestination) {
+
     println("role "+ role)
-    NavHost(navHostController,
-        startDestination = startDestination,
-    ) {
+//    NavHost(navHostController,
+//        startDestination = startDestination,
+//    ) {
 
         composable ("admin_root"){
             AdminScreen(sharedPreferences)

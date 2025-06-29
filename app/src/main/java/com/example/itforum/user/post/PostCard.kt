@@ -72,6 +72,7 @@ fun PostCardWithVote(
 
     var isVote by remember { mutableStateOf(vote?.data?.userVote) }
 
+
     var isChangeUp by remember { mutableStateOf(false) }
     var isChangeDown by remember { mutableStateOf(false) }
 

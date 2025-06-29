@@ -491,6 +491,7 @@ class PostViewModel(
         viewModelScope.launch {
             try {
                 val res = votePost(postId, type, index)
+                Log.d("index",index.toString())
                 if (res != null && index>=0) {
                     val currentList = _postsWithVotes.value.toMutableList()
                     val currentItem = currentList[index]
