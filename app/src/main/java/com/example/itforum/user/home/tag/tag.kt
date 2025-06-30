@@ -40,7 +40,7 @@ fun TagScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 30.dp, vertical = 50.dp)
+            .padding( top = 70.dp)
     ) {
         item {
             Spacer(Modifier.height(10.dp))

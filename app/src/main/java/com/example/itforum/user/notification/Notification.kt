@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
@@ -67,16 +69,24 @@ fun NotificationPage(modifier: Modifier, sharedPreferences: SharedPreferences, n
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.primaryContainer)
     ) {
-        Spacer(modifier = Modifier.height(30.dp))
-        Text(
-            text = "Thông báo",
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 13.dp, vertical = 10.dp)
-                .fillMaxWidth(),
-            textAlign = TextAlign.Center
-        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .statusBarsPadding() // ✅ đẩy xuống khỏi vùng camera/notch
+                .padding(vertical = 12.dp), // ✅ nhỏ gọn lại
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Thông báo",
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center
+            )
+        }
+
 
         Column(
             modifier = modifier

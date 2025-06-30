@@ -152,12 +152,12 @@ fun SearchScreen(
             Tab(
                 selected = selectedTabIndex == 0,
                 onClick = { selectedTabIndex = 0 },
-                text = { Text("By Title") }
+                text = { Text("Theo tiêu đề") }
             )
             Tab(
                 selected = selectedTabIndex == 1,
                 onClick = { selectedTabIndex = 1 },
-                text = { Text("By Tags") }
+                text = { Text("Theo tags") }
             )
         }
 
