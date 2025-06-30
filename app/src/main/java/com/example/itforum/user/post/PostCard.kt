@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,7 +76,12 @@ fun PostCardWithVote(
 
     var isChangeUp by remember { mutableStateOf(false) }
     var isChangeDown by remember { mutableStateOf(false) }
-
+    LaunchedEffect(isVote) {
+        if(isVote == "upvote")
+            isChangeUp = true
+        else if(isVote == "downvote")
+            isChangeDown = true
+    }
 
     Card(
         elevation = 4.dp,

@@ -108,6 +108,16 @@ fun DetailPostPage(
     LaunchedEffect(postId) {
         viewModel.fetchPostById(postId)
     }
+    LaunchedEffect(postWithVote) {
+        upvotes = postWithVote?.vote?.data?.upVoteData?.total ?: 0
+        isVote = postWithVote?.vote?.data?.userVote
+    }
+    LaunchedEffect(isVote) {
+        if(isVote == "upvote")
+            isChangeUp = true
+        else if(isVote == "downvote")
+            isChangeDown = true
+    }
 
     if (postWithVote != null && postWithVote!!.post.isHidden == false) {
         Box(

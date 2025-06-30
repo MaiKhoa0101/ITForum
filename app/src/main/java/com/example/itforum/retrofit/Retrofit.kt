@@ -25,7 +25,7 @@ import com.example.itforum.user.login.otp.AuthService
 object RetrofitInstance {
     private const val SECOND_URL  = "http://192.168.1.216:4000"
     private const val URL_Phone = "http://192.168.1.172:4000"
-    //    private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
+        private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
 //    private const val SECOND_URL = "https://192.168.1.216:4000"
 
     val okHttpClient = OkHttpClient.Builder()
@@ -36,7 +36,7 @@ object RetrofitInstance {
 
     val retrofit = Retrofit.Builder()
 //        .baseUrl(BASE_URL)
-        .baseUrl(URL_Phone)
+        .baseUrl(BASE_URL)
 //        .baseUrl(SECOND_URL)
         .client(okHttpClient) // ← Đảm bảo dùng client có timeout
         .addConverterFactory(GsonConverterFactory.create())
@@ -54,7 +54,7 @@ object RetrofitInstance {
     val api: AnalyticsApi by lazy {
         Retrofit.Builder()
 //            .baseUrl(SECOND_URL)
-            .baseUrl(URL_Phone)
+            .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(AnalyticsApi::class.java)

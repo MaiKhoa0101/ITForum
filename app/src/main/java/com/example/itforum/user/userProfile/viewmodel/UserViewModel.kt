@@ -90,7 +90,6 @@ class UserViewModel (sharedPreferences: SharedPreferences) : ViewModel() {
                 _uiState.value = UiState.FetchFail(e.message ?: "Lỗi hệ thống, vui lòng thử lại")
                 showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
             }
-
         }
     }
 

@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -68,6 +69,7 @@ import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
 import com.example.itforum.user.ReportPost.view.ReportPostDialog
 
 import com.example.itforum.user.complaint.ComplaintPage
+import com.example.itforum.user.complaint.SuccessDialog
 import com.example.itforum.user.home.tag.TagScreen
 import com.example.itforum.user.home.tag.ViewModel.TagViewModel
 import com.example.itforum.user.news.DetailNewsPage
@@ -82,6 +84,7 @@ import com.example.itforum.user.userProfile.OtherUserProfileScreen
 import com.example.itforum.user.userProfile.UserProfileScreen
 import com.example.itforum.user.setting.Setting
 import com.example.itforum.user.skeleton.SkeletonBox
+import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 import com.example.itforum.user.utilities.chat.ChatAIApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -111,11 +114,35 @@ fun SplashScreen(
     navController: NavHostController,
     sharedPreferences: SharedPreferences
 ) {
-    LaunchedEffect(Unit) {
+    val userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
+        initializer { UserViewModel(sharedPreferences) }
+    })
+    userViewModel.getUser()
+    val user by userViewModel.user.collectAsState()
+    var showSuccessDialog by remember { mutableStateOf(false) }
+
+    if (showSuccessDialog && user?.isBanned == true) {
+        SuccessDialog(
+            title = "Thông báo!!!",
+            color = Color.Red,
+            message = "Tài khoản của bạn đã bị khóa đến ngày ${user?.bannedUntil}.",
+            nameButton = "Đóng",
+            onDismiss = {
+                showSuccessDialog = false
+                navController.navigate("login") {
+                    popUpTo("splash") { inclusive = true }
+                }
+            }
+        )
+    }
+    LaunchedEffect(Unit, user) {
         val token = sharedPreferences.getString("access_token", null)
         val role = sharedPreferences.getString("role", null)
         var destination = "login"
         if (token != null && !isTokenExpired(token)) {
+            if(user?.isBanned == true){
+                showSuccessDialog = true
+            }
             if (role != null) {
                 destination = if (role == "admin") "admin_root" else "home"
                 navController.navigate(destination) {

@@ -17,6 +17,7 @@ data class UserProfileResponse(
     val certificate: List<Certificate> = emptyList(),
     val skill: List<String> = emptyList(),
     val createdAt: String = "",
+    val bannedUntil: String? = null
 )
 
 
