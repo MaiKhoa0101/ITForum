@@ -34,6 +34,7 @@ import com.example.itforum.utilities.DrawerContent
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
@@ -42,6 +43,8 @@ import kotlinx.coroutines.launch
 //import com.example.itforum.admin.
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -57,6 +60,8 @@ import com.example.itforum.user.FilterWords.ToastHelper
 import com.google.firebase.messaging.FirebaseMessaging
 import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
 import com.example.itforum.user.ReportPost.view.CreateReportPostScreen
+import com.example.itforum.user.complaint.SuccessDialog
+import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.tasks.await
 
@@ -111,12 +116,37 @@ fun Root(sharedPreferences:SharedPreferences) {
 
     val token = sharedPreferences.getString("access_token", null)
     val role = sharedPreferences.getString("role", null)
+    val userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
+        initializer { UserViewModel(sharedPreferences) }
+    })
+    userViewModel.getUser()
+    val user by userViewModel.user.collectAsState()
+    var showSuccessDialog by remember { mutableStateOf(false) }
 
+    if (showSuccessDialog && user?.isBanned == true) {
+        SuccessDialog(
+            title = "Thông báo!!!",
+            color = Color.Red,
+            message = "Tài khoản của bạn đã bị khóa đến ngày ${user?.bannedUntil}.",
+            nameButton = "Đóng",
+            onDismiss = {
+                showSuccessDialog = false
+                sharedPreferences.edit().remove("role").apply()
+                sharedPreferences.edit().remove("access_token").apply()
+                sharedPreferences.edit().remove("loginType").apply()
+                navHostController.navigate("login") {
+                    popUpTo("splash") { inclusive = true }
+                }
+            }
+        )
+    }
     ITForumTheme(darkTheme = darkTheme)
     {
         if (isTokenExpired(token.toString())) {
             println("Token is expired")
             StartRoot(navHostController, sharedPreferences)
+        } else if(user?.isBanned == true){
+            showSuccessDialog = true
         } else {
             println("Token is not expired")
             ModalNavigationDrawer(

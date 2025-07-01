@@ -1,27 +1,18 @@
 package com.example.itforum.user.root
 
-import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.util.Base64
-import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -61,7 +52,6 @@ import com.example.itforum.utilities.note.NotesApp
 
 import com.example.itforum.admin.adminComplaint.ManagementComplaintDetailScreen
 import com.example.itforum.admin.adminComplaint.ManagementComplaintScreen
-import com.example.itforum.admin.adminCrashlytic.UserSession.email
 import com.example.itforum.service.AuthRepository
 import com.example.itforum.user.Analytics.logScreenEnter
 import com.example.itforum.user.Analytics.logScreenExit
@@ -69,11 +59,9 @@ import com.example.itforum.user.ReportAccount.view.CreateReportAccountScreen
 import com.example.itforum.user.ReportPost.view.ReportPostDialog
 
 import com.example.itforum.user.complaint.ComplaintPage
-import com.example.itforum.user.complaint.SuccessDialog
 import com.example.itforum.user.home.tag.TagScreen
 import com.example.itforum.user.home.tag.ViewModel.TagViewModel
 import com.example.itforum.user.news.DetailNewsPage
-import com.example.itforum.user.post.CommentDialogWrapper
 import com.example.itforum.user.post.ConfirmDeleteDialog
 import com.example.itforum.user.post.EditPostPage
 import com.example.itforum.user.post.OptionDialog
@@ -83,12 +71,8 @@ import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.userProfile.OtherUserProfileScreen
 import com.example.itforum.user.userProfile.UserProfileScreen
 import com.example.itforum.user.setting.Setting
-import com.example.itforum.user.skeleton.SkeletonBox
-import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 import com.example.itforum.user.utilities.chat.ChatAIApp
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.example.itforum.user.utilities.search.SearchViewModel
@@ -108,94 +92,11 @@ fun isTokenExpired(token: String): Boolean {
         true // lỗi -> coi như token không hợp lệ
     }
 }
-@SuppressLint("CommitPrefEdits")
-@Composable
-fun SplashScreen(
-    navController: NavHostController,
-    sharedPreferences: SharedPreferences
-) {
-    val userViewModel: UserViewModel = viewModel(factory = viewModelFactory {
-        initializer { UserViewModel(sharedPreferences) }
-    })
-    userViewModel.getUser()
-    val user by userViewModel.user.collectAsState()
-    var showSuccessDialog by remember { mutableStateOf(false) }
 
-    if (showSuccessDialog && user?.isBanned == true) {
-        SuccessDialog(
-            title = "Thông báo!!!",
-            color = Color.Red,
-            message = "Tài khoản của bạn đã bị khóa đến ngày ${user?.bannedUntil}.",
-            nameButton = "Đóng",
-            onDismiss = {
-                showSuccessDialog = false
-                navController.navigate("login") {
-                    popUpTo("splash") { inclusive = true }
-                }
-            }
-        )
-    }
-    LaunchedEffect(Unit, user) {
-        val token = sharedPreferences.getString("access_token", null)
-        val role = sharedPreferences.getString("role", null)
-        var destination = "login"
-        if (token != null && !isTokenExpired(token)) {
-            if(user?.isBanned == true){
-                showSuccessDialog = true
-            }
-            if (role != null) {
-                destination = if (role == "admin") "admin_root" else "home"
-                navController.navigate(destination) {
-                    popUpTo("splash") { inclusive = true }
-                }
-            }
-        } else {
-            val remove = sharedPreferences.edit().remove("access_token")
-        }
-        Log.d("splash1",destination)
-        navController.navigate(destination) {
-            if(destination == "login"){
-                Log.d("splash2",destination)
-                popUpTo(0) { inclusive = true }  // xóa hết stack
-                launchSingleTop = true           // tránh tạo bản sao nếu đã ở login
-            }
-            else popUpTo("splash") { inclusive = true }
-        }
-    }
-//    LaunchedEffect(Unit) {
-//        val token = sharedPreferences.getString("access_token", null)
-//        val role = sharedPreferences.getString("role", null)
-//
-//        val destination = if (token != null && !isTokenExpired(token)) {
-//            Log.d("Splash", "Role = $role")
-//            if (role == "admin") "admin_root" else "home"
-//        } else {
-//            // Xóa token nếu đã hết hạn
-//            sharedPreferences.edit().remove("access_token").apply()
-//            "login"
-//        }
-//
-//        Log.d("Splash", "Role = $role → Chuyển đến $destination")
-//
-//        navController.navigate(destination) {
-//            if (destination == "login") {
-//                popUpTo(0) { inclusive = true } // clear all
-//                launchSingleTop = true
-//            } else {
-//                popUpTo("splash") { inclusive = true }
-//            }
-//        }
-//    }
-
-    // Giao diện loading đơn giản
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        SkeletonBox()
-    }
-}
 
 @Composable
 fun StartRoot(navHostController: NavHostController, sharedPreferences: SharedPreferences) {
-    NavHost(navHostController, startDestination = "splash") {
+    NavHost(navHostController, startDestination = "login") {
         composable("forgot_password") {
 
             val coroutineScope = rememberCoroutineScope()
@@ -243,9 +144,9 @@ fun StartRoot(navHostController: NavHostController, sharedPreferences: SharedPre
             IntroScreen(navHostController)
         }
 
-        composable("splash") {
-            SplashScreen(navHostController, sharedPreferences)
-        }
+//        composable("splash") {
+//            SplashScreen(navHostController, sharedPreferences)
+//        }
 
         composable("login") {
             val context = LocalContext.current
