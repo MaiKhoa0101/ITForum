@@ -161,28 +161,5 @@ fun MessageBubble(message: Message) {
     }
 }
 
-
-//@Composable
-//fun MessageBubble(message: Message) {
-//    val isUser = message.isUser
-//    Row(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(4.dp),
-//        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
-//    ) {
-//        Box(
-//            modifier = Modifier
-//                .background(
-//                    if (isUser) Color(0xFFD3D3D3) else Color(0xFFE0E0E0),
-//                    RoundedCornerShape(16.dp)
-//                )
-//                .padding(12.dp)
-//        ) {
-//            Text(text = message.text)
-//        }
-//    }
-//}
-
 // Message data class
 data class Message(val text: String, val isUser: Boolean)

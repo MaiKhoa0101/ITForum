@@ -4,8 +4,8 @@
 
 <!--    <domain includeSubdomains="true">192.168.56.1</domain>-->
 
-<!--    <domain includeSubdomains="true">192.168.0.103</domain>-->
-    <domain includeSubdomains="true">192.168.0.100</domain>
+    <domain includeSubdomains="true">beitforum.onrender.com</domain>
+    <domain includeSubdomains="true">192.168.101.153</domain>
 
     <domain includeSubdomains="true">192.168.127.22</domain>
     <domain includeSubdomains="true">192.168.1.28</domain>

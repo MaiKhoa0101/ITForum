@@ -3,7 +3,7 @@ package com.example.itforum.user.utilities.chat
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.itforum.user.utilities.chat.OpenRouterApiClient
+import com.example.itforum.retrofit.RetrofitInstance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -22,7 +22,6 @@ class ChatViewModel(
 
     private val _currentSessionId = MutableStateFlow<String?>(null)
     val currentSessionId = _currentSessionId.asStateFlow()
-
     init {
         viewModelScope.launch {
             repository.deleteEmptySessions(userId)
@@ -111,32 +110,42 @@ class ChatViewModel(
         )
 
         viewModelScope.launch {
+            // Gửi và lưu tin nhắn người dùng
             repository.insertMessage(message)
             _messages.value = repository.getMessagesForSession(sessionId, userId)
-        }
 
-        if (isUser) {
-            Log.d("OpenRouter", "🟢 Gửi câu hỏi: $input")
+            try {
+                // Gửi prompt đến backend
+                val response = RetrofitInstance.chatAiService.getChatResponse(AiRequest(input))
 
-            OpenRouterApiClient.generateText(input) { response ->
-                Log.d("OpenRouter", "🟢 Callback được gọi với phản hồi: $response")
-
-                viewModelScope.launch {
-                    val botMessage = MessageEntity(
-                        id = UUID.randomUUID().toString(),
-                        sessionId = sessionId,
-                        userId = userId,
-                        text = response ?: "❌ Lỗi khi kết nối AI",
-                        isUser = false,
-                        sender = "bot",
-                        timestamp = System.currentTimeMillis()
-                    )
-                    repository.insertMessage(botMessage)
-                    _messages.value = repository.getMessagesForSession(sessionId, userId)
-                }
+                val botMessage = MessageEntity(
+                    id = UUID.randomUUID().toString(),
+                    sessionId = sessionId,
+                    userId = userId,
+                    text = response.response,
+                    isUser = false,
+                    sender = "bot",
+                    timestamp = System.currentTimeMillis()
+                )
+                repository.insertMessage(botMessage)
+                _messages.value = repository.getMessagesForSession(sessionId, userId)
+            } catch (e: Exception) {
+                Log.e("ChatAI", "❌ Lỗi khi gọi AI: ${e.message}")
+                val errorMessage = MessageEntity(
+                    id = UUID.randomUUID().toString(),
+                    sessionId = sessionId,
+                    userId = userId,
+                    text = "❌ AI gặp lỗi khi xử lý: ${e.message}",
+                    isUser = false,
+                    sender = "bot",
+                    timestamp = System.currentTimeMillis()
+                )
+                repository.insertMessage(errorMessage)
+                _messages.value = repository.getMessagesForSession(sessionId, userId)
             }
         }
     }
+
 
     fun updateSessionTitleIfNeeded(title: String) {
         val sessionId = _currentSessionId.value ?: return
@@ -151,4 +160,6 @@ class ChatViewModel(
     }
 
     fun getCurrentSessionId(): String? = _currentSessionId.value
+
+
 }
