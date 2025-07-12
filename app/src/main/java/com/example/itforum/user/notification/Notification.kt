@@ -47,7 +47,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.example.itforum.user.modelData.response.Notification
 import com.google.firebase.messaging.FirebaseMessaging
-
+import java.time.*
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 @Composable
 fun NotificationPage(modifier: Modifier, sharedPreferences: SharedPreferences, navHostController: NavHostController ){
@@ -197,7 +199,7 @@ fun NotifyChild(
                         tint =  MaterialTheme.colorScheme.onBackground
                     )
                     Text(
-                        text = notify.createdAt,
+                        text = formatTimeAgo(notify.createdAt),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
@@ -215,4 +217,26 @@ fun subscribeToAppTopic() {
                 Log.e("FCM", "Topic subscription failed", task.exception)
             }
         }
+}
+fun formatTimeAgo(isoDate: String): String {
+    return try {
+        val created = Instant.parse(isoDate)
+        val now = Instant.now()
+        val duration = Duration.between(created, now)
+
+        when {
+            duration.toMinutes() < 1 -> "Vừa xong"
+            duration.toMinutes() < 60 -> "${duration.toMinutes()} phút trước"
+            duration.toHours() < 24 -> "${duration.toHours()} giờ trước"
+            duration.toDays() == 1L -> "Hôm qua"
+            duration.toDays() < 7 -> "${duration.toDays()} ngày trước"
+            else -> {
+                val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy, HH:mm")
+                    .withZone(ZoneId.systemDefault())
+                formatter.format(created)
+            }
+        }
+    } catch (e: Exception) {
+        isoDate // fallback
+    }
 }

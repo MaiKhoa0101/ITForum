@@ -155,8 +155,11 @@ fun LoginScreen(
                 if (canSubmit) {
                     loginViewModel.userLogin(phoneNumberOrEmail, password)
                 } else {
-                    println("phone: $isPhoneOrEmailValid $phoneNumberOrEmail")
-                    println("password: $isPasswordValid $password")
+                    Toast.makeText(
+                        context,
+                        "Vui lòng nhập số điện thoại/email và mật khẩu hợp lệ",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             },
             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF6FA9FF)),
