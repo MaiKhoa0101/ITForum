@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -69,7 +70,9 @@ fun PostListScreen(
     navHostController: NavHostController,
     getPostRequest: GetPostRequest,
     postViewModel: PostViewModel,
-    commentViewModel: CommentViewModel
+    commentViewModel: CommentViewModel,
+    listState: LazyListState = rememberLazyListState(),
+    onToggleBars: () -> Unit = {}
 ) {
 
 
@@ -144,11 +147,16 @@ fun PostListScreen(
             }
         } else {
             // Posts list with infinite scroll
-            val listState = rememberLazyListState()
+//            val listState = rememberLazyListState()
 
             LazyColumn(
                 state = listState,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            onToggleBars() // Chạm vào phần thân để đảo trạng thái hiển thị
+                        })
+                    },
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 itemsIndexed(

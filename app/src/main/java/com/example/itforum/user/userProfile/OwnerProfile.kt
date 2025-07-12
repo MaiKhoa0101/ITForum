@@ -2,6 +2,11 @@ package com.example.itforum.user.userProfile
 
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -38,6 +45,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +68,7 @@ import com.example.itforum.user.modelData.response.Certificate
 import com.example.itforum.user.modelData.response.Skill
 import com.example.itforum.user.modelData.response.UserProfileResponse
 import com.example.itforum.user.post.PostListScreen
+import com.example.itforum.user.post.getTimeAgo
 import com.example.itforum.user.post.viewmodel.CommentViewModel
 import com.example.itforum.user.post.viewmodel.PostViewModel
 import com.example.itforum.user.userProfile.viewmodel.UserViewModel
@@ -69,6 +78,8 @@ import com.example.itforum.user.userProfile.viewmodel.UserViewModel
 fun UserProfileScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
+    barsVisible: Boolean = true,
+    listState: LazyListState = rememberLazyListState()
 ) {
     val viewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
@@ -100,11 +111,11 @@ fun UserProfileScreen(
         }
     }
 
-
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+        ,
         topBar = {
             TopAppBar(
                 modifier = Modifier.fillMaxWidth(),
@@ -155,7 +166,9 @@ fun UserProfileScreen(
                 showReportDeatil = true
             },
             postViewModel,
-            commentViewModel
+            commentViewModel,
+            listState = listState,
+            barsVisible = barsVisible
         )
     }
     if (showReportDeatil){
@@ -176,11 +189,21 @@ fun ProfileContent(
     sharedPreferences: SharedPreferences,
     onReportClick: (String) -> Unit,
     postViewModel: PostViewModel,
-    commentViewModel: CommentViewModel
+    commentViewModel: CommentViewModel,
+    listState: LazyListState,
+    barsVisible: Boolean = true
 ) {
    Column(modifier = modifier.fillMaxSize()) {
-       UserHeader(user)
-
+       AnimatedVisibility(
+           visible = barsVisible,
+           enter = fadeIn() + slideInVertically(),
+           exit = fadeOut() + shrinkVertically()
+       ) {
+           UserHeader(user)
+       }
+       if(!barsVisible){
+           HeaderSmall(user)
+       }
        UserTabRow(
            tabs = tabs,
            selectedTabIndex = selectedTabIndex,
@@ -200,7 +223,8 @@ fun ProfileContent(
                            userId = user.id
                        ),
                        postViewModel,
-                       commentViewModel
+                       commentViewModel,
+                       listState = listState
                    )
                }
            }
@@ -209,7 +233,9 @@ fun ProfileContent(
 }
 
 @Composable
-fun UserHeader(user: UserProfileResponse?) {
+fun UserHeader(
+    user: UserProfileResponse?,
+) {
     val (userLevel, levelColor, score) = calculateUserLevel(user)
 
 
@@ -233,7 +259,7 @@ fun UserHeader(user: UserProfileResponse?) {
             )
             Spacer(modifier = Modifier.width(50.dp))
             Column {
-                Text(user?.username ?: "Người dùng", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text(user?.name ?: "Người dùng", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 Text(user?.email ?: "hi@gmail.com")
                 Text(getJoinDuration(user?.createdAt), fontStyle = FontStyle.Italic, fontSize = 15.sp)
 
@@ -248,6 +274,7 @@ fun UserHeader(user: UserProfileResponse?) {
         }
 
         Spacer(modifier = Modifier.height(20.dp))
+
         UserStats(user)
         Spacer(modifier = Modifier.height(10.dp))
     }
@@ -441,4 +468,38 @@ fun getJoinDuration(createdAt: String?): String {
     }
 
     return Triple(levelColorPair.first, levelColorPair.second, totalScore)
+}
+
+@Composable
+fun HeaderSmall(user: UserProfileResponse?){
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .padding(horizontal = 10.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(start = 10.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = user?.avatar
+                    ?: "https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg",
+                contentDescription = "Ảnh đại diện người dùng",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(70.dp)
+                    .clip(CircleShape)
+            )
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(
+                text = user?.name ?: "Người dùng",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(modifier = Modifier.width(50.dp))
+    }
 }

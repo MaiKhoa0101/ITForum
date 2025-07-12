@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 
@@ -33,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,8 +65,10 @@ fun HomePage(
     modifier: Modifier,
     sharePreferences: SharedPreferences,
     postViewModel: PostViewModel,
-    commentViewModel: CommentViewModel
-){
+    commentViewModel: CommentViewModel,
+    listState: LazyListState,
+    onToggleBars: () -> Unit,
+    ){
     val context = LocalContext.current
     val db = Room.databaseBuilder(
         context,
@@ -91,7 +96,11 @@ fun HomePage(
         }
     }
     Column(
-        modifier=modifier.fillMaxSize(),
+        modifier=modifier.fillMaxSize()
+//            .pointerInput(Unit) {
+//                detectTapGestures(onTap = { onToggleBars() })
+//            }
+        ,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
@@ -131,7 +140,9 @@ fun HomePage(
                 navHostController,
                 GetPostRequest(page = 1),
                 postViewModel = postViewModel,
-                commentViewModel = commentViewModel
+                commentViewModel = commentViewModel,
+                listState = listState,
+                onToggleBars = onToggleBars
             );
             Row (
                 modifier = Modifier.padding(bottom = 50.dp)

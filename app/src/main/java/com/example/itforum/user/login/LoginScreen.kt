@@ -50,7 +50,6 @@ import com.example.itforum.user.login.loginGoogle.GoogleSignInButton
 import com.example.itforum.user.login.loginGoogle.saveUserToFirestore
 import com.example.itforum.user.login.viewmodel.LoginViewModel
 import com.example.itforum.user.notification.subscribeToAppTopic
-import com.example.itforum.user.root.BodyRoot
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 import com.google.android.gms.common.api.ApiException

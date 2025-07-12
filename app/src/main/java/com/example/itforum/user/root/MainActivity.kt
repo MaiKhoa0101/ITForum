@@ -7,11 +7,18 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 
 import androidx.compose.foundation.layout.fillMaxSize
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -34,8 +41,10 @@ import com.example.itforum.utilities.DrawerContent
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
 import com.example.itforum.user.login.LoginScreen
@@ -140,6 +149,46 @@ fun Root(sharedPreferences:SharedPreferences) {
             }
         )
     }
+
+    // 1. Trạng thái hiển thị thanh
+    var barsVisible by remember { mutableStateOf(true) }
+
+    // 2. Theo dõi trạng thái cuộn của Home
+    val listState = rememberLazyListState()
+    var previousScrollOffset by remember { mutableStateOf(0) }
+
+    // 3. Ẩn/hiện theo hướng cuộn
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemScrollOffset }
+            .collect { currentOffset ->
+                if(currentOffset < 40){
+                    Log.d("barsVisible1", " currentOffset: " + currentOffset + " previousScrollOffset:" + previousScrollOffset)
+                    previousScrollOffset = 0
+                }
+                else {
+                    Log.d(
+                        "barsVisible1",
+                        " currentOffset: " + currentOffset + " previousScrollOffset:" + previousScrollOffset
+                    )
+
+                    if (currentOffset > previousScrollOffset + 10 && barsVisible) {
+                        Log.d(
+                            "barsVisible1",
+                            "barsVisible: " + barsVisible.toString() + " currentOffset: " + currentOffset + " previousScrollOffset:" + previousScrollOffset
+                        )
+                        barsVisible = false // Cuộn xuống
+                    } else if (currentOffset < previousScrollOffset - 30 && !barsVisible) {
+                        Log.d(
+                            "barsVisible2",
+                            "barsVisible: " + barsVisible.toString() + " currentOffset: " + currentOffset + " previousScrollOffset:" + previousScrollOffset
+                        )
+                        barsVisible = true // Cuộn lên
+                    }
+                    previousScrollOffset = currentOffset
+                }
+            }
+    }
+
     ITForumTheme(darkTheme = darkTheme)
     {
         if (isTokenExpired(token.toString())) {
@@ -181,15 +230,22 @@ fun Root(sharedPreferences:SharedPreferences) {
                                         drawerState.open()
                                     }
                                 },
+                                barsVisible = barsVisible
                             )
                         }
                     },
                     bottomBar = {
                         if (showFootBars) {
-                            FootBarRoot(
-                                currentRoute = currentRoute,
-                                navHostController = navHostController
-                            )
+                            AnimatedVisibility(
+                                visible = barsVisible,
+                                enter = fadeIn() + slideInVertically(),
+                                exit = fadeOut() + shrinkVertically()
+                            ) {
+                                FootBarRoot(
+                                    currentRoute = currentRoute,
+                                    navHostController = navHostController
+                                )
+                            }
                         }
                     }
                 ) { innerPadding ->
@@ -200,6 +256,9 @@ fun Root(sharedPreferences:SharedPreferences) {
                         onToggleTheme = {
                             darkTheme = !darkTheme
                         },
+                        listState = listState,
+//                        onToggleBars = { barsVisible = !barsVisible },
+                        barsVisible = barsVisible,
                         darkTheme = darkTheme,
                         role = role
                     )
