@@ -246,7 +246,7 @@ fun CreatePostPage(
                         videoUris = videoUrls,
                         applicationUris = applicationUrls
                     )
-                    CustomPost()
+//                    CustomPost()
                 }
             }
         }
@@ -452,7 +452,7 @@ fun AddTagPost(
             FieldTagText(
                 placeHolder = "Nhập tag",
                 text = textTag,
-                shape = RoundedCornerShape(7.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer
                 ),
@@ -503,63 +503,7 @@ fun AddTagPost(
                     println("Viewmodel: " + tags.value)
                 }
             )
-//            Box{
-//            OutlinedTextField(
-//                value = textTag,
-//                onValueChange = {
-//                    textTag = it
-//                    isError = it.trim().isEmpty()
-//                },
-//                placeholder = { Text("Nhập tag", color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp) },
-//                shape = RoundedCornerShape(7.dp),
-//                colors = OutlinedTextFieldDefaults.colors(
-//                    unfocusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer
-//                ),
-//                textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground),
-//                modifier = Modifier
-//                    .weight(3f)
-//                    .padding(horizontal = 10.dp)
-//                    .onFocusChanged { focusState ->
-//                        isFocused = focusState.isFocused
-//                        // Khi mất focus, reset lỗi
-//                        if (!focusState.isFocused) {
-//                            isError = false
-//                        }
-//                    }
-//            )
-//            DropdownMenu(
-//                expanded = expanded,
-//                onDismissRequest = onDismiss,
-//                properties = PopupProperties(focusable = !hasFocus),
-//                modifier = Modifier.heightIn(max = 230.dp)
-//            ) {onFilterChange()}
-//            IconButton(
-//                onClick = {
-//                    if(textTag.trim().isNotEmpty()) {
-//                        tags.value = tags.value?.plus(textTag)
-//                        textTag = ""
-//                    }
-//                    else
-//                        isError = true
-//                },
-//                modifier = Modifier
-//                    .padding(horizontal = 10.dp)
-//                    .size(54.dp)
-//                    .weight(1f)
-//                    .border(
-//                        width = 1.dp,
-//                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-//                        shape = RoundedCornerShape(7.dp)
-//                    )
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.Add,
-//                    contentDescription = "Nút add tag",
-//                    modifier = Modifier
-//                        .size(40.dp),
-//                    tint = MaterialTheme.colorScheme.onSecondaryContainer
-//                )
-//            }
+
         }
         if (isError) {
             Text(
@@ -596,7 +540,7 @@ fun TagChild(
             .padding(vertical = 8.dp, horizontal = 5.dp)
             .background(
                 Color(0xFF00FBFF),
-                RoundedCornerShape(8.dp)
+                RoundedCornerShape(10.dp)
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -696,15 +640,7 @@ fun AddMedia(
             .BottomBorder()
     ) {
 
-//        Text(
-//            text = "Đã sử dụng: %.2f/100 MB".format(totalUsedMB),
-//            color = MaterialTheme.colorScheme.onBackground,
-//            fontSize = 16.sp,
-//            fontWeight = FontWeight.Bold,
-//            modifier = Modifier
-//                .padding(end = 10.dp)
-//                .align(Alignment.End)
-//        )
+
         if(imageUris.value!!.isEmpty() && videoUris.value!!.isEmpty() && applicationUris.value!!.isEmpty()){
             IconButton(
                 onClick = {
@@ -962,7 +898,7 @@ fun TagFile(
             .padding(vertical = 8.dp, horizontal = 5.dp)
             .background(
                 Color(0xFF00FBFF),
-                RoundedCornerShape(8.dp)
+                RoundedCornerShape(10.dp)
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -1053,7 +989,7 @@ fun WriteTitleField(
 ) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(MaterialTheme.colorScheme.background)
             .TopBorder()
             .BottomBorder()
     ) {
@@ -1067,7 +1003,8 @@ fun WriteTitleField(
             placeholder = { Text("Nhập tiêu đề bài viết...", fontSize = 18.sp) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp),
+                .padding(10.dp)
+                .clip(RoundedCornerShape(10.dp)),
             isError = isError,
             maxLines = 2,
             textStyle = TextStyle(fontSize = 20.sp)
@@ -1085,7 +1022,7 @@ fun WriteContentField(
 ) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(MaterialTheme.colorScheme.background)
             .TopBorder()
             .BottomBorder()
     ) {

@@ -291,8 +291,6 @@ fun UserStats(user: UserProfileResponse?) {
             fontSize = 20.sp)
         Text((user?.totalPost.toString()?:"Chưa có") + " bài viết")
         Text((user?.numberComment.toString()?:"Không có")+" câu trả lời")
-        Text("Được đánh giá 4.5 điểm")
-        Text("Xếp hạng thứ 22 trong hệ thống")
     }
 }
 
@@ -335,13 +333,15 @@ fun UserTabRow(
 
 @Composable
 fun UserInfoDetail(user: UserProfileResponse?, modifier: Modifier) {
+    var introduce = user?.introduce?.takeIf { it.isNotEmpty() } ?: "Chua co thong tin"
     LazyColumn(
         modifier = modifier
             .padding(horizontal = 16.dp)
     ) {
+
         item { Text("Giới thiệu", fontWeight = FontWeight.Bold, fontSize = 20.sp)}
         item { Spacer(modifier = Modifier.height(16.dp))}
-        item { Text(user?.introduce?:"Chưa có giới thiệu", fontSize = 18.sp)}
+        item { Text(introduce, fontSize = 18.sp)}
         item { Spacer(modifier = Modifier.height(16.dp))}
 
         item { TagCertificateSection(title = "Chứng chỉ bằng cấp đã đạt:", tags = user?.certificate)}

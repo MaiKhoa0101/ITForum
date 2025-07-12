@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
@@ -150,6 +151,7 @@ fun Root(sharedPreferences:SharedPreferences) {
         )
     }
 
+
     // 1. Trạng thái hiển thị thanh
     var barsVisible by remember { mutableStateOf(true) }
 
@@ -266,4 +268,8 @@ fun Root(sharedPreferences:SharedPreferences) {
             }
         }
     }
+}
+@Composable
+fun trackerScroll(barsVisible: Boolean,listState: LazyListState,previousScrollOffset:Int){
+
 }
