@@ -196,12 +196,12 @@ fun MediaGrid(
                 modifier = modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                // Large media on the left
+                // Large media on the left (first item)
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .aspectRatio(1f)
-                        .clip(RoundedCornerShape(12.dp, 0.dp, 0.dp, 12.dp))
+                        .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
                         .clickable { onMediaClick?.invoke(mediaItems[0], 0) }
                 ) {
                     MediaItemContent(
@@ -210,16 +210,19 @@ fun MediaGrid(
                     )
                 }
 
-                // Two smaller media items stacked on the right
+                // Two smaller media items stacked on the right (second and third items)
                 Column(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .aspectRatio(1f), // Add aspectRatio to match the left side
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
+                    // Second item (top right)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .clip(RoundedCornerShape(0.dp, 12.dp, 0.dp, 0.dp))
+                            .clip(RoundedCornerShape(topEnd = 12.dp))
                             .clickable { onMediaClick?.invoke(mediaItems[1], 1) }
                     ) {
                         MediaItemContent(
@@ -228,11 +231,12 @@ fun MediaGrid(
                         )
                     }
 
+                    // Third item (bottom right)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .clip(RoundedCornerShape(0.dp, 0.dp, 12.dp, 0.dp))
+                            .clip(RoundedCornerShape(bottomEnd = 12.dp))
                             .clickable { onMediaClick?.invoke(mediaItems[2], 2) }
                     ) {
                         MediaItemContent(
@@ -243,6 +247,7 @@ fun MediaGrid(
                 }
             }
         }
+
 
         mediaItems.size == 4 -> {
             // Four media items in 2x2 grid
