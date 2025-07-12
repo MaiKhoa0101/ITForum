@@ -288,7 +288,7 @@ fun RegisterScreen(
                     }
                 )
             }
-            UiStateMessage(uiState, canSubmit)
+            UiStateMessage(uiState, canSubmit, true)
 
         }
     }

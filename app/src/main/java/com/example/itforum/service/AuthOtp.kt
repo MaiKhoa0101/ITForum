@@ -9,14 +9,14 @@ object AuthRepository {
         return try {
             val response = RetrofitInstance.authService.sendOtp(mapOf("email" to email))
             if (response.isSuccessful) {
-                Log.d("OTP", "✅ Gửi OTP thành công: ${response.body()}")
+                Log.d("OTP", "Gửi OTP thành công: ${response.body()}")
                 Result.success(response.body() ?: "OTP sent")
             } else {
-                Log.e("OTP", "❌ Gửi OTP thất bại: ${response.errorBody()?.string()}")
+                Log.e("OTP", "Gửi OTP thất bại: ${response.errorBody()?.string()}")
                 Result.failure(Exception(response.errorBody()?.string()))
             }
         } catch (e: Exception) {
-            Log.e("OTP", "❌ Lỗi khi gửi OTP", e)
+            Log.e("OTP", "Lỗi khi gửi OTP", e)
             Result.failure(e)
         }
     }

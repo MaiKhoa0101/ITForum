@@ -25,7 +25,7 @@ private val DarkColorScheme = darkColorScheme(
     secondary = LightDarkTheme,
 //    onSecondary = Color.DarkGray,
     //Màu nền nội dung cấp 2 (xám tối) thường dùng cho các card nằm trên background
-    secondaryContainer = BoxLightGrey,
+    secondaryContainer   = BoxLightGrey,
     // Nội dung trên card
     onSecondaryContainer = onSecondDarkContainer,
     //Màu nền nội dung cấp 3 (xanh mờ) thường dùng cho các component như thông báo chưa xem
