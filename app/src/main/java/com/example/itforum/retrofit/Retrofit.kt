@@ -38,8 +38,8 @@ object RetrofitInstance {
 
     val retrofit = Retrofit.Builder()
 //        .baseUrl(BASE_URL)
-//        .baseUrl(URL_Phone)
-        .baseUrl(SECOND_URL)
+        .baseUrl(URL_Phone)
+//        .baseUrl(SECOND_URL)
         .client(okHttpClient) // ← Đảm bảo dùng client có timeout
         .addConverterFactory(GsonConverterFactory.create())
         .build()
@@ -55,8 +55,8 @@ object RetrofitInstance {
     val skillService: SkillService by lazy { retrofit.create(SkillService::class.java) }
     val api: AnalyticsApi by lazy {
         Retrofit.Builder()
-            .baseUrl(SECOND_URL)
-//            .baseUrl(URL_Phone)
+//            .baseUrl(SECOND_URL)
+            .baseUrl(URL_Phone)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(AnalyticsApi::class.java)
