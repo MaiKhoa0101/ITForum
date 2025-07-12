@@ -103,7 +103,7 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                 val registerResponse = userService.register(registerRequest)
                 println("RegisterResponse:  "+registerResponse)
                 println("RegisterResponseError:  "+registerResponse.message())
-                if (registerResponse.isSuccessful || registerResponse.message()=="Unauthorized" ) {
+                if (registerResponse.isSuccessful || registerResponse.code() == 401) {
                     println(registerResponse)
                     val loginResponse = userService.login(loginRequest)
                     if (loginResponse.isSuccessful) {

@@ -24,7 +24,7 @@ import com.example.itforum.user.login.otp.AuthService
 import com.example.itforum.user.utilities.chat.ChatAiService
 
 object RetrofitInstance {
-    private const val SECOND_URL  = "http://192.168.101.153:4000"
+    private const val SECOND_URL  = "http://192.168.1.3:4000"
     private const val URL_Phone = "https://beitforum.onrender.com/"
         private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
 
@@ -38,8 +38,8 @@ object RetrofitInstance {
 
     val retrofit = Retrofit.Builder()
 //        .baseUrl(BASE_URL)
-//        .baseUrl(URL_Phone)
-        .baseUrl(SECOND_URL)
+        .baseUrl(URL_Phone)
+//        .baseUrl(SECOND_URL)
         .client(okHttpClient) // ← Đảm bảo dùng client có timeout
         .addConverterFactory(GsonConverterFactory.create())
         .build()

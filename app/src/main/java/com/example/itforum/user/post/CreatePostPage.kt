@@ -310,7 +310,7 @@ fun TopPost(
                     modifier = Modifier.padding(3.dp),
                 )
             }
-            UiStateMessage(uiState = uiState, canSubmit = true)
+            UiStateMessage(uiState = uiState, canSubmit = true, false)
         }
     }
 }
