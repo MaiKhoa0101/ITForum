@@ -1,6 +1,11 @@
 package com.example.itforum.user.userProfile
 
 import android.content.SharedPreferences
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -59,7 +66,9 @@ fun OtherUserProfileScreen(
     sharedPreferences: SharedPreferences,
     navHostController: NavHostController,
     modifier: Modifier = Modifier,
-    otherUserId: String
+    otherUserId: String,
+    barsVisible: Boolean = true,
+    listState: LazyListState = rememberLazyListState()
 ) {
     val viewModel: UserViewModel = viewModel(factory = viewModelFactory {
         initializer { UserViewModel(sharedPreferences) }
@@ -135,7 +144,9 @@ fun OtherUserProfileScreen(
             tabs = tabs,
             sharedPreferences = sharedPreferences,
             postViewModel,
-            commentViewModel
+            commentViewModel,
+            listState = listState,
+            barsVisible = barsVisible
 
         )
     }
@@ -151,10 +162,21 @@ fun OtherProfileContent(
     tabs: List<String>,
     sharedPreferences: SharedPreferences,
     postViewModel: PostViewModel,
-    commentViewModel: CommentViewModel
+    commentViewModel: CommentViewModel,
+    listState: LazyListState,
+    barsVisible: Boolean = true
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        UserHeader(user)
+        AnimatedVisibility(
+            visible = barsVisible,
+            enter = fadeIn() + slideInVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            UserHeader(user)
+        }
+        if(!barsVisible){
+            HeaderSmall(user)
+        }
 
         UserTabRow(
             tabs = tabs,
@@ -177,7 +199,8 @@ fun OtherProfileContent(
                             userId = user.id
                         ),
                         postViewModel = postViewModel,
-                        commentViewModel = commentViewModel
+                        commentViewModel = commentViewModel,
+                        listState = listState
                     )
                 }
             }

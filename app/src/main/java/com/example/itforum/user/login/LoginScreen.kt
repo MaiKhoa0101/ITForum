@@ -47,10 +47,9 @@ import com.example.itforum.user.complaint.SuccessDialog
 import com.example.itforum.user.effect.model.UiState
 import com.example.itforum.user.effect.UiStateMessage
 import com.example.itforum.user.login.loginGoogle.GoogleSignInButton
-import com.example.itforum.user.login.loginGoogle.saveUserToFirestore
+
 import com.example.itforum.user.login.viewmodel.LoginViewModel
 import com.example.itforum.user.notification.subscribeToAppTopic
-import com.example.itforum.user.root.BodyRoot
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 import com.google.android.gms.common.api.ApiException
@@ -174,7 +173,6 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ✅ Nút Google đã đóng gói xử lý bên trong
         GoogleSignInButton(
             onTokenReceived = { firebaseUser ->
                 println("Firebase User: "+firebaseUser)
@@ -189,7 +187,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
         RegisterText(onRegisterClick)
-        UiStateMessage(uiState, canSubmit)
+        UiStateMessage(uiState, canSubmit, true)
     }
 }
 

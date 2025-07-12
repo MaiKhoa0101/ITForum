@@ -16,13 +16,128 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.itforum.R
-import com.example.itforum.user.utilities.chat.MessageEntity
+//
+//@Composable
+//fun ChatScreen(
+//    navController: NavController,
+//    messages: List<Message>,
+//    onSend: (String) -> Unit,
+//    onShowHistory: () -> Unit,
+//    onBackToHome: () -> Unit
+//) {
+//    var input by remember { mutableStateOf("") }
+//
+//    Scaffold(
+//        topBar = {
+//            TopAppBar(
+//                backgroundColor = Color(0XFF00AEFF),
+//                modifier = Modifier
+//                    .statusBarsPadding()
+//                    .height(115.dp),
+//
+//                title = {
+//                    Row(verticalAlignment = Alignment.CenterVertically) {
+//                        Image(
+//                            painter = painterResource(id = R.drawable.chat),
+//                            contentDescription = null,
+//                            modifier = Modifier.size(40.dp)
+//                        )
+//                        Spacer(modifier = Modifier.width(8.dp))
+//                        Text("Chat AI", fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground)
+//                    }
+//                },
+//                navigationIcon = {
+//                    IconButton(onClick = onBackToHome) {
+//                        Image(
+//                            painter = painterResource(id = R.drawable.back_white),
+//                            contentDescription = "Back",
+//                            modifier = Modifier.size(40.dp)
+//                        )
+//                    }
+//                },
+//                actions = {
+//                    IconButton(onClick = onShowHistory) {
+//                        Image(
+//                            painter = painterResource(id = R.drawable.more),
+//                            contentDescription = "More",
+//                            modifier = Modifier.size(40.dp)
+//                        )
+//                    }
+//                }
+//            )
+//        }
+//    ) { innerPadding ->
+//
+//        // Main content
+//        Box(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(innerPadding)
+//                .imePadding()
+//        ) {
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//            ) {
+//                // MESSAGE LIST
+//                LazyColumn(
+//                    modifier = Modifier
+//                        .weight(1f)
+//                        .fillMaxWidth(),
+//
+//                ) {
+//                    items(messages, key = { it.hashCode() }) { message ->
+//                        MessageBubble(message)
+//                    }
+//                }
+//
+//                // INPUT FIELD
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .background(MaterialTheme.colorScheme.primaryContainer)
+//                        .padding(8.dp),
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    TextField(
+//                        value = input,
+//                        onValueChange = { input = it },
+//                        placeholder = { Text("Nhập nội dung",color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f))},
+//                        modifier = Modifier.weight(1f),
+//                        shape = RoundedCornerShape(20.dp),
+//                        colors = TextFieldDefaults.textFieldColors(
+//                            backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+//                            textColor = MaterialTheme.colorScheme.onSecondaryContainer,
+//                            focusedIndicatorColor = Color.Transparent,
+//                            unfocusedIndicatorColor = Color.Transparent
+//                        )
+//                    )
+//                    IconButton(
+//                        onClick = {
+//                            if (input.isNotBlank()) {
+//                                onSend(input.trim())
+//                                input = ""
+//                            }
+//                        },
+//                        enabled = input.isNotBlank()
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Default.Send,
+//                            contentDescription = "Gửi",
+//                            tint = if (input.isNotBlank()) Color(0xFF00BFFF) else Color.Gray
+//                        )
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 
 
-//import com.example.itforum.home.goToHome
 @Composable
 fun ChatScreen(
     navController: NavController,
@@ -36,23 +151,26 @@ fun ChatScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                backgroundColor = Color(0XFF00AEFF),
-                modifier = Modifier.height(130.dp),
+                backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .height(115.dp),
+
                 title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 15.dp)
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+
                         Image(
                             painter = painterResource(id = R.drawable.chat),
-                            contentDescription = "chat",
-                            modifier = Modifier.size(40.dp)
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp),
+                            colorFilter = ColorFilter.tint(Color.White)
                         )
+
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            "Chat AI", fontSize = 30.sp,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.padding(bottom = 4.dp)
+                            "Chat AI",
+                            fontSize = 30.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 },
@@ -60,10 +178,8 @@ fun ChatScreen(
                     IconButton(onClick = onBackToHome) {
                         Image(
                             painter = painterResource(id = R.drawable.back_white),
-                            contentDescription = "back",
-                            modifier = Modifier
-                                .size(40.dp)
-                                .padding(start = 4.dp, top = 15.dp, end = 8.dp, bottom = 2.dp)
+                            contentDescription = "Back",
+                            modifier = Modifier.size(35.dp)
                         )
                     }
                 },
@@ -71,67 +187,80 @@ fun ChatScreen(
                     IconButton(onClick = onShowHistory) {
                         Image(
                             painter = painterResource(id = R.drawable.more),
-                            contentDescription = "more",
-                            modifier = Modifier
-                                .size(40.dp)
-                                .padding(start = 4.dp, top = 15.dp, end = 8.dp, bottom = 2.dp)
+                            contentDescription = "More",
+                            modifier = Modifier.size(40.dp)
                         )
                     }
                 }
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
-            // ✅ Bọc LazyColumn bằng Box + weight
-            Box(modifier = Modifier.weight(1f)) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
 
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
+                .imePadding()
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+
+                // List message
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
                 ) {
                     items(messages, key = { it.hashCode() }) { message ->
                         MessageBubble(message)
                     }
                 }
-            }
 
-            // ✅ Ô nhập tin nhắn
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextField(
-                    value = input,
-                    onValueChange = { input = it },
-                    placeholder = { Text("Nhập nội dung") },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = Color(0xFFF0F0F0),
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    )
-                )
-                IconButton(
-                    onClick = {
-                        if (input.isNotBlank()) {
-                            onSend(input.trim())
-                            input = ""
-                        }
-                    },
-                    enabled = input.isNotBlank()
+                // Input
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Send,
-                        contentDescription = "Gửi",
-                        tint = if (input.isNotBlank()) Color(0xFF00BFFF) else Color.Gray
+                    TextField(
+                        value = input,
+                        onValueChange = { input = it },
+                        placeholder = {
+                            Text(
+                                "Nhập nội dung",
+                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.5f)
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = TextFieldDefaults.textFieldColors(
+                            backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+                            textColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        )
                     )
+
+                    IconButton(
+                        onClick = {
+                            if (input.isNotBlank()) {
+                                onSend(input.trim())
+                                input = ""
+                            }
+                        },
+                        enabled = input.isNotBlank()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Send,
+                            contentDescription = "Gửi",
+                            tint = if (input.isNotBlank())
+                                MaterialTheme.colorScheme.tertiaryContainer
+                            else
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             }
         }
@@ -142,21 +271,28 @@ fun ChatScreen(
 @Composable
 fun MessageBubble(message: Message) {
     val isUser = message.isUser
+    val bubbleColor = if (isUser)
+        MaterialTheme.colorScheme.tertiaryContainer
+    else
+        MaterialTheme.colorScheme.secondaryContainer
+
+    val textColor = if (isUser)
+        MaterialTheme.colorScheme.onTertiaryContainer
+    else
+        MaterialTheme.colorScheme.onBackground
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
         Box(
             modifier = Modifier
-                .background(
-                    if (isUser) Color(0xFFD3D3D3) else Color(0xFFE0E0E0),
-                    RoundedCornerShape(16.dp)
-                )
+                .background(bubbleColor, RoundedCornerShape(16.dp))
                 .padding(12.dp)
         ) {
-            Text(text = message.text)
+            Text(text = message.text, color = textColor)
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.itforum.utilities.note
 
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +28,7 @@ import com.example.itforum.user.utilities.note.NoteEntity
 import com.example.itforum.user.utilities.note.NoteViewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.material3.Card
 
 @Composable
 fun NotesListScreen(
@@ -79,13 +82,15 @@ fun NotesListScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .background(MaterialTheme.colorScheme.background)
             ) {
                 if (notes.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Chưa có ghi chú nào.")
+                        Text("Chưa có ghi chú nào.",color = MaterialTheme.colorScheme.onSecondaryContainer)
                     }
                 } else {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(modifier = Modifier.fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)) {
                         items(notes) { note ->
                             var expanded by remember { mutableStateOf(false) }
 
@@ -93,9 +98,13 @@ fun NotesListScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                                elevation = 6.dp,
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                )
+                            )
+
+                            {
                                 Column(modifier = Modifier.padding(16.dp)) {
                                     Row(verticalAlignment = Alignment.Top) {
                                         Column(modifier = Modifier.weight(1f)) {
@@ -113,20 +122,21 @@ fun NotesListScreen(
 
                                             DropdownMenu(
                                                 expanded = expanded,
-                                                onDismissRequest = { expanded = false }
+                                                onDismissRequest = { expanded = false },
+                                                modifier = Modifier.background(MaterialTheme.colorScheme.background)
                                             ) {
                                                 DropdownMenuItem(onClick = {
                                                     expanded = false
                                                     editingNote = note
                                                     isEditing = true
                                                 }) {
-                                                    Text("Chỉnh sửa")
+                                                    Text("Chỉnh sửa", color = MaterialTheme.colorScheme.onBackground)
                                                 }
                                                 DropdownMenuItem(onClick = {
                                                     expanded = false
                                                     onDelete(note)
                                                 }) {
-                                                    Text("Xoá")
+                                                    Text("Xoá", color = MaterialTheme.colorScheme.onBackground)
                                                 }
                                             }
                                         }
@@ -185,3 +195,5 @@ fun NotesTopBar(onBackToHome: () -> Unit) {
         }
     }
 }
+
+

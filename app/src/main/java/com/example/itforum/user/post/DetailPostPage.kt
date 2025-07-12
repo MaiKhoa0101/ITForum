@@ -9,18 +9,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -105,9 +109,16 @@ fun DetailPostPage(
 
     var isChangeUp by remember { mutableStateOf(false) }
     var isChangeDown by remember { mutableStateOf(false) }
+    val isLoading by commentViewModel.isLoading.collectAsState()
+    val comments by commentViewModel.comments.collectAsState()
+
+    val isSubmittingComment by commentViewModel.isSubmittingComment.collectAsState()
+
+    val isSubmittingReply by commentViewModel.isSubmittingReply.collectAsState()
 
     LaunchedEffect(postId) {
         viewModel.fetchPostById(postId)
+        commentViewModel.fetchComment(postId)
     }
     LaunchedEffect(postWithVote) {
         upvotes = postWithVote?.vote?.data?.upVoteData?.total ?: 0
@@ -125,6 +136,7 @@ fun DetailPostPage(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.primaryContainer)
+                .imePadding()
         ) {
             Column(
                 modifier = Modifier
@@ -132,206 +144,262 @@ fun DetailPostPage(
             ) {
                 TopDetailPost(navHostController)
                 postWithVote?.post?.let { post ->
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight()
-                            .background( MaterialTheme.colorScheme.secondaryContainer)
-                    ) {
-                        item {
-                            Column(
-                                modifier = Modifier
-                                    .padding(20.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
+                    Box {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight()
+                                .background(MaterialTheme.colorScheme.secondaryContainer),
+                            contentPadding = PaddingValues(bottom = 72.dp)
+                        ) {
+                            item {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(20.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    // Avatar and author
                                     Row(
-                                        verticalAlignment = Alignment.CenterVertically
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        AsyncImage(
-                                            model = post.avatar,
-                                            contentDescription = "avatar",
-                                            modifier = Modifier
-                                                .size(40.dp)
-                                                .clip(RoundedCornerShape(20.dp))
-                                                .clickable {
-                                                    val myUserId =
-                                                        sharedPreferences.getString("userId", null)
-                                                    if (post.userId == myUserId)
-                                                        navHostController.navigate("personal")
-                                                    else navHostController.navigate("otherprofile/${post.userId}")
-                                                }
-                                        )
-                                        Spacer(modifier = Modifier.width(12.dp))
-
-                                        Column {
-                                            Text(
-                                                text = post.userName ?: "Unknown User",
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 12.sp,
-                                                color = MaterialTheme.colorScheme.onBackground,
+                                        // Avatar and author
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            AsyncImage(
+                                                model = post.avatar,
+                                                contentDescription = "avatar",
                                                 modifier = Modifier
+                                                    .size(40.dp)
+                                                    .clip(RoundedCornerShape(20.dp))
                                                     .clickable {
-                                                        val myUserId = sharedPreferences.getString(
-                                                            "userId",
-                                                            null
-                                                        )
+                                                        val myUserId =
+                                                            sharedPreferences.getString(
+                                                                "userId",
+                                                                null
+                                                            )
                                                         if (post.userId == myUserId)
                                                             navHostController.navigate("personal")
                                                         else navHostController.navigate("otherprofile/${post.userId}")
                                                     }
                                             )
-                                            Text(
-                                                text = "${getTimeAgo(post.createdAt ?: "")} • ${""}",
-                                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                fontSize = 11.sp
-                                            )
-                                        }
-                                    }
+                                            Spacer(modifier = Modifier.width(12.dp))
 
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        IconButton(onClick = {
-                                            post.id?.let { onReportClick(postWithVote!!.post.userId.toString()) }
-                                        }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.MoreHoriz,
-                                                contentDescription = "more",
-                                                modifier = Modifier
-                                                    .size(21.dp),
-                                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.height(12.dp))
-
-                                // Post title
-                                Text(
-                                    text = post.title ?: "",
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onBackground
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                // Post content
-                                Text(
-                                    text = post.content ?: "",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    color = MaterialTheme.colorScheme.onBackground
-                                )
-
-                                Spacer(modifier = Modifier.height(12.dp))
-
-                                // media section
-                                PostMediaSection(post.imageUrls, post.videoUrls)
-
-                                // Action buttons row
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceAround,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    // Upvote/Downvote section
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(22.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        IconButton(
-                                            modifier = Modifier.size(60.dp),
-                                            onClick = {
-                                                if (isVote == "upvote") {
-                                                    upvotes--
-                                                    isVote = "none"
-                                                } else if (isVote == "downvote" || isVote == "none") {
-                                                    upvotes++
-                                                    isVote = "upvote"
-                                                }
-                                                onUpvoteClick(isVote)
-                                                isChangeUp = true
+                                            Column {
+                                                Text(
+                                                    text = post.userName ?: "Unknown User",
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 12.sp,
+                                                    color = MaterialTheme.colorScheme.onBackground,
+                                                    modifier = Modifier
+                                                        .clickable {
+                                                            val myUserId =
+                                                                sharedPreferences.getString(
+                                                                    "userId",
+                                                                    null
+                                                                )
+                                                            if (post.userId == myUserId)
+                                                                navHostController.navigate("personal")
+                                                            else navHostController.navigate("otherprofile/${post.userId}")
+                                                        }
+                                                )
+                                                Text(
+                                                    text = "${getTimeAgo(post.createdAt ?: "")} • ${""}",
+                                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    fontSize = 11.sp
+                                                )
                                             }
-                                        ) {
-                                            AnimatedVoteIcon(
-                                                isActive = isVote == "upvote",
-                                                triggerChange = isChangeUp,
-                                                activeColor = Color.Green,
-                                                defaultColor = MaterialTheme.colorScheme.onBackground,
-                                                icon = Icons.Default.ArrowCircleUp,
-                                                onAnimationEnd = { isChangeUp = false }
-                                            )
                                         }
-                                        AnimatedVoteNumber(
-                                            voteCount = upvotes,
-                                            textStyle = TextStyle(
-                                                fontSize = 16.sp,
-                                                fontWeight = FontWeight.SemiBold
-                                            ),
-                                            textColor = MaterialTheme.colorScheme.onBackground
-                                        )
-                                        IconButton(
-                                            modifier = Modifier.size(60.dp),
-                                            onClick = {
-                                                if (isVote == "downvote") {
-                                                    isVote = "none"
-                                                } else if (isVote == "upvote") {
-                                                    upvotes--
-                                                    isVote = "downvote"
-                                                } else if (isVote == "none") {
-                                                    isVote = "downvote"
+
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            IconButton(onClick = {
+                                                post.id?.let { onReportClick(postWithVote!!.post.userId.toString()) }
+                                            }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.MoreHoriz,
+                                                    contentDescription = "more",
+                                                    modifier = Modifier
+                                                        .size(21.dp),
+                                                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    // Post title
+                                    Text(
+                                        text = post.title ?: "",
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onBackground
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    // Post content
+                                    Text(
+                                        text = post.content ?: "",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        color = MaterialTheme.colorScheme.onBackground
+                                    )
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    // media section
+                                    PostMediaSection(post.imageUrls, post.videoUrls)
+
+                                    // Action buttons row
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceAround,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        // Upvote/Downvote section
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(22.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            IconButton(
+                                                modifier = Modifier.size(60.dp),
+                                                onClick = {
+                                                    if (isVote == "upvote") {
+                                                        upvotes--
+                                                        isVote = "none"
+                                                    } else if (isVote == "downvote" || isVote == "none") {
+                                                        upvotes++
+                                                        isVote = "upvote"
+                                                    }
+                                                    onUpvoteClick(isVote)
+                                                    isChangeUp = true
                                                 }
-                                                onDownvoteClick(isVote)
-                                                isChangeDown = true
-                                            })
+                                            ) {
+                                                AnimatedVoteIcon(
+                                                    isActive = isVote == "upvote",
+                                                    triggerChange = isChangeUp,
+                                                    activeColor = Color.Green,
+                                                    defaultColor = MaterialTheme.colorScheme.onBackground,
+                                                    icon = Icons.Default.ArrowCircleUp,
+                                                    onAnimationEnd = { isChangeUp = false }
+                                                )
+                                            }
+                                            AnimatedVoteNumber(
+                                                voteCount = upvotes,
+                                                textStyle = TextStyle(
+                                                    fontSize = 16.sp,
+                                                    fontWeight = FontWeight.SemiBold
+                                                ),
+                                                textColor = MaterialTheme.colorScheme.onBackground
+                                            )
+                                            IconButton(
+                                                modifier = Modifier.size(60.dp),
+                                                onClick = {
+                                                    if (isVote == "downvote") {
+                                                        isVote = "none"
+                                                    } else if (isVote == "upvote") {
+                                                        upvotes--
+                                                        isVote = "downvote"
+                                                    } else if (isVote == "none") {
+                                                        isVote = "downvote"
+                                                    }
+                                                    onDownvoteClick(isVote)
+                                                    isChangeDown = true
+                                                })
+                                            {
+                                                AnimatedVoteIcon(
+                                                    isActive = isVote == "downvote",
+                                                    triggerChange = isChangeDown,
+                                                    activeColor = Color.Red,
+                                                    defaultColor = MaterialTheme.colorScheme.onBackground,
+                                                    icon = Icons.Default.ArrowCircleDown,
+                                                    onAnimationEnd = { isChangeDown = false }
+                                                )
+                                            }
+                                        }
+
+                                        IconButton(onClick = {
+                                            onBookmarkClick()
+                                            //neu save post r doi icon qua chua save va nguoc lai
+                                            if (isSavedPost == true) {
+                                                isSavedPost = false
+                                            } else {
+                                                isSavedPost = true
+                                            }
+                                        }
+                                        )
                                         {
-                                            AnimatedVoteIcon(
-                                                isActive = isVote == "downvote",
-                                                triggerChange = isChangeDown,
-                                                activeColor = Color.Red,
-                                                defaultColor = MaterialTheme.colorScheme.onBackground,
-                                                icon = Icons.Default.ArrowCircleDown,
-                                                onAnimationEnd = { isChangeDown = false }
+                                            Icon(
+                                                imageVector = Icons.Default.Bookmark,
+                                                contentDescription = "Đánh dấu",
+                                                modifier = Modifier.size(30.dp),
+                                                tint = if (isSavedPost == true) Color.Green else MaterialTheme.colorScheme.onBackground
                                             )
                                         }
                                     }
 
-                                    IconButton(onClick = {
-                                        onBookmarkClick()
-                                        //neu save post r doi icon qua chua save va nguoc lai
-                                        if (isSavedPost == true) {
-                                            isSavedPost = false
-                                        } else {
-                                            isSavedPost = true
-                                        }
-                                    }
-                                    )
-                                    {
-                                        Icon(
-                                            imageVector = Icons.Default.Bookmark,
-                                            contentDescription = "Đánh dấu",
-                                            modifier = Modifier.size(30.dp),
-                                            tint = if (isSavedPost == true) Color.Green else MaterialTheme.colorScheme.onBackground
-                                        )
-                                    }
                                 }
-                                PostCommentScreen(
-                                    postId = post.id.toString(),
-                                    sharedPreferences = sharedPreferences,
-                                    commentViewModel = commentViewModel,
-                                )
                             }
+                            item {
+                                Divider()
+                                Text(
+                                    text = "Bình luận",
+                                    modifier = Modifier.padding(16.dp),
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Divider()
+                            }
+                            item {
+
+
+                            }
+                            items(comments) { comment ->
+                                Column {
+                                    CommentCard(
+                                        comment = comment,
+                                        fetchReply = { commentId, onLoaded ->
+                                            commentViewModel.fetchReply(commentId, onLoaded)
+                                        },
+                                        onSubmitReply = { commentId, replyText, onReplyPosted ->
+                                            commentViewModel.postReply(
+                                                commentId,
+                                                replyText
+                                            ) { newReply ->
+                                                onReplyPosted(newReply)
+                                            }
+                                        },
+                                        isSubmittingReply = isSubmittingReply
+                                    )
+                                    Divider()
+                                }
+                            }
+
                         }
+
+
+
+
+
+
+                        CommentInputSection(
+                            onSubmitComment = { commentText ->
+                                commentViewModel.postComment(postId, commentText) {}
+                            },
+                            isLoading = isSubmittingComment,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White)
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                                .align(Alignment.BottomCenter)
+                        )
                     }
                 }
             }
+
         }
     }
     else {

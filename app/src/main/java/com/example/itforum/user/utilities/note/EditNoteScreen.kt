@@ -54,26 +54,26 @@ fun NoteEditScreen(
                 Icon(
                     painter = painterResource(id = R.drawable.note),
                     contentDescription = "Note Icon",
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+
                     modifier = Modifier.size(38.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Ghi chú",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 28.sp
                 )
             }
         }
 
-        // Buttons
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            TextButton(onClick = onCancel) {
+            TextButton(onClick = onCancel,colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)) {
                 Text("Hủy", fontSize = 20.sp)
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -87,7 +87,7 @@ fun NoteEditScreen(
                     date = date
                 )
                 onSave(newNote)
-            }) {
+            },colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)) {
                 Text("Lưu", fontSize = 20.sp)
             }
         }
@@ -96,26 +96,34 @@ fun NoteEditScreen(
         OutlinedTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Nhập tiêu đề", fontSize = 18.sp) },
+            label = { Text("Nhập tiêu đề",color = MaterialTheme.colorScheme.onBackground) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
+                .background(MaterialTheme.colorScheme.onSecondaryContainer),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
+            )
         )
 
-        // Content input
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+
         ) {
             OutlinedTextField(
                 value = content,
                 onValueChange = { content = it },
-                label = { Text("Nhập nội dung", fontSize = 18.sp) },
+                label = { Text("Nhập nội dung", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .heightIn(min = 200.dp, max = 550.dp),
+                    .heightIn(min = 200.dp, max = 550.dp)
+                    .background(MaterialTheme.colorScheme.onSecondaryContainer),
                 maxLines = Int.MAX_VALUE
             )
         }

@@ -1,5 +1,10 @@
 package com.example.itforum.user.root
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -45,6 +50,7 @@ import com.example.itforum.R
 @Composable
 fun TopBarRoot(
     navHostController: NavHostController,
+    barsVisible: Boolean,
     onMenuClick: () -> Unit
 ) {
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -94,43 +100,48 @@ fun TopBarRoot(
             }
         }
 
-
-
-        // Tab Bar
-        TabRow(
-            selectedTabIndex = selectedTabIndex,
-            containerColor = Color.Transparent,
-            modifier = Modifier.padding(horizontal = 8.dp),
-            indicator = {}
+        AnimatedVisibility(
+            visible = barsVisible,
+            enter = fadeIn() + slideInVertically(),
+            exit = fadeOut() + slideOutVertically()
         ) {
-            roles.forEachIndexed { index, title ->
-                Tab(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
-                        .background(
-                            if (selectedTabIndex == index)
-                                MaterialTheme.colorScheme.background
-                            else
-                                MaterialTheme.colorScheme.primaryContainer
-                        ),
-                    selected = selectedTabIndex == index,
-                    onClick = {
-                        selectedTabIndex = index
-                        when (index) {
-                            0 -> navHostController.navigate("home")
-                            1 -> navHostController.navigate("tag")
-                            2 -> navHostController.navigate("follow")
-                            3 -> navHostController.navigate("bookmark")
+
+            // Tab Bar
+            TabRow(
+                selectedTabIndex = selectedTabIndex,
+                containerColor = Color.Transparent,
+                modifier = Modifier.padding(horizontal = 8.dp),
+                indicator = {}
+            ) {
+                roles.forEachIndexed { index, title ->
+                    Tab(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                            .background(
+                                if (selectedTabIndex == index)
+                                    MaterialTheme.colorScheme.background
+                                else
+                                    MaterialTheme.colorScheme.primaryContainer
+                            ),
+                        selected = selectedTabIndex == index,
+                        onClick = {
+                            selectedTabIndex = index
+                            when (index) {
+                                0 -> navHostController.navigate("home")
+                                1 -> navHostController.navigate("tag")
+                                2 -> navHostController.navigate("follow")
+                                3 -> navHostController.navigate("bookmark")
+                            }
+                        },
+                        text = {
+                            Text(
+                                text = title,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                fontSize = MaterialTheme.typography.titleSmall.fontSize.times(0.9f)
+                            )
                         }
-                    },
-                    text = {
-                        Text(
-                            text = title,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontSize = MaterialTheme.typography.titleSmall.fontSize.times(0.9f)
-                        )
-                    }
-                )
+                    )
+                }
             }
         }
     }

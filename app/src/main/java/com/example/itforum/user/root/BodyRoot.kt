@@ -3,6 +3,7 @@ package com.example.itforum.user.root
 import android.content.SharedPreferences
 import android.util.Base64
 import android.widget.Toast
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -360,7 +361,11 @@ fun StartRoot(navHostController: NavHostController, sharedPreferences: SharedPre
 @Composable
 fun BodyRoot(sharedPreferences: SharedPreferences,
              navHostController: NavHostController,
-             modifier: Modifier, onToggleTheme: () -> Unit,
+             modifier: Modifier,
+             barsVisible: Boolean = true,
+             listState: LazyListState,
+             onToggleTheme: () -> Unit,
+             onToggleBars: () -> Unit = {},
              darkTheme: Boolean = false,
              role:String?
 ){
@@ -400,7 +405,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
                 }
             }
 
-            HomePage(navHostController, modifier, sharedPreferences, postViewModel,commentViewModel)
+            HomePage(navHostController, modifier, sharedPreferences, postViewModel,commentViewModel, listState,onToggleBars)
         }
 
         composable("tag") {
@@ -534,7 +539,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
                 }
             }
 
-            UserProfileScreen(sharedPreferences, navHostController)
+            UserProfileScreen(sharedPreferences, navHostController, barsVisible, listState)
         }
 
         composable("otherprofile/{userId}") { backStackEntry ->
@@ -551,7 +556,7 @@ fun BodyRoot(sharedPreferences: SharedPreferences,
                     }
                 }
 
-                OtherUserProfileScreen(sharedPreferences, navHostController, modifier, userId)
+                OtherUserProfileScreen(sharedPreferences, navHostController, modifier, userId, barsVisible, listState)
             }
         }
 

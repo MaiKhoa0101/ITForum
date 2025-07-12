@@ -19,7 +19,7 @@ abstract class NoteDatabase : RoomDatabase() {
                     NoteDatabase::class.java,
                     "note_database"
                 )
-                    .fallbackToDestructiveMigration(false) // 🔥 Xoá và tạo lại DB nếu schema thay đổi
+                    .fallbackToDestructiveMigration(false)
                     .build().also { INSTANCE = it }
             }
         }

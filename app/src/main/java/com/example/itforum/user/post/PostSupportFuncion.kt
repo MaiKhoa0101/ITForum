@@ -123,12 +123,12 @@ fun getTimeAgo(isoTimestamp: String): String {
         val diffSeconds = Duration.between(timestamp, now).seconds
 
         when {
-            diffSeconds < 60 -> "Just now"
-            diffSeconds < 3600 -> "${diffSeconds / 60}m ago"
-            diffSeconds < 86400 -> "${diffSeconds / 3600}h ago"
-            diffSeconds < 2592000 -> "${diffSeconds / 86400}d ago"
-            diffSeconds < 31536000 -> "${diffSeconds / 2592000}mo ago"
-            else -> "${diffSeconds / 31536000}y ago"
+            diffSeconds < 60 -> "Vừa xong"
+            diffSeconds < 3600 -> "${diffSeconds / 60}p trước"
+            diffSeconds < 86400 -> "${diffSeconds / 3600}h trước"
+            diffSeconds < 2592000 -> "${diffSeconds / 86400}d trước"
+            diffSeconds < 31536000 -> "${diffSeconds / 2592000}mo trước"
+            else -> "${diffSeconds / 31536000}y trước"
         }
     } catch (e: Exception) {
         "Unknown"
