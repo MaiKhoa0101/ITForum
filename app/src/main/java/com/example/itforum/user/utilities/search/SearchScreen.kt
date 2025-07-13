@@ -39,7 +39,7 @@ import com.example.itforum.user.modelData.response.PostWithVote
 import com.example.itforum.user.modelData.response.TagItem
 import com.example.itforum.user.post.PostCardWithVote
 import com.example.itforum.user.post.viewmodel.PostViewModel
-import com.example.itforum.user.utilities.search.SearchViewModel
+import com.example.itforum.user.utilities.search.viewmodel.SearchViewModel
 
 @Composable
 fun SearchScreen(
@@ -96,7 +96,7 @@ fun SearchScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .width(300.dp)
     ) {
         TopAppBar(
@@ -173,7 +173,23 @@ fun SearchScreen(
                 sharedPreferences = sharedPreferences,
                 postViewModel = postViewModel
             )
-        } else {
+        }
+        else if (searchQuery.isNotBlank() && currentResults.isEmpty()) {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+                    .background(MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Không tìm thấy thông tin nào",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 18.sp
+                )
+            }
+        }else {
             SearchHistoryAndTags(
                 historyItems = historyItems,
                 tagList = tagList,

@@ -8,8 +8,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.livedata.observeAsState
 import com.example.itforum.user.utilities.note.NoteEntity
-import com.example.itforum.user.utilities.note.NoteViewModel
-import com.example.itforum.user.utilities.note.NoteViewModelFactory
+import com.example.itforum.user.utilities.note.viewmodel.NoteViewModel
+import com.example.itforum.user.utilities.note.viewmodel.NoteViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
 

@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
+import com.example.itforum.user.utilities.chat.viewmodel.ChatViewModel
+import com.example.itforum.user.utilities.chat.viewmodel.ChatViewModelFactory
 import com.example.itforum.utilities.chat.ChatHistoryScreen
 import com.example.itforum.utilities.chat.ChatScreen
 import com.example.itforum.utilities.chat.ChatSession

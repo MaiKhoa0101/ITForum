@@ -1,4 +1,4 @@
-package com.example.itforum.user.utilities.note
+package com.example.itforum.user.utilities.note.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.ViewModel

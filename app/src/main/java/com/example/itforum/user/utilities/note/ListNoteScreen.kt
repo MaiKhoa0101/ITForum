@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.itforum.R
 import com.example.itforum.user.utilities.note.NoteEntity
-import com.example.itforum.user.utilities.note.NoteViewModel
+import com.example.itforum.user.utilities.note.viewmodel.NoteViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.material3.Card

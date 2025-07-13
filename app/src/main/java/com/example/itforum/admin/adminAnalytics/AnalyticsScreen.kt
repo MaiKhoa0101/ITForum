@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.sp
+import com.example.itforum.admin.adminAnalytics.viewmodel.AnalyticsViewModel
 
 @Composable
 fun AnalyticsScreen(navController: NavHostController,

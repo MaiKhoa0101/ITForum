@@ -24,7 +24,7 @@ import com.example.itforum.user.login.otp.AuthService
 import com.example.itforum.user.utilities.chat.ChatAiService
 
 object RetrofitInstance {
-    private const val SECOND_URL  = "http://192.168.1.5:4000"
+    private const val SECOND_URL  = "http://192.168.1.28:4000"
     private const val URL_Phone = "https://beitforum.onrender.com/"
         private const val BASE_URL = "https://beitforum-b0ng.onrender.com/"
 

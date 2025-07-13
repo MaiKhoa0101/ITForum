@@ -76,7 +76,7 @@ import com.example.itforum.user.utilities.chat.ChatAIApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.example.itforum.user.utilities.search.SearchViewModel
+import com.example.itforum.user.utilities.search.viewmodel.SearchViewModel
 import org.json.JSONObject
 
 fun isTokenExpired(token: String): Boolean {

@@ -1,10 +1,9 @@
-package com.example.itforum.admin.adminAnalytics
+package com.example.itforum.admin.adminAnalytics.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.itforum.admin.adminAnalytics.ScreenEvent
 import com.example.itforum.retrofit.RetrofitInstance
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

@@ -1,8 +1,9 @@
-package com.example.itforum.user.utilities.chat
+package com.example.itforum.user.utilities.chat.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.itforum.user.utilities.chat.ChatRepository
+
 class ChatViewModelFactory(
     private val repository: ChatRepository,
     private val userId: String // ✅ thêm userId

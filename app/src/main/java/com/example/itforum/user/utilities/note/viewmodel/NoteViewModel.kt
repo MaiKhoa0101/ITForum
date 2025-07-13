@@ -1,4 +1,4 @@
-package com.example.itforum.user.utilities.note
+package com.example.itforum.user.utilities.note.viewmodel
 
 import android.app.Application
 import android.content.Context
@@ -7,11 +7,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.itforum.user.utilities.note.NoteDatabase
+import com.example.itforum.user.utilities.note.NoteEntity
+import com.example.itforum.user.utilities.note.NoteRepository
 import kotlinx.coroutines.launch
 
 class NoteViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val noteDao = NoteDatabase.getDatabase(application).noteDao()
+    private val noteDao = NoteDatabase.Companion.getDatabase(application).noteDao()
     private val repository = NoteRepository(noteDao)
 
 //    val notes: LiveData<List<NoteEntity>> = repository.getAllNotes().asLiveData()
@@ -25,7 +28,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     val notes: LiveData<List<NoteEntity>> =
         if (userId != null) repository.getAllNotes(userId).asLiveData()
         else MutableLiveData(emptyList())
-    fun addNote(note: NoteEntity) { 
+    fun addNote(note: NoteEntity) {
         viewModelScope.launch {
             repository.insert(note)
         }
@@ -43,4 +46,3 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 }
-

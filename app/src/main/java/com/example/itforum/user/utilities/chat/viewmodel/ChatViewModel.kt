@@ -1,13 +1,17 @@
-package com.example.itforum.user.utilities.chat
+package com.example.itforum.user.utilities.chat.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.itforum.retrofit.RetrofitInstance
+import com.example.itforum.user.utilities.chat.AiRequest
+import com.example.itforum.user.utilities.chat.ChatRepository
+import com.example.itforum.user.utilities.chat.ChatSessionEntity
+import com.example.itforum.user.utilities.chat.MessageEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 
 class ChatViewModel(
     private val repository: ChatRepository,

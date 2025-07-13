@@ -1,4 +1,4 @@
-package com.example.itforum.user.utilities.search
+package com.example.itforum.user.utilities.search.viewmodel
 
 import android.content.SharedPreferences
 import android.util.Log
@@ -29,32 +29,33 @@ class SearchViewModel(
     val postsByTags: StateFlow<List<PostWithVote>> = _postsByTags
 
 
-    private suspend fun searchPost(getPostRequest: GetPostRequest): List<PostWithVote> = coroutineScope {
-        try {
+    private suspend fun searchPost(getPostRequest: GetPostRequest): List<PostWithVote> =
+        coroutineScope {
+            try {
 
-            val bookmarkResponse = postRepository.getSavePost(userId)
-            val bookmarkedIds = bookmarkResponse?.postsId?.toSet() ?: emptySet()
-            val res = RetrofitInstance.postService.getPost(getPostRequest)
-            if (res.isSuccessful && res.body() != null) {
-                val newPosts = res.body()?.posts ?: emptyList()
-                Log.d("searchingg", res.body().toString())
-                newPosts.map { post ->
-                    async {
-                        PostWithVote(
-                            post = post,
-                            vote = postRepository.getVoteDataByPostId(post.id, userId),
-                            isBookMark = bookmarkedIds.contains(post.id)
-                        )
-                    }
-                }.awaitAll()
+                val bookmarkResponse = postRepository.getSavePost(userId)
+                val bookmarkedIds = bookmarkResponse?.postsId?.toSet() ?: emptySet()
+                val res = RetrofitInstance.postService.getPost(getPostRequest)
+                if (res.isSuccessful && res.body() != null) {
+                    val newPosts = res.body()?.posts ?: emptyList()
+                    Log.d("searchingg", res.body().toString())
+                    newPosts.map { post ->
+                        async {
+                            PostWithVote(
+                                post = post,
+                                vote = postRepository.getVoteDataByPostId(post.id, userId),
+                                isBookMark = bookmarkedIds.contains(post.id)
+                            )
+                        }
+                    }.awaitAll()
 
-            } else {
+                } else {
+                    emptyList()
+                }
+            } catch (e: Exception) {
                 emptyList()
             }
-        } catch (e: Exception) {
-            emptyList()
         }
-    }
 
     fun resultByTitle(title: String) {
         viewModelScope.launch {
