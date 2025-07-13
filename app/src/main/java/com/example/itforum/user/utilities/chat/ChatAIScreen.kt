@@ -105,7 +105,7 @@ fun ChatScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .background(MaterialTheme.colorScheme.background)
                         .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {

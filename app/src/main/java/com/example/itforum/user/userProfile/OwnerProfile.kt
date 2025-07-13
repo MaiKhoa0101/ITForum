@@ -267,7 +267,7 @@ fun UserHeader(
                     text = "Cấp độ: $userLevel (Điểm: $score)",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = levelColor // ✅ chỉ đổi màu chữ
+                    color = levelColor
                 )
 
             }
@@ -308,7 +308,7 @@ fun UserTabRow(
         tabs.forEachIndexed { index, title ->
             Tab(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp))
+//                    .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp))
                     .background(
                     if (selectedTabIndex == index)
                         MaterialTheme.colorScheme.background
@@ -333,11 +333,8 @@ fun UserTabRow(
 
 @Composable
 fun UserInfoDetail(user: UserProfileResponse?, modifier: Modifier) {
-    var introduce = user?.introduce?.takeIf { it.isNotEmpty() } ?: "Chua co thong tin"
-    LazyColumn(
-        modifier = modifier
-            .padding(horizontal = 16.dp)
-    ) {
+    var introduce = user?.introduce?.takeIf { it.isNotEmpty() } ?: "Chưa có thông tin"
+    LazyColumn{
 
         item { Text("Giới thiệu", fontWeight = FontWeight.Bold, fontSize = 20.sp)}
         item { Spacer(modifier = Modifier.height(16.dp))}

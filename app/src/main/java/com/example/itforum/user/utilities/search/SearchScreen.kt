@@ -265,17 +265,23 @@ private fun HistoryItem(
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Default.History, contentDescription = null)
+        Icon(Icons.Default.History, contentDescription = null,tint = MaterialTheme.colorScheme.onBackground )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = keyword,
             fontSize = 20.sp,
             modifier = Modifier
                 .weight(1f)
-                .clickable { onHistoryClick(keyword) }
+                .clickable { onHistoryClick(keyword) },
+            color = MaterialTheme.colorScheme.onBackground
         )
         IconButton(onClick = { onDeleteHistory(keyword) }) {
-            Icon(Icons.Default.Delete, contentDescription = "Xoá mục này")
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Xoá mục này",
+                tint = MaterialTheme.colorScheme.onBackground
+            )
+
         }
     }
 }

@@ -21,6 +21,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -77,7 +78,8 @@ fun FollowScreen(
                 "Người đang theo dõi",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
@@ -122,7 +124,7 @@ fun FollowScreen(
                     Text(
                         text = "Không có người theo dõi",
                         modifier = Modifier.padding(8.dp),
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
@@ -134,7 +136,8 @@ fun FollowScreen(
                 "Gợi ý",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
@@ -179,7 +182,7 @@ fun FollowScreen(
                     Text(
                         text = "No suggestions available",
                         modifier = Modifier.padding(8.dp),
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
@@ -234,7 +237,8 @@ fun FollowerWidget(
                 Text(
                     text = follower.name,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }

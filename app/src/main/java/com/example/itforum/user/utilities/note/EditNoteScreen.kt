@@ -8,6 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SearchBarDefaults.colors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,19 +78,35 @@ fun NoteEditScreen(
                 Text("Hủy", fontSize = 20.sp)
             }
             Spacer(modifier = Modifier.width(8.dp))
-            TextButton(onClick = {
-                val date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
-                val newNote = NoteEntity(
-                    id = noteId,
-                    userId = userId,
-                    title = title,
-                    content = content,
-                    date = date
-                )
-                onSave(newNote)
-            },colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)) {
+            TextButton(
+                onClick = {
+                    if (title.isBlank() && content.isBlank()) {
+                        // Không lưu nếu cả tiêu đề và nội dung đều trống
+                        return@TextButton
+                    }
+
+                    val date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+                    val newNote = NoteEntity(
+                        id = noteId,
+                        userId = userId,
+                        title = title,
+                        content = content,
+                        date = date
+                    )
+
+                    if (noteId == 0) {
+                        // Nếu là note mới
+                        onSave(newNote) // Gửi để xử lý thêm mới
+                    } else {
+                        // Nếu là note đã có → giữ id và update nội dung
+                        onSave(newNote) // Gửi để update
+                    }
+                },
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+            ) {
                 Text("Lưu", fontSize = 20.sp)
             }
+
         }
 
         // Title input
@@ -100,7 +117,7 @@ fun NoteEditScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .background(MaterialTheme.colorScheme.onSecondaryContainer),
+                .background(MaterialTheme.colorScheme.secondaryContainer),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline,
@@ -123,7 +140,7 @@ fun NoteEditScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
                     .heightIn(min = 200.dp, max = 550.dp)
-                    .background(MaterialTheme.colorScheme.onSecondaryContainer),
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
                 maxLines = Int.MAX_VALUE
             )
         }

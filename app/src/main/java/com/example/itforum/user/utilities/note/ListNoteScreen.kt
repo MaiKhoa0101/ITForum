@@ -2,6 +2,7 @@ package com.example.itforum.utilities.note
 
 import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -48,7 +49,8 @@ fun NotesListScreen(
         NoteEditScreen(
             initialTitle = editingNote!!.title,
             initialContent = editingNote!!.content,
-            userId = userId, // thêm dòng này
+            userId = userId,
+            noteId = editingNote!!.id,
             onSave = { note ->
                 if (note.id == 0) {
                     viewModel.addNote(note)
@@ -93,12 +95,19 @@ fun NotesListScreen(
                         .background(MaterialTheme.colorScheme.background)) {
                         items(notes) { note ->
                             var expanded by remember { mutableStateOf(false) }
+                            val openEdit = {
+                                editingNote = note
+                                isEditing = true
+                            }
+
 
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .clickable { openEdit() },
                                 shape = RoundedCornerShape(12.dp),
+
                                 colors = CardDefaults.cardColors(
                                     containerColor = MaterialTheme.colorScheme.secondaryContainer
                                 )
@@ -108,11 +117,11 @@ fun NotesListScreen(
                                 Column(modifier = Modifier.padding(16.dp)) {
                                     Row(verticalAlignment = Alignment.Top) {
                                         Column(modifier = Modifier.weight(1f)) {
-                                            Text(note.title, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                                            Text(note.title, fontWeight = FontWeight.Bold, fontSize = 20.sp,color = MaterialTheme.colorScheme.onBackground)
                                             Spacer(modifier = Modifier.height(6.dp))
-                                            Text(note.content, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                            Text(note.content, maxLines = 2, overflow = TextOverflow.Ellipsis, fontSize = 16.sp,color = MaterialTheme.colorScheme.onBackground)
                                             Spacer(modifier = Modifier.height(6.dp))
-                                            Text(note.date, fontSize = 12.sp, color = Color.Gray)
+                                            Text(note.date, fontSize = 12.sp,color = MaterialTheme.colorScheme.onBackground)
                                         }
 
                                         Box {

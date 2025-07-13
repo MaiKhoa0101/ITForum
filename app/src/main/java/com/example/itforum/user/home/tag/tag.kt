@@ -40,11 +40,11 @@ fun TagScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding( top = 70.dp)
+            .padding( top = 20.dp)
     ) {
         item {
             Spacer(Modifier.height(10.dp))
-            Text(text = "Trending Tags", fontWeight = FontWeight.Bold, fontSize = 30.sp)
+            Text(text = "Trending Tags", fontWeight = FontWeight.Bold, fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground)
             Spacer(Modifier.height(20.dp))
         }
 
@@ -54,7 +54,7 @@ fun TagScreen(
 
         item {
             Spacer(Modifier.height(10.dp))
-            Text(text = "Popular Tags", fontWeight = FontWeight.Bold, fontSize = 30.sp)
+            Text(text = "Popular Tags", fontWeight = FontWeight.Bold, fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground)
             Spacer(Modifier.height(20.dp))
         }
 
@@ -64,7 +64,7 @@ fun TagScreen(
 
         item {
             Spacer(Modifier.height(30.dp))
-            Text(text = "All Tags", fontWeight = FontWeight.Bold, fontSize = 30.sp)
+            Text(text = "All Tags", fontWeight = FontWeight.Bold, fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground)
             Spacer(Modifier.height(10.dp))
 
             AllTagsWidget(tags = tagList)
@@ -82,14 +82,14 @@ fun ListTagsWidget(tag: TagItem, index: String){
     ) {
         Text(text = index, color = Color.Gray, fontSize = 18.sp)
         Spacer(Modifier.width(20.dp))
-        Text(text = tag.name, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(text = tag.name, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
     }
 }
 @Composable
 fun AllTagsWidget(
     tags: List<TagItem>,
     modifier: Modifier = Modifier,
-    onTagClick: (String) -> Unit = {}// ✅ thêm callback
+    onTagClick: (String) -> Unit = {}
 
 ) {
     val groupedTags = tags.groupBy { it.name.first().uppercaseChar() }
@@ -109,7 +109,7 @@ fun AllTagsWidget(
                     text = tag.name,
                     selected = false,
                     onSelected = {
-                        onTagClick(tag.name) // ✅ Gọi callback khi click
+                        onTagClick(tag.name)
                     },
                     modifier = Modifier
                         .padding(vertical = 4.dp)
