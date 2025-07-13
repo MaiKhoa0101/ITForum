@@ -41,7 +41,7 @@ import retrofit2.http.Query
 
 interface PostService {
 
-    @GET("posts/all")
+    @GET("posts/getall")
     suspend fun getAllPost(): Response<PostListWrapper>
 
     @POST("posts/search")
