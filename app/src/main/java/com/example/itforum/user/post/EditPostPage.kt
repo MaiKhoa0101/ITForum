@@ -164,7 +164,7 @@ fun EditPostPage(
                         videoUris = videoUrls,
                         applicationUris = applicationUrls
                     )
-                    CustomPost()
+//                    CustomPost()
                 }
             }
         }

@@ -146,7 +146,6 @@ fun OtherUserProfileScreen(
             postViewModel,
             commentViewModel,
             listState = listState,
-            barsVisible = barsVisible
 
         )
     }
@@ -164,8 +163,8 @@ fun OtherProfileContent(
     postViewModel: PostViewModel,
     commentViewModel: CommentViewModel,
     listState: LazyListState,
-    barsVisible: Boolean = true
 ) {
+    var barsVisible by remember { mutableStateOf(true) }
     Column(modifier = modifier.fillMaxSize()) {
         AnimatedVisibility(
             visible = barsVisible,

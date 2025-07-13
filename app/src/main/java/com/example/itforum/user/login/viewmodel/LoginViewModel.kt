@@ -60,25 +60,25 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                         _uiState.value = UiState.Success(
                             response.body()?.message ?: "Đăng nhập thành công"
                         )
-                        delay(500) // Cho phép UI xử lý trạng thái Success
+                        delay(500)
 
                     } else {
                         showError("Token không hợp lệ")
                         _uiState.value = response.body()?.let { UiState.Error(it.message) }!!
-                        delay(500) // Cho phép UI xử lý trạng thái Success
+                        delay(500)
                     }
                 } else {
                     _uiState.value = UiState.Error(response.message())
-                    delay(500) // Cho phép UI xử lý trạng thái Success
+                    delay(500)
                 }
             } catch (e: IOException) {
                 _uiState.value = UiState.Error("Lỗi kết nối mạng: ${e.localizedMessage}")
                 showError("Không thể kết nối máy chủ, vui lòng kiểm tra mạng.")
-                delay(500) // Cho phép UI xử lý trạng thái Success
+                delay(500)
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Lỗi hệ thống, vui lòng thử lại")
                 showError("Lỗi mạng hoặc bất ngờ: ${e.localizedMessage ?: "Không rõ"}")
-                delay(500) // Cho phép UI xử lý trạng thái Success
+                delay(500)
             }
             delay(500)
             _uiState.value = UiState.Idle
@@ -112,7 +112,7 @@ class LoginViewModel(private var sharedPreferences: SharedPreferences)  : ViewMo
                         _uiState.value = UiState.Success(
                             loginResponse.body()?.message ?: "Đăng nhập thành công"
                         )
-                        delay(500) // Cho phép UI xử lý trạng thái Success
+                        delay(500)
                     }
                 }
 
