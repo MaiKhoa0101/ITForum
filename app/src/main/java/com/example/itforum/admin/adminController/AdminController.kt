@@ -145,9 +145,9 @@ fun ControllerManagerScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             ActiveAccount(totalActiveUsers)
-            RevenueReportScreen()
+//            RevenueReportScreen()
             NotificationCard(totalUsersBanned, totalPostsNew, totalComplaintsNew, totalRpPostsNew, totalRpUsersNew)
-            AppointmentRevenueCard()
+//            AppointmentRevenueCard()
         }
     }
 }
